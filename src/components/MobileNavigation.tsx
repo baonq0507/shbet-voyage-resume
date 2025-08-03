@@ -16,8 +16,8 @@ const MobileNavigation = () => {
 
   return (
     <div className="md:hidden bg-card/95 backdrop-blur-sm border-b border-border/50 py-2 relative">
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex space-x-2 px-3">
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex space-x-2 px-3 w-max">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -26,7 +26,7 @@ const MobileNavigation = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center min-w-[70px] px-2 py-2 rounded-lg transition-all duration-200 ${
+                className={`flex flex-col items-center min-w-[70px] px-2 py-2 rounded-lg transition-all duration-200 flex-shrink-0 ${
                   isActive
                     ? "bg-gradient-primary text-white shadow-lg scale-105"
                     : "text-muted-foreground hover:text-primary hover:bg-primary/5"
@@ -40,7 +40,7 @@ const MobileNavigation = () => {
             );
           })}
         </div>
-      </ScrollArea>
+      </div>
       
       {/* Scroll Indicator */}
       <div className="absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none">
