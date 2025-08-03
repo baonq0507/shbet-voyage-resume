@@ -43,7 +43,7 @@ const MobileFooter = () => {
         <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-40 h-6 bg-gradient-to-r from-primary/40 to-secondary/40 blur-2xl rounded-full"></div>
       </div>
       
-      <div className="relative grid grid-cols-4 h-16 px-2">
+      <div className="relative grid grid-cols-4 h-16">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
