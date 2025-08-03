@@ -11,6 +11,7 @@ import TheThao from "./pages/TheThao";
 import GameBai from "./pages/GameBai";
 import DaGa from "./pages/DaGa";
 import NotFound from "./pages/NotFound";
+import MobileFooter from "./components/MobileFooter";
 
 const queryClient = new QueryClient();
 
@@ -20,17 +21,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/casino" element={<Casino />} />
-          <Route path="/nohu" element={<NoHu />} />
-          <Route path="/banca" element={<BanCa />} />
-          <Route path="/thethao" element={<TheThao />} />
-          <Route path="/gamebai" element={<GameBai />} />
-          <Route path="/daga" element={<DaGa />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="pb-16 md:pb-0">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/casino" element={<Casino />} />
+            <Route path="/nohu" element={<NoHu />} />
+            <Route path="/banca" element={<BanCa />} />
+            <Route path="/thethao" element={<TheThao />} />
+            <Route path="/gamebai" element={<GameBai />} />
+            <Route path="/daga" element={<DaGa />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+        <MobileFooter />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
