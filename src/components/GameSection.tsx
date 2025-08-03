@@ -89,7 +89,7 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
         {lobbies && lobbies.length > 0 ? (
           <div className="border border-border rounded-lg p-4 bg-card">
             <Tabs defaultValue={lobbies[0].id} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-6 h-auto p-1">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 mb-6 h-auto p-1">
                 {lobbies.map((lobby) => (
                   <TabsTrigger 
                     key={lobby.id} 
