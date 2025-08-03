@@ -43,9 +43,24 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
     setIsLoading(true);
     try {
-      // Đăng nhập bằng email và password
+      // Get email from username via edge function
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('login-by-username', {
+        body: { username: formData.username, password: formData.password }
+      });
+
+      if (emailError || !emailData?.email) {
+        toast({
+          title: "Đăng nhập thất bại",
+          description: "Tên đăng nhập không tồn tại",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Đăng nhập bằng email
       const { error } = await supabase.auth.signInWithPassword({
-        email: formData.username, // Sử dụng username như một email
+        email: emailData.email,
         password: formData.password
       });
 
@@ -191,13 +206,13 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
           <TabsContent value="login" className="space-y-4 mt-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Email</Label>
+                <Label htmlFor="username">Tên đăng nhập</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="username"
-                    type="email"
-                    placeholder="Nhập email"
+                    type="text"
+                    placeholder="Nhập tên đăng nhập"
                     value={formData.username}
                     onChange={(e) => handleInputChange("username", e.target.value)}
                     className="pl-10"
