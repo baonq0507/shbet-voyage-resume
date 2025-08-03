@@ -93,15 +93,15 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
             <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
             <Tabs defaultValue={lobbies[0].id} className="w-full relative z-10">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-2 mb-6 sm:mb-8 h-auto p-2 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
+              <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-6 gap-1.5 mb-6 sm:mb-8 h-auto p-2 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
                 {lobbies.map((lobby, index) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="group flex flex-col items-center justify-center gap-2 p-3 sm:p-4 h-auto min-h-[80px] sm:min-h-[90px] text-xs font-semibold rounded-lg
+                    className="group flex flex-col items-center justify-center gap-1 p-2 sm:p-2.5 h-auto min-h-[60px] sm:min-h-[65px] text-xs font-semibold rounded-lg
                       data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
-                      data-[state=active]:text-primary-foreground data-[state=active]:shadow-2xl data-[state=active]:scale-105 data-[state=active]:casino-glow
-                      hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-lg
+                      data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:scale-105 data-[state=active]:casino-glow
+                      hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-md
                       transition-all duration-300 ease-out border border-transparent data-[state=active]:border-primary-glow/50
                       relative overflow-hidden"
                     style={{ animationDelay: `${index * 100}ms` }}
@@ -109,23 +109,23 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
                     {/* Animated background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                     
-                    <div className="relative z-10 flex flex-col items-center gap-2">
+                    <div className="relative z-10 flex flex-col items-center gap-1">
                       <div className="relative">
                         <img 
                           src={lobby.logo} 
                           alt={lobby.name}
-                          className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
+                          className="w-6 h-6 sm:w-7 sm:h-7 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
                         />
                         {/* Glow effect for active state */}
                         <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                      <span className="text-center leading-tight text-[10px] sm:text-xs font-bold group-data-[state=active]:text-white group-hover:text-primary transition-colors duration-300">
+                      <span className="text-center leading-tight text-[9px] sm:text-[10px] font-bold group-data-[state=active]:text-white group-hover:text-primary transition-colors duration-300">
                         {lobby.name}
                       </span>
                     </div>
                     
                     {/* Active indicator */}
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
                   </TabsTrigger>
                 ))}
               </TabsList>
