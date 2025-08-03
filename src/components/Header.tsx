@@ -247,31 +247,101 @@ const Header = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+
+                {/* Logged in state - Mobile */}
+                <div className="lg:hidden flex items-center space-x-2">
+                  <div className="text-xs">
+                    <div className="text-primary font-bold">{profile.balance.toLocaleString()}</div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <UserCircle className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <UserCircle className="w-4 h-4 mr-2" />
+                        Thông tin tài khoản
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        setTransactionType('deposit');
+                        setIsTransactionModalOpen(true);
+                      }}>
+                        <ArrowDownToLine className="w-4 h-4 mr-2" />
+                        Nạp tiền
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        setTransactionType('withdrawal');
+                        setIsTransactionModalOpen(true);
+                      }}>
+                        <ArrowUpFromLine className="w-4 h-4 mr-2" />
+                        Rút tiền
+                      </DropdownMenuItem>
+                      {isAdmin && (
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Quản trị
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Đăng xuất
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </>
             ) : (
               <>
                 {/* Not logged in state - Desktop */}
-                <Button 
-                  variant="casino" 
-                  size="sm" 
-                  className="hidden lg:flex"
-                  onClick={() => setIsAuthModalOpen(true)}
-                >
-                  <User className="w-4 h-4" />
-                  Đăng Nhập
-                </Button>
-                <Button 
-                  variant="gold" 
-                  size="sm" 
-                  className="hidden lg:flex"
-                  onClick={() => {
-                    setTransactionType('deposit');
-                    setIsTransactionModalOpen(true);
-                  }}
-                >
-                  <ArrowDownToLine className="w-4 h-4" />
-                  Nạp Tiền
-                </Button>
+                <div className="hidden lg:flex items-center space-x-2">
+                  <Button 
+                    variant="casino" 
+                    size="sm"
+                    onClick={() => setIsAuthModalOpen(true)}
+                  >
+                    <User className="w-4 h-4" />
+                    Đăng Nhập
+                  </Button>
+                  <Button 
+                    variant="gold" 
+                    size="sm"
+                    onClick={() => {
+                      setTransactionType('deposit');
+                      setIsTransactionModalOpen(true);
+                    }}
+                  >
+                    <ArrowDownToLine className="w-4 h-4" />
+                    Nạp Tiền
+                  </Button>
+                </div>
+
+                {/* Not logged in state - Mobile */}
+                <div className="lg:hidden flex items-center space-x-2">
+                  <Button 
+                    variant="casino" 
+                    size="sm"
+                    onClick={() => setIsAuthModalOpen(true)}
+                  >
+                    <User className="w-4 h-4" />
+                    Đăng Nhập
+                  </Button>
+                  <Button 
+                    variant="gold" 
+                    size="sm"
+                    onClick={() => {
+                      setTransactionType('deposit');
+                      setIsTransactionModalOpen(true);
+                    }}
+                  >
+                    <ArrowDownToLine className="w-4 h-4" />
+                    Nạp Tiền
+                  </Button>
+                </div>
               </>
             )}
 
@@ -354,29 +424,10 @@ const Header = () => {
                       </>
                     ) : (
                       <>
-                        <Button 
-                          variant="casino" 
-                          className="w-full justify-start"
-                          onClick={() => {
-                            setIsAuthModalOpen(true);
-                            setIsMobileMenuOpen(false);
-                          }}
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          Đăng Nhập
-                        </Button>
-                        <Button 
-                          variant="gold" 
-                          className="w-full justify-start"
-                          onClick={() => {
-                            setTransactionType('deposit');
-                            setIsTransactionModalOpen(true);
-                            setIsMobileMenuOpen(false);
-                          }}
-                        >
-                          <ArrowDownToLine className="w-4 h-4 mr-2" />
-                          Nạp Tiền
-                        </Button>
+                        {/* Empty section for non-logged in users since buttons are now outside */}
+                        <div className="text-center text-sm text-muted-foreground py-4">
+                          Sử dụng các nút bên ngoài để đăng nhập
+                        </div>
                       </>
                     )}
                   </div>
