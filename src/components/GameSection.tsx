@@ -93,7 +93,7 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
             <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
             <Tabs defaultValue={lobbies[0].id} className="w-full relative z-10">
-              <TabsList className="flex flex-wrap justify-center gap-1 mb-4 sm:mb-6 h-auto p-1.5 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
+              <TabsList className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
                 {lobbies.map((lobby, index) => (
                   <TabsTrigger 
                     key={lobby.id} 
