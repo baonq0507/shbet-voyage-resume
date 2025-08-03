@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,7 +78,23 @@ interface GameSectionProps {
 }
 
 const GameSection = ({ title, lobbies, games, showApiGames }: GameSectionProps) => {
-  const { games: apiGames, loading: apiLoading } = useGamesList(1, 6);
+  const [activeTab, setActiveTab] = useState<string>(showApiGames ? "api-games" : lobbies?.[0]?.id || "");
+  
+  // Map lobby IDs to API categories
+  const getCategoryForTab = (tabId: string) => {
+    const categoryMap: Record<string, string> = {
+      "api-games": "all",
+      "evo": "live-casino",
+      "pragmatic": "slots", 
+      "playtech": "slots",
+      "microgaming": "slots",
+      "netent": "slots",
+      "sports": "sports"
+    };
+    return categoryMap[tabId] || "all";
+  };
+
+  const { games: apiGames, loading: apiLoading } = useGamesList(1, 6, getCategoryForTab(activeTab));
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,7 +112,7 @@ const GameSection = ({ title, lobbies, games, showApiGames }: GameSectionProps) 
             <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-xl"></div>
             <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
-            <Tabs defaultValue={showApiGames ? "api-games" : lobbies?.[0]?.id} className="w-full relative z-10">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full relative z-10">
               <TabsList className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
                 {/* API Games Tab */}
                 {showApiGames && (
@@ -189,14 +206,39 @@ const GameSection = ({ title, lobbies, games, showApiGames }: GameSectionProps) 
                 </TabsContent>
               )}
 
-              {/* Lobby Tab Content */}
+              {/* Lobby Tab Content - Now also using API data */}
               {lobbies && lobbies.map((lobby) => (
                 <TabsContent key={lobby.id} value={lobby.id}>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                    {lobby.games.map((game, index) => (
-                      <GameCard key={index} {...game} />
-                    ))}
-                  </div>
+                  {activeTab === lobby.id && apiLoading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <Card key={index} className="overflow-hidden animate-pulse">
+                          <div className="h-24 sm:h-28 md:h-32 bg-muted"></div>
+                          <CardHeader className="pb-2">
+                            <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : activeTab === lobby.id && apiGames.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                      {apiGames.map((game) => (
+                        <GameCard 
+                          key={game.id} 
+                          title={game.name}
+                          description={game.genre}
+                          image={game.image}
+                          featured={game.rating > 4.5}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                      {lobby.games.map((game, index) => (
+                        <GameCard key={index} {...game} />
+                      ))}
+                    </div>
+                  )}
                 </TabsContent>
               ))}
             </Tabs>

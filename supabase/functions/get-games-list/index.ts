@@ -27,70 +27,157 @@ interface GameResponse {
   metacritic: number;
 }
 
-// Fake data as fallback
-const fakeGamesData: GameResponse[] = [
-  {
-    id: 1,
-    name: "The Legend of Zelda: Breath of the Wild",
-    image: "https://via.placeholder.com/300x200?text=Zelda",
-    rating: 4.8,
-    genre: "Action, Adventure",
-    platform: "Nintendo Switch, PC",
-    releaseDate: "2017-03-03",
-    metacritic: 97
-  },
-  {
-    id: 2,
-    name: "God of War",
-    image: "https://via.placeholder.com/300x200?text=God+of+War",
-    rating: 4.7,
-    genre: "Action, Adventure",
-    platform: "PlayStation, PC",
-    releaseDate: "2018-04-20",
-    metacritic: 94
-  },
-  {
-    id: 3,
-    name: "Cyberpunk 2077",
-    image: "https://via.placeholder.com/300x200?text=Cyberpunk",
-    rating: 4.2,
-    genre: "RPG, Action",
-    platform: "PC, PlayStation, Xbox",
-    releaseDate: "2020-12-10",
-    metacritic: 86
-  },
-  {
-    id: 4,
-    name: "Elden Ring",
-    image: "https://via.placeholder.com/300x200?text=Elden+Ring",
-    rating: 4.9,
-    genre: "RPG, Action",
-    platform: "PC, PlayStation, Xbox",
-    releaseDate: "2022-02-25",
-    metacritic: 96
-  },
-  {
-    id: 5,
-    name: "Spider-Man: Miles Morales",
-    image: "https://via.placeholder.com/300x200?text=Spider-Man",
-    rating: 4.6,
-    genre: "Action, Adventure",
-    platform: "PlayStation, PC",
-    releaseDate: "2020-11-12",
-    metacritic: 85
-  }
-];
+// Fake data organized by category
+const fakeGamesData: Record<string, GameResponse[]> = {
+  "all": [
+    {
+      id: 1,
+      name: "The Legend of Zelda: Breath of the Wild",
+      image: "https://via.placeholder.com/300x200?text=Zelda",
+      rating: 4.8,
+      genre: "Action, Adventure",
+      platform: "Nintendo Switch, PC",
+      releaseDate: "2017-03-03",
+      metacritic: 97
+    },
+    {
+      id: 2,
+      name: "God of War",
+      image: "https://via.placeholder.com/300x200?text=God+of+War",
+      rating: 4.7,
+      genre: "Action, Adventure",
+      platform: "PlayStation, PC",
+      releaseDate: "2018-04-20",
+      metacritic: 94
+    },
+    {
+      id: 3,
+      name: "Cyberpunk 2077",
+      image: "https://via.placeholder.com/300x200?text=Cyberpunk",
+      rating: 4.2,
+      genre: "RPG, Action",
+      platform: "PC, PlayStation, Xbox",
+      releaseDate: "2020-12-10",
+      metacritic: 86
+    }
+  ],
+  "live-casino": [
+    {
+      id: 10,
+      name: "Live Baccarat VIP",
+      image: "https://via.placeholder.com/300x200?text=Live+Baccarat",
+      rating: 4.9,
+      genre: "Live Casino",
+      platform: "Web, Mobile",
+      releaseDate: "2023-01-01",
+      metacritic: 95
+    },
+    {
+      id: 11,
+      name: "Live Roulette Gold",
+      image: "https://via.placeholder.com/300x200?text=Live+Roulette",
+      rating: 4.8,
+      genre: "Live Casino",
+      platform: "Web, Mobile",
+      releaseDate: "2023-01-01",
+      metacritic: 93
+    },
+    {
+      id: 12,
+      name: "Live Blackjack Premium",
+      image: "https://via.placeholder.com/300x200?text=Live+Blackjack",
+      rating: 4.7,
+      genre: "Live Casino",
+      platform: "Web, Mobile",
+      releaseDate: "2023-01-01",
+      metacritic: 92
+    }
+  ],
+  "slots": [
+    {
+      id: 20,
+      name: "Sweet Bonanza Xmas",
+      image: "https://via.placeholder.com/300x200?text=Sweet+Bonanza",
+      rating: 4.6,
+      genre: "Slot Machine",
+      platform: "Web, Mobile",
+      releaseDate: "2023-12-01",
+      metacritic: 89
+    },
+    {
+      id: 21,
+      name: "Gates of Olympus 1000",
+      image: "https://via.placeholder.com/300x200?text=Gates+Olympus",
+      rating: 4.8,
+      genre: "Slot Machine",
+      platform: "Web, Mobile", 
+      releaseDate: "2023-06-01",
+      metacritic: 91
+    },
+    {
+      id: 22,
+      name: "Sugar Rush Ultimate",
+      image: "https://via.placeholder.com/300x200?text=Sugar+Rush",
+      rating: 4.5,
+      genre: "Slot Machine",
+      platform: "Web, Mobile",
+      releaseDate: "2023-08-01",
+      metacritic: 87
+    }
+  ],
+  "sports": [
+    {
+      id: 30,
+      name: "Football Manager 2024",
+      image: "https://via.placeholder.com/300x200?text=Football+Manager",
+      rating: 4.4,
+      genre: "Sports, Simulation",
+      platform: "PC, Mobile",
+      releaseDate: "2023-11-01",
+      metacritic: 85
+    },
+    {
+      id: 31,
+      name: "NBA 2K24",
+      image: "https://via.placeholder.com/300x200?text=NBA+2K24",
+      rating: 4.3,
+      genre: "Sports",
+      platform: "PC, PlayStation, Xbox",
+      releaseDate: "2023-09-01",
+      metacritic: 84
+    },
+    {
+      id: 32,
+      name: "FIFA 24",
+      image: "https://via.placeholder.com/300x200?text=FIFA+24",
+      rating: 4.2,
+      genre: "Sports",
+      platform: "PC, PlayStation, Xbox",
+      releaseDate: "2023-09-29",
+      metacritic: 82
+    }
+  ]
+};
 
-async function fetchGamesFromRAWG(page: number = 1, pageSize: number = 10): Promise<GameResponse[]> {
+async function fetchGamesFromRAWG(page: number = 1, pageSize: number = 10, category: string = "all"): Promise<GameResponse[]> {
   try {
+    // Map category to RAWG API tags if using real API
+    const categoryTagMap: Record<string, string> = {
+      "all": "",
+      "live-casino": "casino",
+      "slots": "slots",
+      "sports": "sports"
+    };
+    
+    const tag = categoryTagMap[category] || "";
+    const apiUrl = `https://api.rawg.io/api/games?key=YOUR_API_KEY&page=${page}&page_size=${pageSize}&ordering=-rating${tag ? `&tags=${tag}` : ""}`;
+
     // RAWG API endpoint - free tier allows 20,000 requests per month
-    const response = await fetch(
-      `https://api.rawg.io/api/games?key=YOUR_API_KEY&page=${page}&page_size=${pageSize}&ordering=-rating`
-    );
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      console.log('RAWG API failed, using fake data');
-      return fakeGamesData.slice(0, pageSize);
+      console.log(`RAWG API failed for category ${category}, using fake data`);
+      return fakeGamesData[category]?.slice(0, pageSize) || fakeGamesData["all"].slice(0, pageSize);
     }
 
     const data = await response.json();
@@ -106,9 +193,9 @@ async function fetchGamesFromRAWG(page: number = 1, pageSize: number = 10): Prom
       metacritic: game.metacritic || 0
     }));
   } catch (error) {
-    console.error('Error fetching from RAWG API:', error);
+    console.error(`Error fetching from RAWG API for category ${category}:`, error);
     console.log('Falling back to fake data');
-    return fakeGamesData.slice(0, pageSize);
+    return fakeGamesData[category]?.slice(0, pageSize) || fakeGamesData["all"].slice(0, pageSize);
   }
 }
 
@@ -119,14 +206,26 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const pageSize = parseInt(url.searchParams.get('page_size') || '10');
-    const category = url.searchParams.get('category') || 'all'; // for future filtering
+    let page = 1;
+    let pageSize = 10;
+    let category = 'all';
+
+    // Handle both GET (URL params) and POST (body) requests
+    if (req.method === 'POST') {
+      const body = await req.json();
+      page = body.page || 1;
+      pageSize = body.pageSize || 10;
+      category = body.category || 'all';
+    } else {
+      const url = new URL(req.url);
+      page = parseInt(url.searchParams.get('page') || '1');
+      pageSize = parseInt(url.searchParams.get('page_size') || '10');
+      category = url.searchParams.get('category') || 'all';
+    }
 
     console.log(`Fetching games - Page: ${page}, Size: ${pageSize}, Category: ${category}`);
 
-    const games = await fetchGamesFromRAWG(page, pageSize);
+    const games = await fetchGamesFromRAWG(page, pageSize, category);
 
     return new Response(
       JSON.stringify({
@@ -150,7 +249,7 @@ serve(async (req) => {
       JSON.stringify({
         success: false,
         error: 'Failed to fetch games',
-        data: fakeGamesData.slice(0, 5), // Return some fake data
+        data: fakeGamesData["all"].slice(0, 5), // Return some fake data
         fallback: true
       }),
       {
