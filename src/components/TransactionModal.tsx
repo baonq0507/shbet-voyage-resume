@@ -23,9 +23,10 @@ interface Bank {
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'deposit' | 'withdrawal';
 }
 
-const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) => {
+const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialTab = 'deposit' }) => {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
@@ -255,7 +256,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
           </DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="deposit" className="w-full">
+        <Tabs defaultValue={initialTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="deposit" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />

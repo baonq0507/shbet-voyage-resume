@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings } from "lucide-react";
+import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [transactionType, setTransactionType] = useState<'deposit' | 'withdrawal'>('deposit');
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut, loading } = useAuth();
@@ -216,9 +217,19 @@ const Header = () => {
                         <UserCircle className="w-4 h-4 mr-2" />
                         Thông tin tài khoản
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setIsTransactionModalOpen(true)}>
-                        <Wallet className="w-4 h-4 mr-2" />
+                      <DropdownMenuItem onClick={() => {
+                        setTransactionType('deposit');
+                        setIsTransactionModalOpen(true);
+                      }}>
+                        <ArrowDownToLine className="w-4 h-4 mr-2" />
                         Nạp tiền
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        setTransactionType('withdrawal');
+                        setIsTransactionModalOpen(true);
+                      }}>
+                        <ArrowUpFromLine className="w-4 h-4 mr-2" />
+                        Rút tiền
                       </DropdownMenuItem>
                       {isAdmin && (
                         <DropdownMenuItem asChild>
@@ -249,8 +260,16 @@ const Header = () => {
                   <User className="w-4 h-4" />
                   Đăng Nhập
                 </Button>
-                <Button variant="gold" size="sm" className="hidden lg:flex">
-                  <Wallet className="w-4 h-4" />
+                <Button 
+                  variant="gold" 
+                  size="sm" 
+                  className="hidden lg:flex"
+                  onClick={() => {
+                    setTransactionType('deposit');
+                    setIsTransactionModalOpen(true);
+                  }}
+                >
+                  <ArrowDownToLine className="w-4 h-4" />
                   Nạp Tiền
                 </Button>
               </>
@@ -304,9 +323,21 @@ const Header = () => {
                           <UserCircle className="w-4 h-4 mr-2" />
                           Thông tin tài khoản
                         </Button>
-                        <Button variant="gold" className="w-full justify-start" onClick={() => setIsTransactionModalOpen(true)}>
-                          <Wallet className="w-4 h-4 mr-2" />
+                        <Button variant="gold" className="w-full justify-start" onClick={() => {
+                          setTransactionType('deposit');
+                          setIsTransactionModalOpen(true);
+                          setIsMobileMenuOpen(false);
+                        }}>
+                          <ArrowDownToLine className="w-4 h-4 mr-2" />
                           Nạp Tiền
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => {
+                          setTransactionType('withdrawal');
+                          setIsTransactionModalOpen(true);
+                          setIsMobileMenuOpen(false);
+                        }}>
+                          <ArrowUpFromLine className="w-4 h-4 mr-2" />
+                          Rút Tiền
                         </Button>
                         {isAdmin && (
                           <Button variant="outline" className="w-full justify-start" asChild>
@@ -334,8 +365,16 @@ const Header = () => {
                           <User className="w-4 h-4 mr-2" />
                           Đăng Nhập
                         </Button>
-                        <Button variant="gold" className="w-full justify-start">
-                          <Wallet className="w-4 h-4 mr-2" />
+                        <Button 
+                          variant="gold" 
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setTransactionType('deposit');
+                            setIsTransactionModalOpen(true);
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          <ArrowDownToLine className="w-4 h-4 mr-2" />
                           Nạp Tiền
                         </Button>
                       </>
@@ -358,6 +397,7 @@ const Header = () => {
       <TransactionModal 
         isOpen={isTransactionModalOpen} 
         onClose={() => setIsTransactionModalOpen(false)}
+        initialTab={transactionType}
       />
     </header>
   );
