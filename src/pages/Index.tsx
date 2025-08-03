@@ -174,7 +174,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      {/* <Header /> */}
       
       {/* Welcome Banner */}
       <section className="relative py-4 overflow-hidden">
