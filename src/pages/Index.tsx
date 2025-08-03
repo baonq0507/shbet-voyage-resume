@@ -178,7 +178,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[300px] md:h-[400px] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${casinoHero})` }}
@@ -189,41 +189,21 @@ const Index = () => {
           <div className="grid grid-cols-2 gap-4 items-center">
             {/* Left Content */}
             <div className="text-left">
-              <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-6">
+              <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4">
                 <span className="text-gradient">DINAMONDBET68</span>
               </h1>
-              <p className="text-xs sm:text-sm md:text-lg lg:text-2xl text-white mb-3 md:mb-8 leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-lg text-white mb-3 md:mb-6 leading-relaxed">
                 Nhà cái uy tín hàng đầu Việt Nam - Trải nghiệm cá cược đỉnh cao với hàng nghìn game hấp dẫn
               </p>
-              <div className="flex flex-col gap-2 md:gap-4">
-                <Button variant="casino" size="sm" className="text-xs sm:text-sm md:text-lg px-3 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 w-full">
-                  <Play className="w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              <div className="flex flex-col gap-2 md:gap-3">
+                <Button variant="casino" size="sm" className="text-xs sm:text-sm md:text-base px-3 sm:px-6 py-2 sm:py-3 w-full">
+                  <Play className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                   Chơi Ngay
                 </Button>
-                <Button variant="gold" size="sm" className="text-xs sm:text-sm md:text-lg px-3 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 w-full">
-                  <Gift className="w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                <Button variant="gold" size="sm" className="text-xs sm:text-sm md:text-base px-3 sm:px-6 py-2 sm:py-3 w-full">
+                  <Gift className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                   Nhận Thưởng
                 </Button>
-              </div>
-              
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-1 sm:gap-2 md:gap-4 mt-4 sm:mt-8 md:mt-12">
-                <div className="text-center bg-black/20 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4">
-                  <div className="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gradient mb-1">10M+</div>
-                  <div className="text-white/80 text-[8px] sm:text-xs md:text-sm">Thành Viên</div>
-                </div>
-                <div className="text-center bg-black/20 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4">
-                  <div className="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gradient mb-1">1000+</div>
-                  <div className="text-white/80 text-[8px] sm:text-xs md:text-sm">Game Hot</div>
-                </div>
-                <div className="text-center bg-black/20 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4">
-                  <div className="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gradient mb-1">99.9%</div>
-                  <div className="text-white/80 text-[8px] sm:text-xs md:text-sm">Uptime</div>
-                </div>
-                <div className="text-center bg-black/20 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4">
-                  <div className="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gradient mb-1">24/7</div>
-                  <div className="text-white/80 text-[8px] sm:text-xs md:text-sm">Hỗ Trợ</div>
-                </div>
               </div>
             </div>
             
