@@ -14,17 +14,17 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
   <Card className={`group cursor-pointer transition-all duration-300 hover:scale-105 border ${
     featured ? "casino-glow border-primary" : "border-border"
   }`}>
-    <CardHeader className="p-3">
+    <CardHeader className="p-2 sm:p-3">
       <div className="relative overflow-hidden rounded-lg">
         <img 
           src={image} 
           alt={title}
-          className="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-24 sm:h-28 md:h-32 object-cover group-hover:scale-110 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <Button variant="casino" size="sm">
-            <Play className="w-4 h-4" />
-            Chơi Ngay
+          <Button variant="casino" size="sm" className="text-xs sm:text-sm">
+            <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline ml-1">Chơi Ngay</span>
           </Button>
         </div>
         {featured && (
@@ -33,7 +33,7 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
           </div>
         )}
       </div>
-      <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors mt-2 text-center">
+      <CardTitle className="text-xs sm:text-sm md:text-base font-medium group-hover:text-primary transition-colors mt-2 text-center line-clamp-2">
         {title}
       </CardTitle>
     </CardHeader>
@@ -65,38 +65,38 @@ interface GameSectionProps {
 
 const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">
+    <section className="py-12 md:py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
             <span className="text-gradient">{title}</span>
           </h2>
-          <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
+          <div className="w-16 sm:w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
         {lobbies && lobbies.length > 0 ? (
-          <div className="border border-border rounded-lg p-4 bg-gradient-to-br from-card/80 via-card to-muted/50 backdrop-blur-sm shadow-lg">
+          <div className="border border-border rounded-lg p-3 sm:p-4 bg-gradient-to-br from-card/80 via-card to-muted/50 backdrop-blur-sm shadow-lg">
             <Tabs defaultValue={lobbies[0].id} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 mb-6 h-auto p-1 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 shadow-inner">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-1 mb-4 sm:mb-6 h-auto p-1 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 shadow-inner">
                 {lobbies.map((lobby) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="flex flex-col items-center justify-center gap-1 p-1.5 h-auto min-h-[50px] text-xs font-medium data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 transition-all duration-300"
+                    className="flex flex-col items-center justify-center gap-1 p-1.5 sm:p-2 h-auto min-h-[60px] sm:min-h-[70px] text-xs font-medium data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 transition-all duration-300"
                   >
                     <img 
                       src={lobby.logo} 
                       alt={lobby.name}
-                      className="w-8 h-8 object-contain"
+                      className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                     />
-                    <span className="text-center leading-tight text-[10px]">{lobby.name}</span>
+                    <span className="text-center leading-tight text-[9px] sm:text-[10px] md:text-xs">{lobby.name}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
 
               {lobbies.map((lobby) => (
                 <TabsContent key={lobby.id} value={lobby.id}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                     {lobby.games.map((game, index) => (
                       <GameCard key={index} {...game} />
                     ))}
@@ -106,7 +106,7 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
             </Tabs>
           </div>
         ) : games && games.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {games.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
@@ -117,15 +117,17 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
           </div>
         )}
 
-        <div className="text-center mt-12">
-          <Button variant="casino" size="lg" className="mr-4">
-            <Trophy className="w-5 h-5" />
-            Xem Tất Cả Game
-          </Button>
-          <Button variant="gold" size="lg">
-            <Gift className="w-5 h-5" />
-            Nhận Thưởng
-          </Button>
+        <div className="text-center mt-8 md:mt-12">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button variant="casino" size="lg" className="w-full sm:w-auto">
+              <Trophy className="w-5 h-5" />
+              Xem Tất Cả Game
+            </Button>
+            <Button variant="gold" size="lg" className="w-full sm:w-auto">
+              <Gift className="w-5 h-5" />
+              Nhận Thưởng
+            </Button>
+          </div>
         </div>
       </div>
     </section>

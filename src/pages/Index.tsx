@@ -177,61 +177,61 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${casinoHero})` }}
         />
         <div className="absolute inset-0 bg-gradient-hero opacity-90" />
         
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
-            <div className="text-center lg:text-left">
-              <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <div className="text-center lg:text-left order-2 lg:order-1">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 md:mb-6">
                 <span className="text-gradient">DINAMONDBET68</span>
               </h1>
-              <p className="text-xl md:text-2xl text-white mb-8">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 md:mb-8 leading-relaxed">
                 Nhà cái uy tín hàng đầu Việt Nam - Trải nghiệm cá cược đỉnh cao với hàng nghìn game hấp dẫn
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button variant="casino" size="lg" className="text-lg px-8 py-4">
-                  <Play className="w-6 h-6" />
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+                <Button variant="casino" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto">
+                  <Play className="w-5 h-5 sm:w-6 sm:h-6" />
                   Chơi Ngay
                 </Button>
-                <Button variant="gold" size="lg" className="text-lg px-8 py-4">
-                  <Gift className="w-6 h-6" />
+                <Button variant="gold" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto">
+                  <Gift className="w-5 h-5 sm:w-6 sm:h-6" />
                   Nhận Thưởng
                 </Button>
               </div>
               
               {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-                <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-gradient mb-1">10M+</div>
-                  <div className="text-white/80">Thành Viên</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-12">
+                <div className="text-center lg:text-left bg-black/20 backdrop-blur-sm rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gradient mb-1">10M+</div>
+                  <div className="text-white/80 text-xs sm:text-sm">Thành Viên</div>
                 </div>
-                <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-gradient mb-1">1000+</div>
-                  <div className="text-white/80">Game Hot</div>
+                <div className="text-center lg:text-left bg-black/20 backdrop-blur-sm rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gradient mb-1">1000+</div>
+                  <div className="text-white/80 text-xs sm:text-sm">Game Hot</div>
                 </div>
-                <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-gradient mb-1">99.9%</div>
-                  <div className="text-white/80">Uptime</div>
+                <div className="text-center lg:text-left bg-black/20 backdrop-blur-sm rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gradient mb-1">99.9%</div>
+                  <div className="text-white/80 text-xs sm:text-sm">Uptime</div>
                 </div>
-                <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-gradient mb-1">24/7</div>
-                  <div className="text-white/80">Hỗ Trợ</div>
+                <div className="text-center lg:text-left bg-black/20 backdrop-blur-sm rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gradient mb-1">24/7</div>
+                  <div className="text-white/80 text-xs sm:text-sm">Hỗ Trợ</div>
                 </div>
               </div>
             </div>
             
             {/* Right Image */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <img 
                 src={casinoBanner} 
                 alt="Casino Banner" 
-                className="max-w-full h-auto object-contain"
+                className="max-w-full h-auto object-contain w-full max-w-md lg:max-w-lg xl:max-w-xl"
               />
             </div>
           </div>
@@ -243,41 +243,41 @@ const Index = () => {
       <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} />
 
       {/* Promotions */}
-      <section className="py-16 bg-gradient-hero">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-8 text-white">
+      <section className="py-12 md:py-16 bg-gradient-hero">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-white">
             🎁 Khuyến Mãi Đặc Biệt 🎁
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
             <Card className="casino-glow">
-              <CardHeader>
-                <CardTitle className="text-gradient">Thưởng Nạp Đầu</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-gradient text-lg sm:text-xl">Thưởng Nạp Đầu</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-primary mb-2">100%</div>
-                <p className="text-muted-foreground">Tối đa 5,000,000 VNĐ</p>
+              <CardContent className="pt-2">
+                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">100%</div>
+                <p className="text-muted-foreground text-sm sm:text-base">Tối đa 5,000,000 VNĐ</p>
               </CardContent>
             </Card>
             <Card className="casino-glow">
-              <CardHeader>
-                <CardTitle className="text-gradient">Cashback</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-gradient text-lg sm:text-xl">Cashback</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-primary mb-2">10%</div>
-                <p className="text-muted-foreground">Hoàn tiền hàng tuần</p>
+              <CardContent className="pt-2">
+                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">10%</div>
+                <p className="text-muted-foreground text-sm sm:text-base">Hoàn tiền hàng tuần</p>
               </CardContent>
             </Card>
-            <Card className="casino-glow">
-              <CardHeader>
-                <CardTitle className="text-gradient">Giải Đấu</CardTitle>
+            <Card className="casino-glow sm:col-span-2 lg:col-span-1">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-gradient text-lg sm:text-xl">Giải Đấu</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-primary mb-2">1 Tỷ</div>
-                <p className="text-muted-foreground">Giải thưởng tháng</p>
+              <CardContent className="pt-2">
+                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">1 Tỷ</div>
+                <p className="text-muted-foreground text-sm sm:text-base">Giải thưởng tháng</p>
               </CardContent>
             </Card>
           </div>
-          <Button variant="gold" size="lg" className="mt-8">
+          <Button variant="gold" size="lg" className="mt-6 md:mt-8 w-full sm:w-auto">
             <Trophy className="w-5 h-5" />
             Tham Gia Ngay
           </Button>
