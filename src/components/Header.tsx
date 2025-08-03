@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import AuthModal from "./AuthModal";
+import TransactionModal from "./TransactionModal";
 import casinoIcon from "@/assets/menu/casino-green.png";
 import nohuIcon from "@/assets/menu/nohu-green.png";
 import bancaIcon from "@/assets/menu/banca-green.png";
@@ -16,6 +17,7 @@ import dagaIcon from "@/assets/menu/daga-green.png";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut, loading } = useAuth();
 
@@ -117,7 +119,7 @@ const Header = () => {
                         <UserCircle className="w-4 h-4 mr-2" />
                         Thông tin tài khoản
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setIsTransactionModalOpen(true)}>
                         <Wallet className="w-4 h-4 mr-2" />
                         Nạp tiền
                       </DropdownMenuItem>
@@ -197,7 +199,7 @@ const Header = () => {
                           <UserCircle className="w-4 h-4 mr-2" />
                           Thông tin tài khoản
                         </Button>
-                        <Button variant="gold" className="w-full justify-start">
+                        <Button variant="gold" className="w-full justify-start" onClick={() => setIsTransactionModalOpen(true)}>
                           <Wallet className="w-4 h-4 mr-2" />
                           Nạp Tiền
                         </Button>
@@ -238,6 +240,11 @@ const Header = () => {
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+      />
+      
+      <TransactionModal 
+        isOpen={isTransactionModalOpen} 
+        onClose={() => setIsTransactionModalOpen(false)}
       />
     </header>
   );

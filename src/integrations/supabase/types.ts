@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank: {
+        Row: {
+          account_holder: string
+          account_number: string
+          bank_name: string
+          created_at: string
+          id: string
+          is_active: boolean
+          qr_code_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_holder: string
+          account_number: string
+          bank_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          qr_code_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_holder?: string
+          account_number?: string
+          bank_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          qr_code_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           balance: number | null
@@ -52,6 +85,59 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      transactions: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          bank_id: string | null
+          created_at: string
+          id: string
+          proof_image_url: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_id?: string | null
+          created_at?: string
+          id?: string
+          proof_image_url?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_id?: string | null
+          created_at?: string
+          id?: string
+          proof_image_url?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "bank"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
