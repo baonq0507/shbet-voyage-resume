@@ -85,8 +85,8 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
           <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
-        {lobbies ? (
-          <Tabs defaultValue={lobbies[0]?.id} className="w-full">
+        {lobbies && lobbies.length > 0 ? (
+          <Tabs defaultValue={lobbies[0].id} className="w-full">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-8">
               {lobbies.map((lobby) => (
                 <TabsTrigger key={lobby.id} value={lobby.id} className="text-sm">
@@ -105,11 +105,15 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
               </TabsContent>
             ))}
           </Tabs>
-        ) : (
+        ) : games && games.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {games?.map((game, index) => (
+            {games.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Không có game nào để hiển thị</p>
           </div>
         )}
 
