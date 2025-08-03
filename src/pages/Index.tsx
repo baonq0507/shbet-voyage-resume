@@ -177,21 +177,12 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[700px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] ease-in-out hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${casinoHero})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-secondary/60 to-primary/80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30" />
-        
-        {/* Animated floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-gradient-gold rounded-full animate-pulse opacity-60"></div>
-          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-primary rounded-full animate-ping delay-1000 opacity-40"></div>
-          <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-gradient-gold rounded-full animate-pulse delay-2000 opacity-50"></div>
-          <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-primary rounded-full animate-ping delay-500 opacity-30"></div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-hero opacity-90" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
