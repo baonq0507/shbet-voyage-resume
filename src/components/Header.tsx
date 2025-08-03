@@ -24,7 +24,6 @@ const Header = () => {
     { path: "/daga", label: "ĐÁ GÀ", icon: Bird },
     { path: "/khuyenmai", label: "KHUYẾN MẠI", icon: Gift },
     { path: "/daily", label: "ĐẠI LÝ", icon: Users },
-    { path: "/thongbao", label: "THÔNG BÁO", icon: MessageSquare },
   ];
 
   return (
@@ -84,12 +83,6 @@ const Header = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" className="hidden lg:flex" asChild>
-              <Link to="/thongbao">
-                <Bell className="w-4 h-4" />
-                Thông Báo
-              </Link>
-            </Button>
             <Button variant="casino" size="sm" className="hidden md:flex">
               <User className="w-4 h-4" />
               Đăng Nhập
@@ -136,12 +129,6 @@ const Header = () => {
                     ))}
                   </div>
                   <div className="mt-6 pt-6 border-t border-border space-y-3">
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <Link to="/thongbao">
-                        <Bell className="w-4 h-4 mr-2" />
-                        Thông Báo
-                      </Link>
-                    </Button>
                     <Button variant="casino" className="w-full justify-start">
                       <User className="w-4 h-4 mr-2" />
                       Đăng Nhập
