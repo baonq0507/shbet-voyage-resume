@@ -122,33 +122,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              <span className="text-gradient">Tại Sao Chọn DINAMONDBET68?</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Chúng tôi cam kết mang đến trải nghiệm cá cược tốt nhất với công nghệ hiện đại và dịch vụ chuyên nghiệp
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <Card key={index} className="text-center group hover:scale-105 transition-all duration-300 casino-glow">
-                <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-lg mb-2 text-gradient">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Games Section */}
       <GameSection title="GAME HOT NHẤT" games={featuredGames} />
