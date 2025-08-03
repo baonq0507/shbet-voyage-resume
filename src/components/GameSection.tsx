@@ -11,8 +11,8 @@ interface GameCardProps {
 }
 
 const GameCard = ({ title, description, image, featured }: GameCardProps) => (
-  <Card className={`group cursor-pointer transition-all duration-300 hover:scale-105 ${
-    featured ? "casino-glow border-primary" : ""
+  <Card className={`group cursor-pointer transition-all duration-300 hover:scale-105 border ${
+    featured ? "casino-glow border-primary" : "border-border"
   }`}>
     <CardHeader className="p-3">
       <div className="relative overflow-hidden rounded-lg">
