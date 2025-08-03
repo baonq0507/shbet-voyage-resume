@@ -40,6 +40,50 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
     }
   }, [isOpen]);
 
+  // Set up real-time subscription for user's transactions
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('user-transactions')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'transactions',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Real-time transaction update for user:', payload);
+          
+          const transaction = payload.new as any;
+          
+          // Show notification for transaction status updates
+          if (transaction.status === 'approved') {
+            toast({
+              title: "Giao dịch được duyệt ✅",
+              description: `${transaction.type === 'deposit' ? 'Nạp tiền' : 
+                            transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} ${transaction.amount?.toLocaleString()} VND đã được duyệt`,
+            });
+          } else if (transaction.status === 'rejected') {
+            toast({
+              title: "Giao dịch bị từ chối ❌",
+              description: `${transaction.type === 'deposit' ? 'Nạp tiền' : 
+                            transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} ${transaction.amount?.toLocaleString()} VND bị từ chối`,
+              variant: "destructive",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, toast]);
+
   const fetchBanks = async () => {
     try {
       const { data, error } = await supabase

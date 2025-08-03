@@ -78,8 +78,59 @@ const AdminPage = () => {
     if (isAdmin && !roleLoading) {
       fetchTransactions();
       fetchUsers();
+      
+      // Set up real-time subscription for transactions
+      const channel = supabase
+        .channel('admin-transactions')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+            schema: 'public',
+            table: 'transactions'
+          },
+          (payload) => {
+            console.log('Real-time transaction update:', payload);
+            
+            // Refresh transactions and users data when any transaction changes
+            fetchTransactions();
+            fetchUsers();
+            
+            // Show toast notification for real-time updates
+            if (payload.eventType === 'INSERT') {
+              const transaction = payload.new as any;
+              toast({
+                title: "Giao dịch mới",
+                description: `${transaction.type === 'deposit' ? 'Nạp tiền' : 
+                              transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} - ${transaction.amount?.toLocaleString()} VND`,
+              });
+            } else if (payload.eventType === 'UPDATE') {
+              const transaction = payload.new as any;
+              if (transaction.status === 'approved') {
+                toast({
+                  title: "Giao dịch được duyệt",
+                  description: `${transaction.type === 'deposit' ? 'Nạp tiền' : 
+                                transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} - ${transaction.amount?.toLocaleString()} VND`,
+                });
+              } else if (transaction.status === 'rejected') {
+                toast({
+                  title: "Giao dịch bị từ chối",
+                  description: `${transaction.type === 'deposit' ? 'Nạp tiền' : 
+                                transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} - ${transaction.amount?.toLocaleString()} VND`,
+                  variant: "destructive",
+                });
+              }
+            }
+          }
+        )
+        .subscribe();
+
+      // Cleanup subscription on unmount
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
-  }, [isAdmin, roleLoading]);
+  }, [isAdmin, roleLoading, toast]);
 
   const fetchTransactions = async () => {
     try {
