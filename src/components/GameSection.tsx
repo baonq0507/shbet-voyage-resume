@@ -94,7 +94,7 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="flex flex-col items-center justify-center gap-1 p-2 h-auto min-h-[60px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    className="flex flex-col items-center justify-center gap-1 p-1.5 h-auto min-h-[50px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                   >
                     <img 
                       src={lobby.logo} 
