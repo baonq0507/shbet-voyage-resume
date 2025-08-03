@@ -63,21 +63,21 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-md text-xs font-medium transition-colors min-w-[70px] ${
                   location.pathname === item.path
                     ? "bg-primary text-primary-foreground casino-glow"
                     : "text-foreground hover:bg-primary/10 hover:text-primary"
                 }`}
               >
                 {item.icon && (
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-5 h-5" />
                 )}
-                <span>{item.label}</span>
+                <span className="text-center leading-tight">{item.label}</span>
               </Link>
             ))}
           </nav>
