@@ -225,6 +225,7 @@ const Header = () => {
                         Nạp tiền
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
+                        console.log('Withdrawal button clicked');
                         setTransactionType('withdrawal');
                         setIsTransactionModalOpen(true);
                       }}>

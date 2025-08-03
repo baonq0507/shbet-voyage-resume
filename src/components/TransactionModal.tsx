@@ -28,6 +28,7 @@ interface TransactionModalProps {
 
 const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialTab = 'deposit' }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
+  console.log('TransactionModal props:', { isOpen, initialTab, activeTab });
   const [banks, setBanks] = useState<Bank[]>([]);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
@@ -40,7 +41,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
   // Update active tab when initialTab changes or modal opens
   useEffect(() => {
+    console.log('useEffect triggered:', { isOpen, initialTab });
     if (isOpen) {
+      console.log('Setting activeTab to:', initialTab);
       setActiveTab(initialTab);
     }
   }, [initialTab, isOpen]);
@@ -273,7 +276,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
               <CreditCard className="w-4 h-4" />
               Nạp tiền
             </TabsTrigger>
-            <TabsTrigger value="withdraw" className="flex items-center gap-2">
+            <TabsTrigger value="withdrawal" className="flex items-center gap-2">
               <Wallet className="w-4 h-4" />
               Rút tiền
             </TabsTrigger>
@@ -398,7 +401,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
             </Card>
           </TabsContent>
           
-          <TabsContent value="withdraw" className="space-y-4">
+          <TabsContent value="withdrawal" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Rút tiền từ tài khoản</CardTitle>
