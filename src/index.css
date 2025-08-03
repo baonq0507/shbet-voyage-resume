@@ -93,8 +93,32 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background: var(--gradient-dark);
+    background: linear-gradient(135deg, 
+      hsl(215 48% 8%) 0%, 
+      hsl(214 74% 12%) 25%, 
+      hsl(215 48% 10%) 50%, 
+      hsl(214 74% 15%) 75%, 
+      hsl(215 48% 8%) 100%);
+    background-attachment: fixed;
     min-height: 100vh;
+    position: relative;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at top center, 
+      hsl(214 74% 20% / 0.1) 0%, 
+      transparent 50%), 
+    radial-gradient(ellipse at bottom center, 
+      hsl(45 100% 20% / 0.05) 0%, 
+      transparent 70%);
+    pointer-events: none;
+    z-index: -1;
   }
 }
 
