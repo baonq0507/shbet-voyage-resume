@@ -21,7 +21,7 @@ const Header = () => {
     <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm">
       {/* Top Banner */}
       <div className="bg-gradient-primary text-center py-2 text-sm text-primary-foreground">
-        🎉 CHÀO MỪNG ĐẾN VỚI SHBET - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM 🎉
+        🎉 CHÀO MỪNG ĐẾN VỚI DINAMONDBET68 - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM 🎉
       </div>
 
       {/* Main Header */}
@@ -30,9 +30,9 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
-              <span className="text-white font-bold text-xl">SH</span>
+              <span className="text-white font-bold text-xl">D68</span>
             </div>
-            <div className="text-gradient font-bold text-xl">SHBET</div>
+            <div className="text-gradient font-bold text-xl">DINAMONDBET68</div>
           </Link>
 
           {/* Desktop Navigation */}

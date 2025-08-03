@@ -10,9 +10,9 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
-                <span className="text-white font-bold text-xl">SH</span>
+                <span className="text-white font-bold text-xl">D68</span>
               </div>
-              <div className="text-gradient font-bold text-xl">SHBET</div>
+              <div className="text-gradient font-bold text-xl">DINAMONDBET68</div>
             </div>
             <p className="text-muted-foreground mb-4">
               Nhà cái uy tín hàng đầu Việt Nam với hơn 10 năm kinh nghiệm trong lĩnh vực cá cược trực tuyến.
@@ -64,7 +64,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Mail className="w-4 h-4" />
-                <span>support@shbet.com</span>
+                <span>support@dinamondbet68.com</span>
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
@@ -83,7 +83,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-          <p>&copy; 2024 SHBET. Tất cả quyền được bảo lưu. Chơi có trách nhiệm.</p>
+          <p>&copy; 2024 DINAMONDBET68. Tất cả quyền được bảo lưu. Chơi có trách nhiệm.</p>
         </div>
       </div>
     </footer>

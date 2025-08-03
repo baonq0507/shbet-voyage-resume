@@ -84,7 +84,7 @@ const Index = () => {
         
         <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="text-gradient">SHBET</span>
+            <span className="text-gradient">DINAMONDBET68</span>
           </h1>
           <p className="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto">
             Nhà cái uy tín hàng đầu Việt Nam - Trải nghiệm cá cược đỉnh cao với hàng nghìn game hấp dẫn
@@ -127,7 +127,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              <span className="text-gradient">Tại Sao Chọn SHBET?</span>
+              <span className="text-gradient">Tại Sao Chọn DINAMONDBET68?</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Chúng tôi cam kết mang đến trải nghiệm cá cược tốt nhất với công nghệ hiện đại và dịch vụ chuyên nghiệp
