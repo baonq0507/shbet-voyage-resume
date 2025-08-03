@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GameSection from "@/components/GameSection";
 import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import MobileNavigation from "@/components/MobileNavigation";
 import casinoHero from "@/assets/casino-hero.jpg";
 import casinoBannerNew from "@/assets/casino-banner-new.png";
@@ -173,6 +174,8 @@ const Index = () => {
     }
   ];
 
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -204,16 +207,22 @@ const Index = () => {
                 với hàng nghìn game hấp dẫn
               </p>
               
-              <div className="flex flex-col md:flex-row gap-3 md:gap-3 lg:gap-6 pt-2 md:pt-3 lg:pt-4">
-                <Button variant="casino" size="sm" className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold casino-glow hover:scale-105 transition-all duration-300">
-                  <Play className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
-                  Chơi Ngay
-                </Button>
-                <Button variant="gold" size="sm" className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold gold-glow hover:scale-105 transition-all duration-300">
-                  <Gift className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
-                  Nhận Thưởng
-                </Button>
-              </div>
+              {!user ? (
+                <div className="flex flex-col md:flex-row gap-3 md:gap-3 lg:gap-6 pt-2 md:pt-3 lg:pt-4">
+                  <Button variant="casino" size="sm" className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold casino-glow hover:scale-105 transition-all duration-300">
+                    <Play className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
+                    Chơi Ngay
+                  </Button>
+                  <Button variant="gold" size="sm" className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold gold-glow hover:scale-105 transition-all duration-300">
+                    <Gift className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
+                    Nhận Thưởng
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-yellow-300 font-bold text-sm md:text-lg lg:text-xl">
+                  Chào mừng bạn trở lại! Hãy bắt đầu chơi ngay!
+                </div>
+              )}
             </div>
             
             {/* Right Image */}
