@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import GameSection from "@/components/GameSection";
 import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap } from "lucide-react";
 import casinoHero from "@/assets/casino-hero.jpg";
+import casinoBanner from "@/assets/casino-banner.png";
 import nohuGame from "@/assets/nohu-game.jpg";
 import bancaGame from "@/assets/banca-game.jpg";
 import sportsGame from "@/assets/sports-game.jpg";
@@ -82,41 +83,55 @@ const Index = () => {
         />
         <div className="absolute inset-0 bg-gradient-hero opacity-90" />
         
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="text-gradient">DINAMONDBET68</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto">
-            Nhà cái uy tín hàng đầu Việt Nam - Trải nghiệm cá cược đỉnh cao với hàng nghìn game hấp dẫn
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="casino" size="lg" className="text-lg px-8 py-4">
-              <Play className="w-6 h-6" />
-              Chơi Ngay
-            </Button>
-            <Button variant="gold" size="lg" className="text-lg px-8 py-4">
-              <Gift className="w-6 h-6" />
-              Nhận Thưởng
-            </Button>
-          </div>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">10M+</div>
-              <div className="text-white/80">Thành Viên</div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Left Content */}
+            <div className="text-center lg:text-left">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6">
+                <span className="text-gradient">DINAMONDBET68</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-white mb-8">
+                Nhà cái uy tín hàng đầu Việt Nam - Trải nghiệm cá cược đỉnh cao với hàng nghìn game hấp dẫn
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button variant="casino" size="lg" className="text-lg px-8 py-4">
+                  <Play className="w-6 h-6" />
+                  Chơi Ngay
+                </Button>
+                <Button variant="gold" size="lg" className="text-lg px-8 py-4">
+                  <Gift className="w-6 h-6" />
+                  Nhận Thưởng
+                </Button>
+              </div>
+              
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                <div className="text-center lg:text-left">
+                  <div className="text-3xl font-bold text-gradient mb-1">10M+</div>
+                  <div className="text-white/80">Thành Viên</div>
+                </div>
+                <div className="text-center lg:text-left">
+                  <div className="text-3xl font-bold text-gradient mb-1">1000+</div>
+                  <div className="text-white/80">Game Hot</div>
+                </div>
+                <div className="text-center lg:text-left">
+                  <div className="text-3xl font-bold text-gradient mb-1">99.9%</div>
+                  <div className="text-white/80">Uptime</div>
+                </div>
+                <div className="text-center lg:text-left">
+                  <div className="text-3xl font-bold text-gradient mb-1">24/7</div>
+                  <div className="text-white/80">Hỗ Trợ</div>
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">1000+</div>
-              <div className="text-white/80">Game Hot</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">99.9%</div>
-              <div className="text-white/80">Uptime</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">24/7</div>
-              <div className="text-white/80">Hỗ Trợ</div>
+            
+            {/* Right Image */}
+            <div className="flex justify-center lg:justify-end">
+              <img 
+                src={casinoBanner} 
+                alt="Casino Banner" 
+                className="max-w-full h-auto object-contain"
+              />
             </div>
           </div>
         </div>
