@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, Star, Users, ArrowLeft, Filter } from "lucide-react";
 import { useGamesList, type Game } from "@/hooks/useGamesList";
+import Header from "@/components/Header";
 
 // Define types for static games and API games
 type StaticGame = {
@@ -149,6 +150,8 @@ const Lobby = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
+      
       {/* Header Section */}
       <div className="bg-gradient-to-r from-primary via-secondary to-primary text-white">
         <div className="container mx-auto px-4 py-8">
