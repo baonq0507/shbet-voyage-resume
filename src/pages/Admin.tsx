@@ -19,7 +19,7 @@ import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye } from 'lucid
 interface Transaction {
   id: string;
   user_id: string;
-  type: 'deposit' | 'withdrawal';
+  type: 'deposit' | 'withdrawal' | 'bonus';
   amount: number;
   status: 'pending' | 'approved' | 'rejected';
   bank_id?: string;
@@ -242,23 +242,42 @@ const AdminPage = () => {
     }
 
     try {
-      const { error } = await supabase
+      const amountToAdd = parseFloat(balanceToAdd);
+      
+      // Update user balance
+      const { error: balanceError } = await supabase
         .from('profiles')
         .update({
-          balance: selectedUser.balance + parseFloat(balanceToAdd)
+          balance: selectedUser.balance + amountToAdd
         })
         .eq('id', selectedUser.id);
 
-      if (error) throw error;
+      if (balanceError) throw balanceError;
+
+      // Create bonus transaction record
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: selectedUser.user_id,
+          type: 'bonus',
+          amount: amountToAdd,
+          status: 'approved',
+          admin_note: `Admin cộng tiền bonus: ${amountToAdd.toLocaleString()} VND`,
+          approved_by: user?.id,
+          approved_at: new Date().toISOString()
+        });
+
+      if (transactionError) throw transactionError;
 
       toast({
         title: "Thành công",
-        description: `Đã cộng ${parseFloat(balanceToAdd).toLocaleString()} VND vào tài khoản`,
+        description: `Đã cộng ${amountToAdd.toLocaleString()} VND vào tài khoản và lưu vào lịch sử giao dịch`,
       });
 
       setBalanceToAdd('');
       setSelectedUser(null);
       fetchUsers();
+      fetchTransactions();
     } catch (error) {
       console.error('Error adding balance:', error);
       toast({
@@ -502,11 +521,15 @@ const AdminPage = () => {
                             <div className="text-sm text-muted-foreground">@{transaction.profiles?.username}</div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={transaction.type === 'deposit' ? 'default' : 'outline'}>
-                            {transaction.type === 'deposit' ? 'Nạp tiền' : 'Rút tiền'}
-                          </Badge>
-                        </TableCell>
+                         <TableCell>
+                           <Badge variant={
+                             transaction.type === 'deposit' ? 'default' : 
+                             transaction.type === 'bonus' ? 'secondary' : 'outline'
+                           }>
+                             {transaction.type === 'deposit' ? 'Nạp tiền' : 
+                              transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'}
+                           </Badge>
+                         </TableCell>
                         <TableCell className="font-medium">
                           {transaction.amount.toLocaleString()} VND
                         </TableCell>
@@ -551,10 +574,13 @@ const AdminPage = () => {
                                         <Label>Số tiền</Label>
                                         <div className="text-sm font-medium">{selectedTransaction.amount.toLocaleString()} VND</div>
                                       </div>
-                                      <div>
-                                        <Label>Loại giao dịch</Label>
-                                        <div className="text-sm">{selectedTransaction.type === 'deposit' ? 'Nạp tiền' : 'Rút tiền'}</div>
-                                      </div>
+                                       <div>
+                                         <Label>Loại giao dịch</Label>
+                                         <div className="text-sm">
+                                           {selectedTransaction.type === 'deposit' ? 'Nạp tiền' : 
+                                            selectedTransaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'}
+                                         </div>
+                                       </div>
                                       <div>
                                         <Label>Trạng thái</Label>
                                         <Badge className={getStatusColor(selectedTransaction.status)}>
@@ -843,8 +869,12 @@ const AdminPage = () => {
                                           {userTransactions.map((transaction) => (
                                             <TableRow key={transaction.id}>
                                               <TableCell>
-                                                <Badge variant={transaction.type === 'deposit' ? 'default' : 'outline'}>
-                                                  {transaction.type === 'deposit' ? 'Nạp tiền' : 'Rút tiền'}
+                                                <Badge variant={
+                                                  transaction.type === 'deposit' ? 'default' : 
+                                                  transaction.type === 'bonus' ? 'secondary' : 'outline'
+                                                }>
+                                                  {transaction.type === 'deposit' ? 'Nạp tiền' : 
+                                                   transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'}
                                                 </Badge>
                                               </TableCell>
                                               <TableCell className="font-medium">
