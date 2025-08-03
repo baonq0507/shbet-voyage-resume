@@ -15,6 +15,7 @@ import KhuyenMai from "./pages/KhuyenMai";
 import DaiLy from "./pages/DaiLy";
 import ThongBao from "./pages/ThongBao";
 import Admin from "./pages/Admin";
+import Lobby from "./pages/Lobby";
 import NotFound from "./pages/NotFound";
 import MobileFooter from "./components/MobileFooter";
 import MobileNavigation from "./components/MobileNavigation";
@@ -40,7 +41,7 @@ const App = () => (
               <Route path="/khuyenmai" element={<KhuyenMai />} />
               <Route path="/daily" element={<DaiLy />} />
               <Route path="/thongbao" element={<ThongBao />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/lobby" element={<Lobby />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

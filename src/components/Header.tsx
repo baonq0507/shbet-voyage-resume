@@ -89,8 +89,8 @@ const Header = () => {
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '');
     
-    // Navigate to category/lobby route
-    navigate(`${categoryPath}/${lobbySlug}`);
+    // Navigate to common lobby route with query parameter
+    navigate(`/lobby?sanh=${lobbySlug}`);
   };
 
   return (
