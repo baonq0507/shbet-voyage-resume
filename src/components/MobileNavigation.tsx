@@ -45,8 +45,8 @@ const MobileNavigation = () => {
       {/* Scroll Indicator */}
       <div className="absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none">
         <div className="bg-gradient-to-l from-card via-card/60 to-transparent w-6 h-full absolute -left-4 top-0" />
-        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-          <ChevronRight className="w-3 h-3 text-primary/60" />
+        <div className="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center">
+          <ChevronRight className="w-3 h-3 text-primary" />
         </div>
       </div>
     </div>
