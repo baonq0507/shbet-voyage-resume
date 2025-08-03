@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, Wallet, Bell, Home } from "lucide-react";
-import casinoIcon from "@/assets/menu/casino-transparent.png";
-import nohuIcon from "@/assets/menu/nohu-transparent.png";
-import bancaIcon from "@/assets/menu/banca-transparent.png";
-import thethaoIcon from "@/assets/menu/thethao-transparent.png";
-import gamebaiIcon from "@/assets/menu/gamebai-transparent.png";
-import dagaIcon from "@/assets/menu/daga-transparent.png";
+import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird } from "lucide-react";
+import casinoIcon from "@/assets/menu/casino-green.png";
+import nohuIcon from "@/assets/menu/nohu-green.png";
+import bancaIcon from "@/assets/menu/banca-green.png";
+import thethaoIcon from "@/assets/menu/thethao-green.png";
+import gamebaiIcon from "@/assets/menu/gamebai-green.png";
+import dagaIcon from "@/assets/menu/daga-green.png";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,12 +15,12 @@ const Header = () => {
 
   const navItems = [
     { path: "/", label: "TRANG CHỦ", icon: Home },
-    { path: "/casino", label: "CASINO", image: casinoIcon },
-    { path: "/nohu", label: "NỔ HŨ", image: nohuIcon },
-    { path: "/banca", label: "BẮN CÁ", image: bancaIcon },
-    { path: "/thethao", label: "THỂ THAO", image: thethaoIcon },
-    { path: "/gamebai", label: "GAME BÀI", image: gamebaiIcon },
-    { path: "/daga", label: "ĐÁ GÀ", image: dagaIcon },
+    { path: "/casino", label: "CASINO", icon: Coins },
+    { path: "/nohu", label: "NỔ HŨ", icon: Zap },
+    { path: "/banca", label: "BẮN CÁ", icon: Fish },
+    { path: "/thethao", label: "THỂ THAO", icon: Trophy },
+    { path: "/gamebai", label: "GAME BÀI", icon: Spade },
+    { path: "/daga", label: "ĐÁ GÀ", icon: Bird },
   ];
 
   return (
@@ -53,15 +53,9 @@ const Header = () => {
                     : "text-foreground hover:bg-primary/10 hover:text-primary"
                 }`}
               >
-                {item.icon ? (
+                {item.icon && (
                   <item.icon className="w-4 h-4" />
-                ) : item.image ? (
-                  <img 
-                    src={item.image} 
-                    alt={item.label}
-                    className="w-4 h-4 object-contain"
-                  />
-                ) : null}
+                )}
                 <span>{item.label}</span>
               </Link>
             ))}
@@ -109,15 +103,9 @@ const Header = () => {
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {item.icon ? (
+                  {item.icon && (
                     <item.icon className="w-5 h-5" />
-                  ) : item.image ? (
-                    <img 
-                      src={item.image} 
-                      alt={item.label}
-                      className="w-5 h-5 object-contain"
-                    />
-                  ) : null}
+                  )}
                   <span>{item.label}</span>
                 </Link>
               ))}
