@@ -87,14 +87,14 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
         </div>
 
         {lobbies && lobbies.length > 0 ? (
-          <div className="border border-border rounded-lg p-4 bg-card">
+          <div className="border border-border rounded-lg p-4 bg-gradient-to-br from-card/80 via-card to-muted/50 backdrop-blur-sm shadow-lg">
             <Tabs defaultValue={lobbies[0].id} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 mb-6 h-auto p-1">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 mb-6 h-auto p-1 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 shadow-inner">
                 {lobbies.map((lobby) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="flex flex-col items-center justify-center gap-1 p-1.5 h-auto min-h-[50px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    className="flex flex-col items-center justify-center gap-1 p-1.5 h-auto min-h-[50px] text-xs font-medium data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 transition-all duration-300"
                   >
                     <img 
                       src={lobby.logo} 
