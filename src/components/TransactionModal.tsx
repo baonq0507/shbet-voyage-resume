@@ -27,6 +27,7 @@ interface TransactionModalProps {
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialTab = 'deposit' }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
@@ -36,6 +37,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const [userBalance, setUserBalance] = useState<number>(0);
   const { toast } = useToast();
   const { user, profile } = useAuth();
+
+  // Update active tab when initialTab changes
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   // Update user balance from profile
   useEffect(() => {
@@ -256,7 +262,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
           </DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue={initialTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'deposit' | 'withdrawal')} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="deposit" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
