@@ -86,11 +86,11 @@ const Header = () => {
               <Bell className="w-4 h-4" />
               Thông Báo
             </Button>
-            <Button variant="casino" size="sm">
+            <Button variant="casino" size="sm" className="hidden md:flex">
               <User className="w-4 h-4" />
               Đăng Nhập
             </Button>
-            <Button variant="gold" size="sm">
+            <Button variant="gold" size="sm" className="hidden md:flex">
               <Wallet className="w-4 h-4" />
               Nạp Tiền
             </Button>
