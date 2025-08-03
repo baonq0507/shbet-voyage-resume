@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -27,6 +27,7 @@ const Header = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, profile, signOut, loading } = useAuth();
   const { isAdmin } = useRole();
 
@@ -80,6 +81,16 @@ const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLobbyClick = (categoryPath: string, lobbyName: string) => {
+    // Convert lobby name to URL-friendly slug
+    const lobbySlug = lobbyName.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '');
+    
+    // Navigate to category/lobby route
+    navigate(`${categoryPath}/${lobbySlug}`);
   };
 
   return (
@@ -146,6 +157,7 @@ const Header = () => {
                         {item.lobbies.map((lobby, index) => (
                           <div
                             key={index}
+                            onClick={() => handleLobbyClick(item.path, lobby.name)}
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-all duration-200 cursor-pointer hover-scale group/lobby"
                           >
                             <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 casino-glow">
