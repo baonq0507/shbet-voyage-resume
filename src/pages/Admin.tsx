@@ -72,6 +72,14 @@ const AdminPage = () => {
   const [searchBalanceMax, setSearchBalanceMax] = useState('');
   const [searchCreatedDate, setSearchCreatedDate] = useState('');
   const [searchDepositType, setSearchDepositType] = useState('');
+  
+  // Transaction search states
+  const [searchTransactionType, setSearchTransactionType] = useState('');
+  const [searchAmountMin, setSearchAmountMin] = useState('');
+  const [searchAmountMax, setSearchAmountMax] = useState('');
+  const [searchDateFrom, setSearchDateFrom] = useState('');
+  const [searchDateTo, setSearchDateTo] = useState('');
+  const [searchUserInfo, setSearchUserInfo] = useState('');
 
   // Move all hooks before any conditional returns
   useEffect(() => {
@@ -466,6 +474,57 @@ const AdminPage = () => {
     setSearchDepositType('');
   };
 
+  const filteredTransactions = transactions.filter(transaction => {
+    // Transaction type filter
+    if (searchTransactionType && transaction.type !== searchTransactionType) {
+      return false;
+    }
+
+    // Amount range filter
+    if (searchAmountMin && transaction.amount < parseFloat(searchAmountMin)) {
+      return false;
+    }
+    if (searchAmountMax && transaction.amount > parseFloat(searchAmountMax)) {
+      return false;
+    }
+
+    // Date range filter
+    if (searchDateFrom) {
+      const transactionDate = new Date(transaction.created_at).toISOString().split('T')[0];
+      if (transactionDate < searchDateFrom) {
+        return false;
+      }
+    }
+    if (searchDateTo) {
+      const transactionDate = new Date(transaction.created_at).toISOString().split('T')[0];
+      if (transactionDate > searchDateTo) {
+        return false;
+      }
+    }
+
+    // User info filter (name, email, phone)
+    if (searchUserInfo) {
+      const userInfo = searchUserInfo.toLowerCase();
+      const fullName = transaction.profiles?.full_name?.toLowerCase() || '';
+      const username = transaction.profiles?.username?.toLowerCase() || '';
+      
+      if (!fullName.includes(userInfo) && !username.includes(userInfo)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  const clearTransactionFilters = () => {
+    setSearchTransactionType('');
+    setSearchAmountMin('');
+    setSearchAmountMax('');
+    setSearchDateFrom('');
+    setSearchDateTo('');
+    setSearchUserInfo('');
+  };
+
   // Conditional returns AFTER all hooks
   if (roleLoading) {
     return <div className="flex items-center justify-center min-h-screen">Đang tải...</div>;
@@ -543,6 +602,94 @@ const AdminPage = () => {
         </TabsList>
         
         <TabsContent value="transactions" className="space-y-4">
+          {/* Transaction Search Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tìm kiếm giao dịch</CardTitle>
+              <CardDescription>
+                Sử dụng các bộ lọc để tìm kiếm giao dịch
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="search-transaction-type">Loại giao dịch</Label>
+                  <Select value={searchTransactionType} onValueChange={setSearchTransactionType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn loại giao dịch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="deposit">Nạp tiền</SelectItem>
+                      <SelectItem value="withdrawal">Rút tiền</SelectItem>
+                      <SelectItem value="bonus">Bonus</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-amount-min">Số tiền từ (VND)</Label>
+                  <Input
+                    id="search-amount-min"
+                    type="number"
+                    placeholder="Số tiền tối thiểu"
+                    value={searchAmountMin}
+                    onChange={(e) => setSearchAmountMin(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-amount-max">Số tiền đến (VND)</Label>
+                  <Input
+                    id="search-amount-max"
+                    type="number"
+                    placeholder="Số tiền tối đa"
+                    value={searchAmountMax}
+                    onChange={(e) => setSearchAmountMax(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-date-from">Từ ngày</Label>
+                  <Input
+                    id="search-date-from"
+                    type="date"
+                    value={searchDateFrom}
+                    onChange={(e) => setSearchDateFrom(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-date-to">Đến ngày</Label>
+                  <Input
+                    id="search-date-to"
+                    type="date"
+                    value={searchDateTo}
+                    onChange={(e) => setSearchDateTo(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-user-info">Tìm người dùng</Label>
+                  <Input
+                    id="search-user-info"
+                    placeholder="Tên, email hoặc SĐT"
+                    value={searchUserInfo}
+                    onChange={(e) => setSearchUserInfo(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2 mt-4">
+                <Button variant="outline" onClick={clearTransactionFilters}>
+                  Xóa bộ lọc
+                </Button>
+                <div className="text-sm text-muted-foreground flex items-center">
+                  Tìm thấy {filteredTransactions.length} giao dịch
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Danh sách giao dịch</CardTitle>
@@ -564,7 +711,7 @@ const AdminPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {transactions.map((transaction) => (
+                    {filteredTransactions.map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>
                           <div>
