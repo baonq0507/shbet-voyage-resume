@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GameSection from "@/components/GameSection";
+import { GamesList } from "@/components/GamesList";
 import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import MobileNavigation from "@/components/MobileNavigation";
@@ -244,7 +245,7 @@ const Index = () => {
       <MobileNavigation />
 
       {/* Games Section */}
-      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} />
+      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} showApiGames={true} />
 
       {/* Promotions */}
       <section className="py-12 md:py-16 bg-gradient-hero">

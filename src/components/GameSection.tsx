@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Star, Trophy, Gift } from "lucide-react";
+import { Play, Star, Trophy, Gift, Globe } from "lucide-react";
+import { useGamesList } from "@/hooks/useGamesList";
 
 interface GameCardProps {
   title: string;
@@ -72,9 +73,11 @@ interface GameSectionProps {
     image: string;
     featured?: boolean;
   }>;
+  showApiGames?: boolean;
 }
 
-const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
+const GameSection = ({ title, lobbies, games, showApiGames }: GameSectionProps) => {
+  const { games: apiGames, loading: apiLoading } = useGamesList(1, 6);
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,16 +88,45 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
           <div className="w-16 sm:w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
-        {lobbies && lobbies.length > 0 ? (
+        {(lobbies && lobbies.length > 0) || showApiGames ? (
           <div className="relative border border-border/50 rounded-2xl p-2 sm:p-3 bg-gradient-to-br from-card/95 via-card to-muted/30 backdrop-blur-md shadow-2xl casino-glow">
             {/* Decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
             <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-xl"></div>
             <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
-            <Tabs defaultValue={lobbies[0].id} className="w-full relative z-10">
+            <Tabs defaultValue={showApiGames ? "api-games" : lobbies?.[0]?.id} className="w-full relative z-10">
               <TabsList className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
-                {lobbies.map((lobby, index) => (
+                {/* API Games Tab */}
+                {showApiGames && (
+                  <TabsTrigger 
+                    value="api-games"
+                    className="group flex flex-col items-center justify-center gap-0.5 p-1.5 sm:p-2 h-auto min-h-[50px] sm:min-h-[55px] text-xs font-semibold rounded-lg min-w-[70px] max-w-[90px] flex-shrink-0
+                      data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
+                      data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:scale-105 data-[state=active]:casino-glow
+                      hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-md
+                      transition-all duration-300 ease-out border border-transparent data-[state=active]:border-primary-glow/50
+                      relative overflow-hidden"
+                  >
+                    {/* Animated background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center gap-0.5">
+                      <div className="relative">
+                        <Globe className="w-8 h-8 sm:w-10 sm:h-10 group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg" />
+                        {/* Glow effect for active state */}
+                        <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
+                      </div>
+                      <span className="text-[10px] leading-none">API</span>
+                    </div>
+                    
+                    {/* Active indicator */}
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
+                  </TabsTrigger>
+                )}
+                
+                {/* Lobby Tabs */}
+                {lobbies && lobbies.map((lobby, index) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
@@ -127,7 +159,38 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
                 ))}
               </TabsList>
 
-              {lobbies.map((lobby) => (
+              {/* API Games Tab Content */}
+              {showApiGames && (
+                <TabsContent value="api-games">
+                  {apiLoading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <Card key={index} className="overflow-hidden animate-pulse">
+                          <div className="h-24 sm:h-28 md:h-32 bg-muted"></div>
+                          <CardHeader className="pb-2">
+                            <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                      {apiGames.map((game) => (
+                        <GameCard 
+                          key={game.id} 
+                          title={game.name}
+                          description={game.genre}
+                          image={game.image}
+                          featured={game.rating > 4.5}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              )}
+
+              {/* Lobby Tab Content */}
+              {lobbies && lobbies.map((lobby) => (
                 <TabsContent key={lobby.id} value={lobby.id}>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                     {lobby.games.map((game, index) => (
