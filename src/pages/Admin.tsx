@@ -61,6 +61,17 @@ const AdminPage = () => {
   const [balanceToAdd, setBalanceToAdd] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [isUserTransactionDialogOpen, setIsUserTransactionDialogOpen] = useState(false);
+  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
+  
+  // Search states
+  const [searchName, setSearchName] = useState('');
+  const [searchEmail, setSearchEmail] = useState('');
+  const [searchRole, setSearchRole] = useState('');
+  const [searchBalanceMin, setSearchBalanceMin] = useState('');
+  const [searchBalanceMax, setSearchBalanceMax] = useState('');
+  const [searchCreatedDate, setSearchCreatedDate] = useState('');
+  const [searchDepositType, setSearchDepositType] = useState('');
 
   // Move all hooks before any conditional returns
   useEffect(() => {
@@ -274,6 +285,115 @@ const AdminPage = () => {
       case 'rejected': return 'Đã từ chối';
       default: return status;
     }
+  };
+
+  const fetchUserTransactions = async (userId: string) => {
+    try {
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (transactionError) throw transactionError;
+
+      // Fetch banks for each unique bank_id
+      const bankIds = [...new Set(transactionData?.map(t => t.bank_id).filter(Boolean) || [])];
+      let bankData = [];
+      if (bankIds.length > 0) {
+        const { data: banks, error: bankError } = await supabase
+          .from('bank')
+          .select('id, bank_name, account_number')
+          .in('id', bankIds);
+        
+        if (bankError) throw bankError;
+        bankData = banks || [];
+      }
+
+      // Combine data
+      const enrichedTransactions = transactionData?.map(transaction => {
+        const bank = bankData?.find(b => b.id === transaction.bank_id);
+        return {
+          ...transaction,
+          bank: bank
+        };
+      }) || [];
+
+      setUserTransactions(enrichedTransactions as any);
+    } catch (error) {
+      console.error('Error fetching user transactions:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách giao dịch người dùng",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getUserDepositStats = (userId: string) => {
+    const userTransactions = transactions.filter(t => t.user_id === userId && t.type === 'deposit' && t.status === 'approved');
+    const totalDeposited = userTransactions.reduce((sum, t) => sum + t.amount, 0);
+    return { count: userTransactions.length, total: totalDeposited };
+  };
+
+  const filteredUsers = users.filter(user => {
+    // Name filter
+    if (searchName && !user.full_name.toLowerCase().includes(searchName.toLowerCase()) && 
+        !user.username.toLowerCase().includes(searchName.toLowerCase())) {
+      return false;
+    }
+
+    // Email filter (using username as email equivalent)
+    if (searchEmail && !user.username.toLowerCase().includes(searchEmail.toLowerCase())) {
+      return false;
+    }
+
+    // Balance range filter
+    if (searchBalanceMin && user.balance < parseFloat(searchBalanceMin)) {
+      return false;
+    }
+    if (searchBalanceMax && user.balance > parseFloat(searchBalanceMax)) {
+      return false;
+    }
+
+    // Created date filter
+    if (searchCreatedDate) {
+      const userDate = new Date(user.created_at).toISOString().split('T')[0];
+      if (userDate !== searchCreatedDate) {
+        return false;
+      }
+    }
+
+    // Deposit amount filter
+    if (searchDepositType) {
+      const { total } = getUserDepositStats(user.user_id);
+      
+      if (searchDepositType === 'highest') {
+        const allDepositTotals = users.map(u => getUserDepositStats(u.user_id).total);
+        const maxDeposit = Math.max(...allDepositTotals);
+        if (total !== maxDeposit || total === 0) return false;
+      } else if (searchDepositType === 'lowest') {
+        const usersWithDeposits = users.filter(u => getUserDepositStats(u.user_id).total > 0);
+        if (usersWithDeposits.length === 0) return false;
+        const depositTotals = usersWithDeposits.map(u => getUserDepositStats(u.user_id).total);
+        const minDeposit = Math.min(...depositTotals);
+        if (total !== minDeposit || total === 0) return false;
+      } else if (searchDepositType === 'none') {
+        if (total > 0) return false;
+      }
+    }
+
+    return true;
+  });
+
+  const clearFilters = () => {
+    setSearchName('');
+    setSearchEmail('');
+    setSearchRole('');
+    setSearchBalanceMin('');
+    setSearchBalanceMax('');
+    setSearchCreatedDate('');
+    setSearchDepositType('');
   };
 
   // Conditional returns AFTER all hooks
@@ -498,6 +618,94 @@ const AdminPage = () => {
         </TabsContent>
         
         <TabsContent value="users" className="space-y-4">
+          {/* Search Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tìm kiếm người dùng</CardTitle>
+              <CardDescription>
+                Sử dụng các bộ lọc để tìm kiếm người dùng
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="search-name">Tìm theo tên/username</Label>
+                  <Input
+                    id="search-name"
+                    placeholder="Nhập tên hoặc username"
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-email">Tìm theo email</Label>
+                  <Input
+                    id="search-email"
+                    placeholder="Nhập email/username"
+                    value={searchEmail}
+                    onChange={(e) => setSearchEmail(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-deposit">Tìm theo nạp tiền</Label>
+                  <Select value={searchDepositType} onValueChange={setSearchDepositType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn loại" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="highest">Nạp nhiều nhất</SelectItem>
+                      <SelectItem value="lowest">Nạp ít nhất</SelectItem>
+                      <SelectItem value="none">Chưa nạp tiền</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-balance-min">Số dư từ (VND)</Label>
+                  <Input
+                    id="search-balance-min"
+                    type="number"
+                    placeholder="Số dư tối thiểu"
+                    value={searchBalanceMin}
+                    onChange={(e) => setSearchBalanceMin(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-balance-max">Số dư đến (VND)</Label>
+                  <Input
+                    id="search-balance-max"
+                    type="number"
+                    placeholder="Số dư tối đa"
+                    value={searchBalanceMax}
+                    onChange={(e) => setSearchBalanceMax(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="search-created">Ngày tạo</Label>
+                  <Input
+                    id="search-created"
+                    type="date"
+                    value={searchCreatedDate}
+                    onChange={(e) => setSearchCreatedDate(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2 mt-4">
+                <Button variant="outline" onClick={clearFilters}>
+                  Xóa bộ lọc
+                </Button>
+                <div className="text-sm text-muted-foreground flex items-center">
+                  Tìm thấy {filteredUsers.length} người dùng
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Danh sách người dùng</CardTitle>
@@ -513,64 +721,163 @@ const AdminPage = () => {
                       <TableHead>Tên đầy đủ</TableHead>
                       <TableHead>Username</TableHead>
                       <TableHead>Số dư</TableHead>
+                      <TableHead>Tổng nạp tiền</TableHead>
                       <TableHead>Số điện thoại</TableHead>
                       <TableHead>Ngày tham gia</TableHead>
                       <TableHead>Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.full_name}</TableCell>
-                        <TableCell>@{user.username}</TableCell>
-                        <TableCell className="font-medium text-primary">
-                          {user.balance.toLocaleString()} VND
-                        </TableCell>
-                        <TableCell>{user.phone_number || 'N/A'}</TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString('vi-VN')}
-                        </TableCell>
-                        <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSelectedUser(user)}
-                              >
-                                Cộng tiền
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Cộng tiền vào tài khoản</DialogTitle>
-                                <DialogDescription>
-                                  Cộng tiền cho người dùng {selectedUser?.full_name}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>Số dư hiện tại</Label>
-                                  <div className="text-lg font-medium text-primary">
-                                    {selectedUser?.balance.toLocaleString()} VND
+                    {filteredUsers.map((user) => (
+                       <TableRow key={user.id}>
+                         <TableCell className="font-medium">{user.full_name}</TableCell>
+                         <TableCell>@{user.username}</TableCell>
+                         <TableCell className="font-medium text-primary">
+                           {user.balance.toLocaleString()} VND
+                         </TableCell>
+                         <TableCell className="font-medium text-green-600">
+                           {getUserDepositStats(user.user_id).total.toLocaleString()} VND
+                         </TableCell>
+                         <TableCell>{user.phone_number || 'N/A'}</TableCell>
+                         <TableCell>
+                           {new Date(user.created_at).toLocaleDateString('vi-VN')}
+                         </TableCell>
+                         <TableCell>
+                            <div className="flex gap-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSelectedUser(user)}
+                                  >
+                                    Cộng tiền
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Cộng tiền vào tài khoản</DialogTitle>
+                                    <DialogDescription>
+                                      Cộng tiền cho người dùng {selectedUser?.full_name}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <Label>Số dư hiện tại</Label>
+                                      <div className="text-lg font-medium text-primary">
+                                        {selectedUser?.balance.toLocaleString()} VND
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="balance-amount">Số tiền cộng thêm (VND)</Label>
+                                      <Input
+                                        id="balance-amount"
+                                        type="number"
+                                        value={balanceToAdd}
+                                        onChange={(e) => setBalanceToAdd(e.target.value)}
+                                        placeholder="Nhập số tiền"
+                                      />
+                                    </div>
+                                    <Button onClick={handleAddBalance} className="w-full">
+                                      Cộng tiền
+                                    </Button>
                                   </div>
-                                </div>
-                                <div>
-                                  <Label htmlFor="balance-amount">Số tiền cộng thêm (VND)</Label>
-                                  <Input
-                                    id="balance-amount"
-                                    type="number"
-                                    value={balanceToAdd}
-                                    onChange={(e) => setBalanceToAdd(e.target.value)}
-                                    placeholder="Nhập số tiền"
-                                  />
-                                </div>
-                                <Button onClick={handleAddBalance} className="w-full">
-                                  Cộng tiền
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                                </DialogContent>
+                              </Dialog>
+
+                              <Dialog open={isUserTransactionDialogOpen} onOpenChange={setIsUserTransactionDialogOpen}>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedUser(user);
+                                      fetchUserTransactions(user.user_id);
+                                      setIsUserTransactionDialogOpen(true);
+                                    }}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="custom-scrollbar max-w-4xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Giao dịch của {selectedUser?.full_name}</DialogTitle>
+                                    <DialogDescription>
+                                      Danh sách tất cả giao dịch của người dùng
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div className="grid grid-cols-3 gap-4 text-center">
+                                      <div className="p-3 bg-secondary rounded-lg">
+                                        <div className="text-sm text-muted-foreground">Số dư hiện tại</div>
+                                        <div className="text-lg font-bold text-primary">
+                                          {selectedUser?.balance.toLocaleString()} VND
+                                        </div>
+                                      </div>
+                                      <div className="p-3 bg-green-50 rounded-lg">
+                                        <div className="text-sm text-muted-foreground">Tổng đã nạp</div>
+                                        <div className="text-lg font-bold text-green-600">
+                                          {selectedUser ? getUserDepositStats(selectedUser.user_id).total.toLocaleString() : 0} VND
+                                        </div>
+                                      </div>
+                                      <div className="p-3 bg-blue-50 rounded-lg">
+                                        <div className="text-sm text-muted-foreground">Số giao dịch</div>
+                                        <div className="text-lg font-bold text-blue-600">
+                                          {userTransactions.length}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="max-h-96 overflow-y-auto">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead>Loại</TableHead>
+                                            <TableHead>Số tiền</TableHead>
+                                            <TableHead>Trạng thái</TableHead>
+                                            <TableHead>Ngân hàng</TableHead>
+                                            <TableHead>Ngày tạo</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {userTransactions.map((transaction) => (
+                                            <TableRow key={transaction.id}>
+                                              <TableCell>
+                                                <Badge variant={transaction.type === 'deposit' ? 'default' : 'outline'}>
+                                                  {transaction.type === 'deposit' ? 'Nạp tiền' : 'Rút tiền'}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell className="font-medium">
+                                                {transaction.amount.toLocaleString()} VND
+                                              </TableCell>
+                                              <TableCell>
+                                                <Badge className={getStatusColor(transaction.status)}>
+                                                  {getStatusText(transaction.status)}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell>
+                                                {transaction.bank ? 
+                                                  `${transaction.bank.bank_name} - ${transaction.bank.account_number}` : 
+                                                  'N/A'
+                                                }
+                                              </TableCell>
+                                              <TableCell>
+                                                {new Date(transaction.created_at).toLocaleDateString('vi-VN')}
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                      {userTransactions.length === 0 && (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                          Người dùng chưa có giao dịch nào
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
                         </TableCell>
                       </TableRow>
                     ))}
