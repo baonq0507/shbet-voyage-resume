@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Copy, CreditCard, Upload, Wallet } from "lucide-react";
+import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle } from "lucide-react";
 
 interface Bank {
   id: string;
@@ -31,8 +32,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [proofImage, setProofImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userBalance, setUserBalance] = useState<number>(0);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+
+  // Update user balance from profile
+  useEffect(() => {
+    if (profile?.balance) {
+      setUserBalance(Number(profile.balance));
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (isOpen) {
@@ -208,6 +217,35 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
     }
   };
 
+  // Real-time validation for withdrawal amount
+  const withdrawalValidation = useMemo(() => {
+    if (!withdrawAmount) return null;
+    
+    const amount = parseFloat(withdrawAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return { type: 'error', message: 'Vui lòng nhập số tiền hợp lệ' };
+    }
+    
+    if (amount > userBalance) {
+      return { 
+        type: 'error', 
+        message: `Số dư không đủ. Số dư hiện tại: ${userBalance.toLocaleString()} VND` 
+      };
+    }
+    
+    if (amount === userBalance) {
+      return { 
+        type: 'warning', 
+        message: 'Bạn đang rút toàn bộ số dư' 
+      };
+    }
+    
+    return { 
+      type: 'success', 
+      message: `Số dư sau khi rút: ${(userBalance - amount).toLocaleString()} VND` 
+    };
+  }, [withdrawAmount, userBalance]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -357,6 +395,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Current Balance Display */}
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-blue-800">Số dư hiện tại:</span>
+                    <span className="font-bold text-lg text-blue-900">
+                      {userBalance.toLocaleString()} VND
+                    </span>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="withdraw-amount">Số tiền rút (VND)</Label>
                   <Input
@@ -365,7 +413,30 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
                     placeholder="Nhập số tiền"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
+                    className={withdrawalValidation?.type === 'error' ? 'border-red-500' : ''}
                   />
+                  
+                  {/* Real-time validation messages */}
+                  {withdrawalValidation && (
+                    <Alert className={`mt-2 ${
+                      withdrawalValidation.type === 'error' ? 'border-red-200 bg-red-50' :
+                      withdrawalValidation.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                      'border-green-200 bg-green-50'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        {withdrawalValidation.type === 'error' && <AlertTriangle className="w-4 h-4 text-red-600" />}
+                        {withdrawalValidation.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600" />}
+                        {withdrawalValidation.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600" />}
+                        <AlertDescription className={`text-sm ${
+                          withdrawalValidation.type === 'error' ? 'text-red-800' :
+                          withdrawalValidation.type === 'warning' ? 'text-yellow-800' :
+                          'text-green-800'
+                        }`}>
+                          {withdrawalValidation.message}
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+                  )}
                 </div>
 
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -377,7 +448,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
 
                 <Button 
                   onClick={handleWithdrawSubmit}
-                  disabled={loading || !withdrawAmount}
+                  disabled={loading || !withdrawAmount || withdrawalValidation?.type === 'error'}
                   className="w-full"
                   variant="outline"
                 >
