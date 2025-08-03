@@ -4,8 +4,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GameSection from "@/components/GameSection";
 import { GamesList } from "@/components/GamesList";
-import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap } from "lucide-react";
+import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap, UserPlus, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 import MobileNavigation from "@/components/MobileNavigation";
 import casinoHero from "@/assets/casino-hero.jpg";
 import casinoBannerNew from "@/assets/casino-banner-new.png";
@@ -176,6 +178,11 @@ const Index = () => {
   ];
 
   const { user } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+  };
 
   return (
     <div className="min-h-screen">
@@ -210,6 +217,27 @@ const Index = () => {
               
               {!user ? (
                 <div className="flex flex-col md:flex-row gap-3 md:gap-3 lg:gap-6 pt-2 md:pt-3 lg:pt-4">
+                  <Button 
+                    variant="casino" 
+                    size="sm" 
+                    className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold casino-glow hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsAuthModalOpen(true)}
+                  >
+                    <LogIn className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
+                    Đăng Nhập
+                  </Button>
+                  <Button 
+                    variant="gold" 
+                    size="sm" 
+                    className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold gold-glow hover:scale-105 transition-all duration-300"
+                    onClick={() => setIsAuthModalOpen(true)}
+                  >
+                    <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
+                    Đăng Ký
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col md:flex-row gap-3 md:gap-3 lg:gap-6 pt-2 md:pt-3 lg:pt-4">
                   <Button variant="casino" size="sm" className="text-xs sm:text-sm md:text-sm lg:text-xl px-4 sm:px-8 md:px-8 lg:px-12 py-3 md:py-3 lg:py-6 font-bold casino-glow hover:scale-105 transition-all duration-300">
                     <Play className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
                     Chơi Ngay
@@ -218,10 +246,6 @@ const Index = () => {
                     <Gift className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
                     Nhận Thưởng
                   </Button>
-                </div>
-              ) : (
-                <div className="text-yellow-300 font-bold text-sm md:text-lg lg:text-xl">
-                  Chào mừng bạn trở lại! Hãy bắt đầu chơi ngay!
                 </div>
               )}
             </div>
@@ -290,6 +314,12 @@ const Index = () => {
       </section>
 
       <Footer />
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };
