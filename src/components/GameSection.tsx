@@ -88,19 +88,19 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
 
         {lobbies && lobbies.length > 0 ? (
           <Tabs defaultValue={lobbies[0].id} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 mb-8 h-auto p-2">
+            <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-8 h-auto p-1">
               {lobbies.map((lobby) => (
                 <TabsTrigger 
                   key={lobby.id} 
                   value={lobby.id} 
-                  className="flex flex-col items-center justify-center gap-2 p-4 h-auto min-h-[80px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="flex flex-col items-center justify-center gap-1 p-2 h-auto min-h-[60px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   <img 
                     src={lobby.logo} 
                     alt={lobby.name}
-                    className="w-8 h-8 object-contain"
+                    className="w-6 h-6 object-contain"
                   />
-                  <span className="text-center leading-tight">{lobby.name}</span>
+                  <span className="text-center leading-tight text-[10px]">{lobby.name}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
