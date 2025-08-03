@@ -87,34 +87,36 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
         </div>
 
         {lobbies && lobbies.length > 0 ? (
-          <Tabs defaultValue={lobbies[0].id} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-8 h-auto p-1">
-              {lobbies.map((lobby) => (
-                <TabsTrigger 
-                  key={lobby.id} 
-                  value={lobby.id} 
-                  className="flex flex-col items-center justify-center gap-1 p-2 h-auto min-h-[60px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <img 
-                    src={lobby.logo} 
-                    alt={lobby.name}
-                    className="w-6 h-6 object-contain"
-                  />
-                  <span className="text-center leading-tight text-[10px]">{lobby.name}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          <div className="border border-border rounded-lg p-4 bg-card">
+            <Tabs defaultValue={lobbies[0].id} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-6 h-auto p-1">
+                {lobbies.map((lobby) => (
+                  <TabsTrigger 
+                    key={lobby.id} 
+                    value={lobby.id} 
+                    className="flex flex-col items-center justify-center gap-1 p-2 h-auto min-h-[60px] text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    <img 
+                      src={lobby.logo} 
+                      alt={lobby.name}
+                      className="w-6 h-6 object-contain"
+                    />
+                    <span className="text-center leading-tight text-[10px]">{lobby.name}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            {lobbies.map((lobby) => (
-              <TabsContent key={lobby.id} value={lobby.id}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {lobby.games.map((game, index) => (
-                    <GameCard key={index} {...game} />
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+              {lobbies.map((lobby) => (
+                <TabsContent key={lobby.id} value={lobby.id}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {lobby.games.map((game, index) => (
+                      <GameCard key={index} {...game} />
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
         ) : games && games.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {games.map((game, index) => (
