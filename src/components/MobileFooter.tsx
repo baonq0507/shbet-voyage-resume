@@ -29,12 +29,18 @@ const MobileFooter = () => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-      {/* Background with gradient and blur */}
-      <div className="absolute inset-0 bg-gradient-to-t from-card via-card/95 to-card/90 backdrop-blur-md border-t-2 border-primary/30 shadow-2xl">
-        {/* Decorative top border gradient */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary"></div>
-        {/* Subtle glow effect */}
-        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-32 h-4 bg-primary/20 blur-xl rounded-full"></div>
+      {/* Enhanced Background with multiple layers */}
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-800 to-gray-700 backdrop-blur-lg border-t-4 border-primary shadow-2xl">
+        {/* Primary gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-primary/20 to-transparent"></div>
+        {/* Secondary gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-secondary/20 via-transparent to-secondary/20"></div>
+        {/* Animated top border */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-yellow-400 to-primary animate-pulse"></div>
+        {/* Multiple glow effects */}
+        <div className="absolute -top-4 left-1/4 w-24 h-8 bg-primary/30 blur-xl rounded-full"></div>
+        <div className="absolute -top-4 right-1/4 w-24 h-8 bg-secondary/30 blur-xl rounded-full"></div>
+        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-40 h-6 bg-gradient-to-r from-primary/40 to-secondary/40 blur-2xl rounded-full"></div>
       </div>
       
       <div className="relative grid grid-cols-4 h-16 px-2">
