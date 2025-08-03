@@ -174,10 +174,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* <Header /> */}
-      
       {/* Welcome Banner */}
-      <section className="relative py-4 overflow-hidden">
+      <section className="relative py-2 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary animate-pulse">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-slide-in-right"></div>
         </div>
