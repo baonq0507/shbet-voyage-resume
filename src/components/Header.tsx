@@ -33,18 +33,20 @@ const Header = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-slide-in-right"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center">
-            <h1 className="text-xs md:text-base lg:text-lg font-black text-white animate-fade-in whitespace-nowrap overflow-hidden">
-              <span className="inline-block animate-pulse mr-1">🎉</span>
-              <span className="text-shadow-lg tracking-tight">
-                CHÀO MỪNG ĐẾN VỚI 
-                <span className="text-yellow-300 mx-1 font-extrabold text-xs md:text-lg lg:text-xl">
-                  DINAMONDBET68
+          <div className="text-center overflow-hidden">
+            <div className="animate-marquee whitespace-nowrap">
+              <h1 className="text-xs md:text-base lg:text-lg font-black text-white inline-block">
+                <span className="inline-block animate-pulse mr-1">🎉</span>
+                <span className="text-shadow-lg tracking-tight">
+                  CHÀO MỪNG ĐẾN VỚI 
+                  <span className="text-yellow-300 mx-1 font-extrabold text-xs md:text-lg lg:text-xl">
+                    DINAMONDBET68
+                  </span>
+                  - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
                 </span>
-                - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
-              </span>
-              <span className="inline-block animate-pulse ml-1">🎉</span>
-            </h1>
+                <span className="inline-block animate-pulse ml-1">🎉</span>
+              </h1>
+            </div>
           </div>
         </div>
       </section>
