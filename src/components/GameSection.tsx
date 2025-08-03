@@ -55,6 +55,7 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
 interface CasinoLobby {
   id: string;
   name: string;
+  logo: string;
   games: Array<{
     title: string;
     description: string;
@@ -89,8 +90,13 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
           <Tabs defaultValue={lobbies[0].id} className="w-full">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-8">
               {lobbies.map((lobby) => (
-                <TabsTrigger key={lobby.id} value={lobby.id} className="text-sm">
-                  {lobby.name}
+                <TabsTrigger key={lobby.id} value={lobby.id} className="text-sm flex items-center gap-2 p-3">
+                  <img 
+                    src={lobby.logo} 
+                    alt={lobby.name}
+                    className="w-6 h-6 object-contain"
+                  />
+                  <span className="hidden sm:inline">{lobby.name}</span>
                 </TabsTrigger>
               ))}
             </TabsList>

@@ -11,12 +11,19 @@ import bancaGame from "@/assets/banca-game.jpg";
 import sportsGame from "@/assets/sports-game.jpg";
 import cardsGame from "@/assets/cards-game.jpg";
 import dagaGame from "@/assets/daga-game.jpg";
+import evoLogo from "@/assets/lobbies/evo.png";
+import pragmaticLogo from "@/assets/lobbies/pragmatic.png";
+import playtechLogo from "@/assets/lobbies/playtech.png";
+import microgamingLogo from "@/assets/lobbies/microgaming.png";
+import netentLogo from "@/assets/lobbies/netent.jpg";
+import sportsLogo from "@/assets/lobbies/sports.png";
 
 const Index = () => {
   const casinoLobbies = [
     {
       id: "evo",
       name: "EVO Gaming",
+      logo: evoLogo,
       games: [
         {
           title: "Live Baccarat",
@@ -39,6 +46,7 @@ const Index = () => {
     {
       id: "pragmatic",
       name: "Pragmatic Play",
+      logo: pragmaticLogo,
       games: [
         {
           title: "Sweet Bonanza",
@@ -61,6 +69,7 @@ const Index = () => {
     {
       id: "playtech",
       name: "Playtech",
+      logo: playtechLogo,
       games: [
         {
           title: "Age of Gods",
@@ -78,6 +87,7 @@ const Index = () => {
     {
       id: "microgaming",
       name: "Microgaming",
+      logo: microgamingLogo,
       games: [
         {
           title: "Mega Moolah",
@@ -95,6 +105,7 @@ const Index = () => {
     {
       id: "netent",
       name: "NetEnt",
+      logo: netentLogo,
       games: [
         {
           title: "Starburst",
@@ -111,6 +122,7 @@ const Index = () => {
     {
       id: "sports",
       name: "Thể Thao",
+      logo: sportsLogo,
       games: [
         {
           title: "Bóng Đá",
