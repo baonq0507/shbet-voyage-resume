@@ -77,7 +77,7 @@ const Header = () => {
                 {item.icon && (
                   <item.icon className="w-5 h-5" />
                 )}
-                <span className="text-center leading-tight">{item.label}</span>
+                <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
               </Link>
             ))}
           </nav>
