@@ -380,10 +380,7 @@ const Header = () => {
                       </>
                     ) : (
                       <>
-                        {/* Empty section for non-logged in users since buttons are now outside */}
-                        <div className="text-center text-sm text-muted-foreground py-4">
-                          Sử dụng các nút bên ngoài để đăng nhập
-                        </div>
+                        {/* Empty section for non-logged in users */}
                       </>
                     )}
                   </div>
