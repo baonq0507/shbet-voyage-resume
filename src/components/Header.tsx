@@ -28,10 +28,7 @@ const Header = () => {
     <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm">
       {/* Top Banner */}
       {/* Welcome Banner */}
-      <section className="relative py-2 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary animate-pulse">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-slide-in-right"></div>
-        </div>
+      <section className="relative py-2 overflow-hidden bg-gradient-to-r from-primary via-secondary to-primary">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center overflow-hidden">
             <div className="animate-marquee whitespace-nowrap">
