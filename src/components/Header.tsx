@@ -2,12 +2,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, Wallet, Bell, Home } from "lucide-react";
-import casinoIcon from "@/assets/menu/casino.png";
-import nohuIcon from "@/assets/menu/nohu-new.png";
-import bancaIcon from "@/assets/menu/banca.png";
-import thethaoIcon from "@/assets/menu/thethao.png";
-import gamebaiIcon from "@/assets/menu/gamebai.png";
-import dagaIcon from "@/assets/menu/daga.png";
+import casinoIcon from "@/assets/menu/casino-transparent.png";
+import nohuIcon from "@/assets/menu/nohu-transparent.png";
+import bancaIcon from "@/assets/menu/banca-transparent.png";
+import thethaoIcon from "@/assets/menu/thethao-transparent.png";
+import gamebaiIcon from "@/assets/menu/gamebai-transparent.png";
+import dagaIcon from "@/assets/menu/daga-transparent.png";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
