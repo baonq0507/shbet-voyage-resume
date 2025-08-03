@@ -33,11 +33,11 @@ const Header = () => {
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
-            <h1 className="text-lg md:text-xl lg:text-2xl font-black text-white animate-fade-in">
+            <h1 className="text-sm md:text-base lg:text-lg font-black text-white animate-fade-in">
               <span className="inline-block animate-pulse mr-2">🎉</span>
               <span className="text-shadow-lg tracking-wide">
                 CHÀO MỪNG ĐẾN VỚI 
-                <span className="text-yellow-300 mx-2 font-extrabold text-xl md:text-2xl lg:text-3xl">
+                <span className="text-yellow-300 mx-2 font-extrabold text-base md:text-lg lg:text-xl">
                   DINAMONDBET68
                 </span>
                 - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
