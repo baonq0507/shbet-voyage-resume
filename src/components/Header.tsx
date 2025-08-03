@@ -158,7 +158,7 @@ const Header = () => {
                   <Menu />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80 p-0 overflow-y-auto max-h-screen">
+              <SheetContent side="left" className="w-80 p-0 overflow-y-auto max-h-screen custom-scrollbar">
                 <div className="px-6 py-4 border-b border-border">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
