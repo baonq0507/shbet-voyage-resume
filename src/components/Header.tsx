@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare } from "lucide-react";
+import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import AuthModal from "./AuthModal";
 import casinoIcon from "@/assets/menu/casino-green.png";
 import nohuIcon from "@/assets/menu/nohu-green.png";
 import bancaIcon from "@/assets/menu/banca-green.png";
@@ -12,7 +15,9 @@ import dagaIcon from "@/assets/menu/daga-green.png";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const location = useLocation();
+  const { user, profile, signOut, loading } = useAuth();
 
   const navItems = [
     { path: "/", label: "TRANG CHỦ", icon: Home },
@@ -25,6 +30,15 @@ const Header = () => {
     { path: "/khuyenmai", label: "KHUYẾN MẠI", icon: Gift },
     { path: "/daily", label: "ĐẠI LÝ", icon: Users },
   ];
+
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm">
@@ -83,14 +97,57 @@ const Header = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
-            <Button variant="casino" size="sm" className="hidden md:flex">
-              <User className="w-4 h-4" />
-              Đăng Nhập
-            </Button>
-            <Button variant="gold" size="sm" className="hidden md:flex">
-              <Wallet className="w-4 h-4" />
-              Nạp Tiền
-            </Button>
+            {!loading && user && profile ? (
+              <>
+                {/* Logged in state - Desktop */}
+                <div className="hidden lg:flex items-center space-x-3">
+                  <div className="text-sm">
+                    <div className="text-foreground font-medium">{profile.full_name}</div>
+                    <div className="text-primary font-bold">{profile.balance.toLocaleString()} VND</div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <UserCircle className="w-4 h-4 mr-2" />
+                        {profile.username}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <UserCircle className="w-4 h-4 mr-2" />
+                        Thông tin tài khoản
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Nạp tiền
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Đăng xuất
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Not logged in state - Desktop */}
+                <Button 
+                  variant="casino" 
+                  size="sm" 
+                  className="hidden lg:flex"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  <User className="w-4 h-4" />
+                  Đăng Nhập
+                </Button>
+                <Button variant="gold" size="sm" className="hidden lg:flex">
+                  <Wallet className="w-4 h-4" />
+                  Nạp Tiền
+                </Button>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -129,14 +186,45 @@ const Header = () => {
                     ))}
                   </div>
                   <div className="mt-6 pt-6 border-t border-border space-y-3">
-                    <Button variant="casino" className="w-full justify-start">
-                      <User className="w-4 h-4 mr-2" />
-                      Đăng Nhập
-                    </Button>
-                    <Button variant="gold" className="w-full justify-start">
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Nạp Tiền
-                    </Button>
+                    {!loading && user && profile ? (
+                      <>
+                        <div className="px-4 py-2 bg-muted rounded-md">
+                          <div className="text-sm font-medium">{profile.full_name}</div>
+                          <div className="text-primary font-bold">{profile.balance.toLocaleString()} VND</div>
+                          <div className="text-xs text-muted-foreground">@{profile.username}</div>
+                        </div>
+                        <Button variant="outline" className="w-full justify-start">
+                          <UserCircle className="w-4 h-4 mr-2" />
+                          Thông tin tài khoản
+                        </Button>
+                        <Button variant="gold" className="w-full justify-start">
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Nạp Tiền
+                        </Button>
+                        <Button variant="destructive" className="w-full justify-start" onClick={handleSignOut}>
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Đăng xuất
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button 
+                          variant="casino" 
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setIsAuthModalOpen(true);
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          Đăng Nhập
+                        </Button>
+                        <Button variant="gold" className="w-full justify-start">
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Nạp Tiền
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </nav>
               </SheetContent>
@@ -145,6 +233,12 @@ const Header = () => {
         </div>
 
       </div>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </header>
   );
 };
