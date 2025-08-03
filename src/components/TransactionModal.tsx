@@ -227,7 +227,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
                             <img 
                               src={selectedBank.qr_code_url} 
                               alt="QR Code" 
-                              className="w-48 h-48 mx-auto border rounded-lg shadow-sm"
+                              className="w-32 h-32 md:w-48 md:h-48 mx-auto border rounded-lg shadow-sm"
                             />
                           </div>
                         )}
