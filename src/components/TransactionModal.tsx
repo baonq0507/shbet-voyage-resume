@@ -38,10 +38,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const { toast } = useToast();
   const { user, profile } = useAuth();
 
-  // Update active tab when initialTab changes
+  // Update active tab when initialTab changes or modal opens
   useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab]);
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
 
   // Update user balance from profile
   useEffect(() => {
