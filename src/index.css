@@ -8,11 +8,11 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Updated Theme */
-    --background: 215 48% 12%;
+    /* Updated Theme - Darker */
+    --background: 215 48% 8%;
     --foreground: 0 0% 100%;
 
-    --card: 215 48% 13%;
+    --card: 215 48% 9%;
     --card-foreground: 0 0% 100%;
 
     --popover: 215 48% 15%;
@@ -44,7 +44,7 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(135deg, hsl(214 74% 50%), hsl(214 74% 65%));
     --gradient-gold: linear-gradient(135deg, hsl(45 100% 50%), hsl(45 100% 65%));
     --gradient-dark: linear-gradient(135deg, hsl(215 48% 13%), hsl(215 48% 12%));
-    --gradient-hero: linear-gradient(135deg, hsl(215 48% 13%) 0%, hsl(214 74% 30%) 50%, hsl(215 48% 12%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(215 48% 9%) 0%, hsl(214 74% 25%) 50%, hsl(215 48% 8%) 100%);
 
     /* Shadows */
     --shadow-glow: 0 0 30px hsl(214 74% 58% / 0.3);
@@ -94,11 +94,11 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     background: linear-gradient(135deg, 
-      hsl(215 48% 8%) 0%, 
-      hsl(214 74% 12%) 25%, 
-      hsl(215 48% 10%) 50%, 
-      hsl(214 74% 15%) 75%, 
-      hsl(215 48% 8%) 100%);
+      hsl(215 48% 4%) 0%, 
+      hsl(214 74% 8%) 25%, 
+      hsl(215 48% 6%) 50%, 
+      hsl(214 74% 10%) 75%, 
+      hsl(215 48% 4%) 100%);
     background-attachment: fixed;
     min-height: 100vh;
     position: relative;
