@@ -1,4 +1,4 @@
-import { Home, Users, Gift, MessageCircle } from "lucide-react";
+import { Home, Users, Gift, Bell } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const MobileFooter = () => {
@@ -11,19 +11,19 @@ const MobileFooter = () => {
       path: "/",
     },
     {
-      icon: Users,
-      label: "Đại lý",
-      path: "/agent",
-    },
-    {
       icon: Gift,
       label: "Khuyến Mại",
-      path: "/promotions",
+      path: "/khuyenmai",
     },
     {
-      icon: MessageCircle,
-      label: "CSKH",
-      path: "/support",
+      icon: Users,
+      label: "Đại lý",
+      path: "/daily",
+    },
+    {
+      icon: Bell,
+      label: "Thông Báo",
+      path: "/thongbao",
     },
   ];
 
