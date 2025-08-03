@@ -94,7 +94,7 @@ const NoHu = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME NỔ HŨ HOT NHẤT" games={nohuGames} />
+      <GameSection title="GAME NỔ HŨ HOT NHẤT" showApiGames={true} defaultCategory="slots" />
 
       <Footer />
     </div>

@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, Star, Users, ArrowLeft, Filter } from "lucide-react";
+import { useGamesList, type Game } from "@/hooks/useGamesList";
+
+// Define types for static games and API games
+type StaticGame = {
+  id: number;
+  name: string;
+  type: string;
+  players: number;
+  rating: number;
+  jackpot: string;
+};
 
 // Game data for different lobbies
 const gameData = {
@@ -86,6 +97,26 @@ const Lobby = () => {
   // Get lobby data
   const lobbyData = gameData[lobbySlug as keyof typeof gameData];
   
+  // Map lobby to API category
+  const getApiCategory = (lobbySlug: string) => {
+    const categoryMap: Record<string, string> = {
+      'evolution-gaming': 'live-casino',
+      'pragmatic-play-live': 'live-casino',
+      'playtech': 'live-casino',
+      'pragmatic-slots': 'slots',
+      'microgaming': 'slots',
+      'netent': 'slots'
+    };
+    return categoryMap[lobbySlug] || 'all';
+  };
+
+  // Call API for games
+  const { games: apiGames, loading: apiLoading, error: apiError } = useGamesList(
+    1, 
+    12, 
+    getApiCategory(lobbySlug)
+  );
+  
   useEffect(() => {
     if (!lobbyData) {
       navigate('/');
@@ -96,11 +127,20 @@ const Lobby = () => {
     return null;
   }
 
+  // Use API games if available, otherwise fallback to static data
+  const gamesToShow: (Game | StaticGame)[] = apiGames.length > 0 ? apiGames : lobbyData.games;
+  
   // Filter games by type
-  const gameTypes = ['all', ...Array.from(new Set(lobbyData.games.map(game => game.type)))];
+  const gameTypes = ['all', ...Array.from(new Set(gamesToShow.map(game => 
+    'type' in game ? game.type : game.genre.split(', ')[0]
+  )))];
+  
   const filteredGames = selectedType === 'all' 
-    ? lobbyData.games 
-    : lobbyData.games.filter(game => game.type === selectedType);
+    ? gamesToShow 
+    : gamesToShow.filter(game => {
+        const gameType = 'type' in game ? game.type : game.genre.split(', ')[0];
+        return gameType === selectedType;
+      });
 
   const handlePlayGame = (gameId: number) => {
     // Placeholder for game launch logic
@@ -155,51 +195,80 @@ const Lobby = () => {
           </div>
         </div>
 
-        {/* Games Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredGames.map((game) => (
-            <Card key={game.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg mb-1">{game.name}</CardTitle>
-                    <Badge variant="outline" className="text-xs">
-                      {game.type}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{game.rating}</span>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-3">
-                  {/* Game Stats */}
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      <span>{game.players} đang chơi</span>
+        {/* Loading State */}
+        {apiLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card key={index} className="overflow-hidden animate-pulse">
+                <CardHeader className="pb-3">
+                  <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-muted rounded w-1/3"></div>
+                      <div className="h-4 bg-muted rounded w-1/4"></div>
                     </div>
-                    <div className="text-primary font-bold">
-                      Jackpot: {game.jackpot}
+                    <div className="h-10 bg-muted rounded w-full"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          /* Games Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredGames.map((game, index) => (
+              <Card key={'id' in game ? game.id : index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                       <CardTitle className="text-lg mb-1">
+                         {'name' in game ? game.name : 'Unknown Game'}
+                       </CardTitle>
+                      <Badge variant="outline" className="text-xs">
+                        {'type' in game ? game.type : game.genre.split(', ')[0]}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">
+                        {'rating' in game ? game.rating.toFixed(1) : '4.5'}
+                      </span>
                     </div>
                   </div>
-                  
-                  {/* Play Button */}
-                  <Button 
-                    className="w-full" 
-                    onClick={() => handlePlayGame(game.id)}
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Chơi ngay
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-3">
+                    {/* Game Stats */}
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                        <span>
+                          {'players' in game ? `${game.players} đang chơi` : 'Online'}
+                        </span>
+                      </div>
+                      <div className="text-primary font-bold">
+                        {'jackpot' in game ? `Jackpot: ${game.jackpot}` : 'Hot Game'}
+                      </div>
+                    </div>
+                    
+                    {/* Play Button */}
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handlePlayGame('id' in game ? game.id : index)}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Chơi ngay
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
         {filteredGames.length === 0 && (

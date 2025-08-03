@@ -75,13 +75,19 @@ interface GameSectionProps {
     featured?: boolean;
   }>;
   showApiGames?: boolean;
+  defaultCategory?: string;
 }
 
-const GameSection = ({ title, lobbies, games, showApiGames }: GameSectionProps) => {
+const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory }: GameSectionProps) => {
   const [activeTab, setActiveTab] = useState<string>(showApiGames ? "api-games" : lobbies?.[0]?.id || "");
   
   // Map lobby IDs to API categories
   const getCategoryForTab = (tabId: string) => {
+    // If defaultCategory is provided (for dedicated pages), use it
+    if (defaultCategory && tabId === "api-games") {
+      return defaultCategory;
+    }
+    
     const categoryMap: Record<string, string> = {
       "api-games": "all",
       "evo": "live-casino",

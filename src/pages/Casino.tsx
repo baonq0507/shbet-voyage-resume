@@ -93,7 +93,7 @@ const Casino = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME CASINO HOT NHẤT" games={casinoGames} />
+      <GameSection title="GAME CASINO HOT NHẤT" showApiGames={true} defaultCategory="live-casino" />
 
       {/* Live Dealers */}
       <section className="py-16 bg-gradient-hero">
