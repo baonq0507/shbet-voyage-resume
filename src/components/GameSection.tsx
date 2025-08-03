@@ -109,20 +109,17 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
                     {/* Animated background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                     
-                    <div className="relative z-10 flex flex-col items-center gap-0.5">
-                      <div className="relative">
-                        <img 
-                          src={lobby.logo} 
-                          alt={lobby.name}
-                          className="w-5 h-5 sm:w-6 sm:h-6 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
-                        />
-                        {/* Glow effect for active state */}
-                        <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      <span className="text-center leading-tight text-[8px] sm:text-[9px] font-bold group-data-[state=active]:text-white group-hover:text-primary transition-colors duration-300 px-1">
-                        {lobby.name}
-                      </span>
-                    </div>
+                     <div className="relative z-10 flex flex-col items-center gap-0.5">
+                       <div className="relative">
+                         <img 
+                           src={lobby.logo} 
+                           alt={lobby.name}
+                           className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
+                         />
+                         {/* Glow effect for active state */}
+                         <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
+                       </div>
+                     </div>
                     
                     {/* Active indicator */}
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
