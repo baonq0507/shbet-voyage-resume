@@ -11,29 +11,40 @@ interface GameCardProps {
 }
 
 const GameCard = ({ title, description, image, featured }: GameCardProps) => (
-  <Card className={`group cursor-pointer transition-all duration-300 hover:scale-105 border ${
-    featured ? "casino-glow border-primary" : "border-border"
-  }`}>
+  <Card className={`group cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 border-2 overflow-hidden ${
+    featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
+  } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}>
     <CardHeader className="p-2 sm:p-3">
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative overflow-hidden rounded-xl shadow-lg">
         <img 
           src={image} 
           alt={title}
-          className="w-full h-24 sm:h-28 md:h-32 object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-24 sm:h-28 md:h-32 object-cover group-hover:scale-125 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <Button variant="casino" size="sm" className="text-xs sm:text-sm">
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        {/* Play button */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+          <Button variant="casino" size="sm" className="text-xs sm:text-sm transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
             <Play className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline ml-1">Chơi Ngay</span>
           </Button>
         </div>
+        
+        {/* Featured badge */}
         {featured && (
-          <div className="absolute top-1 right-1 bg-gradient-gold px-1.5 py-0.5 rounded text-xs font-bold text-black">
+          <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-yellow-600 px-2 py-1 rounded-full text-xs font-bold text-black shadow-lg animate-pulse">
+            <Star className="w-3 h-3 inline mr-1" />
             HOT
           </div>
         )}
+        
+        {/* Shine effect */}
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/20 via-transparent to-transparent rotate-45 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000"></div>
       </div>
-      <CardTitle className="text-xs sm:text-sm md:text-base font-medium group-hover:text-primary transition-colors mt-2 text-center line-clamp-2">
+      
+      <CardTitle className="text-xs sm:text-sm md:text-base font-semibold group-hover:text-primary transition-colors mt-3 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
         {title}
       </CardTitle>
     </CardHeader>
@@ -75,21 +86,46 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
         </div>
 
         {lobbies && lobbies.length > 0 ? (
-          <div className="border border-border rounded-lg p-3 sm:p-4 bg-gradient-to-br from-card/80 via-card to-muted/50 backdrop-blur-sm shadow-lg">
-            <Tabs defaultValue={lobbies[0].id} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-1 mb-4 sm:mb-6 h-auto p-1 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 shadow-inner">
-                {lobbies.map((lobby) => (
+          <div className="relative border border-border/50 rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-card/95 via-card to-muted/30 backdrop-blur-md shadow-2xl casino-glow">
+            {/* Decorative elements */}
+            <div className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
+            <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-xl"></div>
+            <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
+            
+            <Tabs defaultValue={lobbies[0].id} className="w-full relative z-10">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-2 mb-6 sm:mb-8 h-auto p-2 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
+                {lobbies.map((lobby, index) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="flex flex-col items-center justify-center gap-1 p-1.5 sm:p-2 h-auto min-h-[60px] sm:min-h-[70px] text-xs font-medium data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 transition-all duration-300"
+                    className="group flex flex-col items-center justify-center gap-2 p-3 sm:p-4 h-auto min-h-[80px] sm:min-h-[90px] text-xs font-semibold rounded-lg
+                      data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
+                      data-[state=active]:text-primary-foreground data-[state=active]:shadow-2xl data-[state=active]:scale-105 data-[state=active]:casino-glow
+                      hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-lg
+                      transition-all duration-300 ease-out border border-transparent data-[state=active]:border-primary-glow/50
+                      relative overflow-hidden"
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <img 
-                      src={lobby.logo} 
-                      alt={lobby.name}
-                      className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
-                    />
-                    <span className="text-center leading-tight text-[9px] sm:text-[10px] md:text-xs">{lobby.name}</span>
+                    {/* Animated background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center gap-2">
+                      <div className="relative">
+                        <img 
+                          src={lobby.logo} 
+                          alt={lobby.name}
+                          className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
+                        />
+                        {/* Glow effect for active state */}
+                        <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
+                      </div>
+                      <span className="text-center leading-tight text-[10px] sm:text-xs font-bold group-data-[state=active]:text-white group-hover:text-primary transition-colors duration-300">
+                        {lobby.name}
+                      </span>
+                    </div>
+                    
+                    {/* Active indicator */}
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
                   </TabsTrigger>
                 ))}
               </TabsList>

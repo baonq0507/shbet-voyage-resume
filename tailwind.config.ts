@@ -95,12 +95,20 @@ export default {
 				'marquee': {
 					'0%': { transform: 'translateX(100%)' },
 					'100%': { transform: 'translateX(-100%)' }
+				},
+				'fade-in-up': {
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'marquee': 'marquee 15s linear infinite'
+				'marquee': 'marquee 15s linear infinite',
+				'fade-in-up': 'fade-in-up 0.6s ease-out'
+			},
+			scale: {
+				'102': '1.02'
 			}
 		}
 	},
