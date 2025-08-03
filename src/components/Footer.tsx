@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Facebook, MessageCircle, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -34,10 +35,11 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-base sm:text-lg mb-3 md:mb-4 text-gradient">Liên Kết Nhanh</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Giới Thiệu</a></li>
+              <li><Link to="/khuyenmai" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Khuyến Mại</Link></li>
+              <li><Link to="/daily" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Đại Lý</Link></li>
+              <li><Link to="/thongbao" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Thông Báo</Link></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Điều Khoản</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Chính Sách</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Bảo Mật</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Hướng Dẫn</a></li>
             </ul>
           </div>
@@ -46,11 +48,12 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-base sm:text-lg mb-3 md:mb-4 text-gradient">Sản Phẩm Game</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Casino Trực Tuyến</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Thể Thao</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Nổ Hũ</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Bắn Cá</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Đá Gà</a></li>
+              <li><Link to="/casino" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Casino Trực Tuyến</Link></li>
+              <li><Link to="/thethao" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Thể Thao</Link></li>
+              <li><Link to="/nohu" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Nổ Hũ</Link></li>
+              <li><Link to="/banca" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Bắn Cá</Link></li>
+              <li><Link to="/gamebai" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Game Bài</Link></li>
+              <li><Link to="/daga" className="text-muted-foreground hover:text-primary transition-colors text-sm sm:text-base">Đá Gà</Link></li>
             </ul>
           </div>
 
