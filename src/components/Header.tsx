@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import casinoIcon from "@/assets/menu/casino-green.png";
 import nohuIcon from "@/assets/menu/nohu-green.png";
 import bancaIcon from "@/assets/menu/banca-green.png";
@@ -95,41 +96,61 @@ const Header = () => {
             </Button>
 
             {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X /> : <Menu />}
-            </Button>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <div className="px-6 py-4 border-b border-border">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
+                      <span className="text-white font-bold text-lg">D68</span>
+                    </div>
+                    <div className="text-gradient font-bold text-lg">DINAMONDBET68</div>
+                  </div>
+                </div>
+                <nav className="p-6">
+                  <div className="space-y-3">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                          location.pathname === item.path
+                            ? "bg-primary text-primary-foreground casino-glow"
+                            : "text-foreground hover:bg-primary/10 hover:text-primary"
+                        }`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item.icon && (
+                          <item.icon className="w-5 h-5" />
+                        )}
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-border space-y-3">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Bell className="w-4 h-4 mr-2" />
+                      Thông Báo
+                    </Button>
+                    <Button variant="casino" className="w-full justify-start">
+                      <User className="w-4 h-4 mr-2" />
+                      Đăng Nhập
+                    </Button>
+                    <Button variant="gold" className="w-full justify-start">
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Nạp Tiền
+                    </Button>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <nav className="space-y-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === item.path
-                      ? "bg-primary text-primary-foreground casino-glow"
-                      : "text-foreground hover:bg-primary/10 hover:text-primary"
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.icon && (
-                    <item.icon className="w-5 h-5" />
-                  )}
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
     </header>
   );
