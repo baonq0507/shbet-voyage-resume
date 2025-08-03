@@ -12,6 +12,7 @@ import GameBai from "./pages/GameBai";
 import DaGa from "./pages/DaGa";
 import NotFound from "./pages/NotFound";
 import MobileFooter from "./components/MobileFooter";
+import MobileNavigation from "./components/MobileNavigation";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MobileNavigation />
         </div>
         <MobileFooter />
       </BrowserRouter>

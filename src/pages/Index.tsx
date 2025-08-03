@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GameSection from "@/components/GameSection";
-import MobileNavigation from "@/components/MobileNavigation";
 import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap } from "lucide-react";
 import casinoHero from "@/assets/casino-hero.jpg";
 import casinoBanner from "@/assets/casino-banner.png";
@@ -238,9 +237,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Mobile Navigation */}
-      <MobileNavigation />
 
       {/* Games Section */}
       <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} />
