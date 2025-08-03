@@ -6,7 +6,7 @@ import GameSection from "@/components/GameSection";
 import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap } from "lucide-react";
 import MobileNavigation from "@/components/MobileNavigation";
 import casinoHero from "@/assets/casino-hero.jpg";
-import casinoBanner from "@/assets/casino-banner.png";
+import newCasinoBanner from "@/assets/new-casino-banner.jpg";
 import nohuGame from "@/assets/nohu-game.jpg";
 import bancaGame from "@/assets/banca-game.jpg";
 import sportsGame from "@/assets/sports-game.jpg";
@@ -230,7 +230,7 @@ const Index = () => {
             {/* Right Image */}
             <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <img 
-                src={casinoBanner} 
+                src={newCasinoBanner} 
                 alt="Casino Banner" 
                 className="max-w-full h-auto object-contain w-full max-w-md lg:max-w-lg xl:max-w-xl"
               />
