@@ -218,57 +218,63 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose }) 
 
                 {selectedBank && (
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col space-y-4">
+                      {/* QR Code Section */}
                       <div className="text-center">
-                        <Label className="text-sm font-medium">QR Code</Label>
+                        <Label className="text-sm font-medium">QR Code chuyển khoản</Label>
                         {selectedBank.qr_code_url && (
                           <div className="mt-2">
                             <img 
                               src={selectedBank.qr_code_url} 
                               alt="QR Code" 
-                              className="w-32 h-32 mx-auto border rounded"
+                              className="w-48 h-48 mx-auto border rounded-lg shadow-sm"
                             />
                           </div>
                         )}
                       </div>
-                      <div className="space-y-2">
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Ngân hàng</Label>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{selectedBank.bank_name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(selectedBank.bank_name)}
-                            >
-                              <Copy className="w-3 h-3" />
-                            </Button>
+                      
+                      {/* Bank Information Section */}
+                      <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                        <Label className="text-sm font-medium text-center block">Thông tin chuyển khoản</Label>
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Ngân hàng</Label>
+                            <div className="flex items-center justify-between p-2 bg-background rounded border">
+                              <span className="font-medium">{selectedBank.bank_name}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedBank.bank_name)}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Số tài khoản</Label>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{selectedBank.account_number}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(selectedBank.account_number)}
-                            >
-                              <Copy className="w-3 h-3" />
-                            </Button>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Số tài khoản</Label>
+                            <div className="flex items-center justify-between p-2 bg-background rounded border">
+                              <span className="font-medium text-lg">{selectedBank.account_number}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedBank.account_number)}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Chủ tài khoản</Label>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{selectedBank.account_holder}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(selectedBank.account_holder)}
-                            >
-                              <Copy className="w-3 h-3" />
-                            </Button>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Chủ tài khoản</Label>
+                            <div className="flex items-center justify-between p-2 bg-background rounded border">
+                              <span className="font-medium">{selectedBank.account_holder}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedBank.account_holder)}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
