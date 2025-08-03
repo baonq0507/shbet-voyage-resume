@@ -123,10 +123,10 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
-              <span className="text-white font-bold text-xl">D68</span>
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
+              <span className="text-white font-bold text-lg lg:text-xl">D68</span>
             </div>
-            <div className="text-gradient font-bold text-xl">DINAMONDBET68</div>
+            <div className="text-gradient font-bold text-sm lg:text-xl">DINAMONDBET68</div>
           </Link>
 
           {/* Desktop Navigation - only show on large screens */}
