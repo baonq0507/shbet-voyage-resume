@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Coins, Zap, Fish, Trophy, Spade, Bird } from "lucide-react";
+import { Coins, Zap, Fish, Trophy, Spade, Bird, ChevronRight } from "lucide-react";
 
 const MobileNavigation = () => {
   const location = useLocation();
@@ -15,7 +15,7 @@ const MobileNavigation = () => {
   ];
 
   return (
-    <div className="md:hidden bg-card border-b border-border py-3">
+    <div className="md:hidden bg-card border-b border-border py-3 relative">
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex space-x-4 px-4">
           {navItems.map((item) => {
@@ -41,6 +41,12 @@ const MobileNavigation = () => {
           })}
         </div>
       </ScrollArea>
+      
+      {/* Scroll Indicator */}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+        <div className="bg-gradient-to-l from-card via-card/80 to-transparent w-8 h-full absolute -left-6 top-0" />
+        <ChevronRight className="w-4 h-4 text-muted-foreground animate-pulse" />
+      </div>
     </div>
   );
 };
