@@ -197,20 +197,17 @@ const Lobby = () => {
 
         {/* Loading State */}
         {apiLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, index) => (
               <Card key={index} className="overflow-hidden animate-pulse">
-                <CardHeader className="pb-3">
-                  <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="aspect-video bg-muted"></div>
+                <CardHeader className="pb-2 pt-3 px-3">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <div className="h-4 bg-muted rounded w-1/3"></div>
-                      <div className="h-4 bg-muted rounded w-1/4"></div>
-                    </div>
-                    <div className="h-10 bg-muted rounded w-full"></div>
+                <CardContent className="px-3 pb-3">
+                  <div className="space-y-2">
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                    <div className="h-6 bg-muted rounded w-full"></div>
                   </div>
                 </CardContent>
               </Card>
@@ -218,50 +215,49 @@ const Lobby = () => {
           </div>
         ) : (
           /* Games Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredGames.map((game, index) => (
-              <Card key={'id' in game ? game.id : index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                       <CardTitle className="text-lg mb-1">
-                         {'name' in game ? game.name : 'Unknown Game'}
-                       </CardTitle>
-                      <Badge variant="outline" className="text-xs">
-                        {'type' in game ? game.type : game.genre.split(', ')[0]}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">
-                        {'rating' in game ? game.rating.toFixed(1) : '4.5'}
-                      </span>
-                    </div>
-                  </div>
+              <Card key={'id' in game ? game.id : index} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                {/* Game Image */}
+                <div className="aspect-video relative overflow-hidden">
+                  <img 
+                    src={'image' in game ? game.image : "https://via.placeholder.com/300x200?text=Game"} 
+                    alt={'name' in game ? game.name : 'Game'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://via.placeholder.com/300x200?text=No+Image";
+                    }}
+                  />
+                  {/* Game type badge */}
+                  <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
+                    {'type' in game ? game.type : game.genre.split(', ')[0]}
+                  </Badge>
+                </div>
+                
+                <CardHeader className="pb-2 pt-3 px-3">
+                  <CardTitle className="text-sm line-clamp-2 leading-tight">
+                    {'name' in game ? game.name : 'Unknown Game'}
+                  </CardTitle>
                 </CardHeader>
                 
-                <CardContent>
-                  <div className="space-y-3">
-                    {/* Game Stats */}
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>
-                          {'players' in game ? `${game.players} đang chơi` : 'Online'}
-                        </span>
-                      </div>
-                      <div className="text-primary font-bold">
-                        {'jackpot' in game ? `Jackpot: ${game.jackpot}` : 'Hot Game'}
-                      </div>
+                <CardContent className="px-3 pb-3">
+                  <div className="space-y-2">
+                    {/* Game Stats - Only players count */}
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Users className="w-3 h-3" />
+                      <span>
+                        {'players' in game ? `${game.players} chơi` : 'Online'}
+                      </span>
                     </div>
                     
-                    {/* Play Button */}
+                    {/* Play Button - Smaller */}
                     <Button 
-                      className="w-full" 
+                      className="w-full h-8 text-xs" 
+                      size="sm"
                       onClick={() => handlePlayGame('id' in game ? game.id : index)}
                     >
-                      <Play className="w-4 h-4 mr-2" />
-                      Chơi ngay
+                      <Play className="w-3 h-3 mr-1" />
+                      Chơi
                     </Button>
                   </div>
                 </CardContent>
