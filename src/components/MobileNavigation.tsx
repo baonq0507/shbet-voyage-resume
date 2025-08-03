@@ -15,7 +15,7 @@ const MobileNavigation = () => {
   ];
 
   return (
-    <div className="md:hidden bg-card/95 backdrop-blur-sm border-b border-border/50 py-2 relative">
+    <div className="lg:hidden bg-card/95 backdrop-blur-sm border-b border-border/50 py-2 relative">
       <div className="overflow-x-auto scrollbar-hide touch-pan-x">
         <div className="flex space-x-2 px-3 w-max">
           {navItems.map((item) => {

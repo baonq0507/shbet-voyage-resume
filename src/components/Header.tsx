@@ -61,8 +61,8 @@ const Header = () => {
             <div className="text-gradient font-bold text-xl">DINAMONDBET68</div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-2">
+          {/* Desktop Navigation - only show on large screens */}
+          <nav className="hidden lg:flex items-center space-x-2">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -95,7 +95,7 @@ const Header = () => {
             {/* Mobile Menu Button */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden">
                   <Menu />
                 </Button>
               </SheetTrigger>

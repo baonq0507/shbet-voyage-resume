@@ -28,7 +28,7 @@ const MobileFooter = () => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
       {/* Enhanced Background with multiple layers */}
       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-800 to-gray-700 backdrop-blur-lg border-t-4 border-primary shadow-2xl">
         {/* Primary gradient overlay */}
