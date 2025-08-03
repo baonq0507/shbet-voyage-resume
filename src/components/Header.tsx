@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle } from "lucide-react";
+import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import AuthModal from "./AuthModal";
 import TransactionModal from "./TransactionModal";
 import casinoIcon from "@/assets/menu/casino-green.png";
@@ -20,6 +21,7 @@ const Header = () => {
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut, loading } = useAuth();
+  const { isAdmin } = useRole();
 
   const navItems = [
     { path: "/", label: "TRANG CHỦ", icon: Home },
@@ -123,6 +125,14 @@ const Header = () => {
                         <Wallet className="w-4 h-4 mr-2" />
                         Nạp tiền
                       </DropdownMenuItem>
+                      {isAdmin && (
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Quản trị
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleSignOut}>
                         <LogOut className="w-4 h-4 mr-2" />
@@ -203,6 +213,14 @@ const Header = () => {
                           <Wallet className="w-4 h-4 mr-2" />
                           Nạp Tiền
                         </Button>
+                        {isAdmin && (
+                          <Button variant="outline" className="w-full justify-start" asChild>
+                            <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                              <Settings className="w-4 h-4 mr-2" />
+                              Quản trị
+                            </Link>
+                          </Button>
+                        )}
                         <Button variant="destructive" className="w-full justify-start" onClick={handleSignOut}>
                           <LogOut className="w-4 h-4 mr-2" />
                           Đăng xuất
