@@ -20,7 +20,7 @@ const Header = () => {
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm">
       {/* Top Banner */}
-      <div className="bg-gradient-primary text-center py-2 text-sm text-white">
+      <div className="bg-gradient-primary text-center py-2 text-sm text-primary-foreground">
         🎉 CHÀO MỪNG ĐẾN VỚI SHBET - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM 🎉
       </div>
 
