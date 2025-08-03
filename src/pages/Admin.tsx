@@ -61,19 +61,13 @@ const AdminPage = () => {
   const [balanceToAdd, setBalanceToAdd] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
-  // Redirect if not admin
-  if (roleLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Đang tải...</div>;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
+  // Move all hooks before any conditional returns
   useEffect(() => {
-    fetchTransactions();
-    fetchUsers();
-  }, []);
+    if (isAdmin && !roleLoading) {
+      fetchTransactions();
+      fetchUsers();
+    }
+  }, [isAdmin, roleLoading]);
 
   const fetchTransactions = async () => {
     try {
@@ -243,6 +237,15 @@ const AdminPage = () => {
       default: return status;
     }
   };
+
+  // Conditional returns AFTER all hooks
+  if (roleLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Đang tải...</div>;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Đang tải...</div>;
