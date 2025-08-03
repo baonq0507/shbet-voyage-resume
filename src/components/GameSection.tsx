@@ -99,7 +99,7 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
                     <img 
                       src={lobby.logo} 
                       alt={lobby.name}
-                      className="w-6 h-6 object-contain"
+                      className="w-8 h-8 object-contain"
                     />
                     <span className="text-center leading-tight text-[10px]">{lobby.name}</span>
                   </TabsTrigger>
