@@ -86,19 +86,19 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
         </div>
 
         {lobbies && lobbies.length > 0 ? (
-          <div className="relative border border-border/50 rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-card/95 via-card to-muted/30 backdrop-blur-md shadow-2xl casino-glow">
+          <div className="relative border border-border/50 rounded-2xl p-2 sm:p-3 bg-gradient-to-br from-card/95 via-card to-muted/30 backdrop-blur-md shadow-2xl casino-glow">
             {/* Decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
-            <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-xl"></div>
-            <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
+            <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-xl"></div>
+            <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
             <Tabs defaultValue={lobbies[0].id} className="w-full relative z-10">
-              <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-6 gap-1.5 mb-6 sm:mb-8 h-auto p-2 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
+              <TabsList className="flex flex-wrap justify-center gap-1 mb-4 sm:mb-6 h-auto p-1.5 bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm">
                 {lobbies.map((lobby, index) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="group flex flex-col items-center justify-center gap-1 p-2 sm:p-2.5 h-auto min-h-[60px] sm:min-h-[65px] text-xs font-semibold rounded-lg
+                    className="group flex flex-col items-center justify-center gap-0.5 p-1.5 sm:p-2 h-auto min-h-[50px] sm:min-h-[55px] text-xs font-semibold rounded-lg min-w-[70px] max-w-[90px] flex-shrink-0
                       data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
                       data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:scale-105 data-[state=active]:casino-glow
                       hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-md
@@ -109,17 +109,17 @@ const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
                     {/* Animated background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                     
-                    <div className="relative z-10 flex flex-col items-center gap-1">
+                    <div className="relative z-10 flex flex-col items-center gap-0.5">
                       <div className="relative">
                         <img 
                           src={lobby.logo} 
                           alt={lobby.name}
-                          className="w-6 h-6 sm:w-7 sm:h-7 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
+                          className="w-5 h-5 sm:w-6 sm:h-6 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
                         />
                         {/* Glow effect for active state */}
                         <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                      <span className="text-center leading-tight text-[9px] sm:text-[10px] font-bold group-data-[state=active]:text-white group-hover:text-primary transition-colors duration-300">
+                      <span className="text-center leading-tight text-[8px] sm:text-[9px] font-bold group-data-[state=active]:text-white group-hover:text-primary transition-colors duration-300 px-1">
                         {lobby.name}
                       </span>
                     </div>
