@@ -127,15 +127,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Real-time profile update:', payload);
+          console.log('Real-time profile update received:', payload);
           const updatedProfile = payload.new as Profile;
+          console.log('Setting new profile balance:', updatedProfile.balance);
           setProfile(updatedProfile);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Profile subscription status:', status);
+      });
 
     // Cleanup subscription
     return () => {
+      console.log('Cleaning up profile subscription');
       supabase.removeChannel(channel);
     };
   }, [user]);

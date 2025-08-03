@@ -301,7 +301,7 @@ const AdminPage = () => {
         .update({
           balance: selectedUser.balance + amountToAdd
         })
-        .eq('id', selectedUser.id);
+        .eq('user_id', selectedUser.user_id); // Changed from .eq('id', selectedUser.id)
 
       if (balanceError) throw balanceError;
 
