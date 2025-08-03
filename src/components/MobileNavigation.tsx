@@ -15,9 +15,9 @@ const MobileNavigation = () => {
   ];
 
   return (
-    <div className="md:hidden bg-card border-b border-border py-3 relative">
+    <div className="md:hidden bg-card/95 backdrop-blur-sm border-b border-border/50 py-2 relative">
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex space-x-4 px-4">
+        <div className="flex space-x-2 px-3">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -26,14 +26,14 @@ const MobileNavigation = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center min-w-[80px] px-3 py-2 rounded-lg transition-all ${
+                className={`flex flex-col items-center min-w-[70px] px-2 py-2 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? "bg-primary text-primary-foreground casino-glow"
-                    : "text-foreground hover:bg-primary/10 hover:text-primary"
+                    ? "bg-gradient-primary text-white shadow-lg scale-105"
+                    : "text-muted-foreground hover:text-primary hover:bg-primary/5"
                 }`}
               >
-                <Icon className="w-6 h-6 mb-1" />
-                <span className="text-xs font-medium text-center whitespace-nowrap">
+                <Icon className="w-5 h-5 mb-1" />
+                <span className="text-[10px] font-medium text-center leading-tight">
                   {item.label}
                 </span>
               </Link>
@@ -43,9 +43,11 @@ const MobileNavigation = () => {
       </ScrollArea>
       
       {/* Scroll Indicator */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-        <div className="bg-gradient-to-l from-card via-card/80 to-transparent w-8 h-full absolute -left-6 top-0" />
-        <ChevronRight className="w-4 h-4 text-muted-foreground animate-pulse" />
+      <div className="absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none">
+        <div className="bg-gradient-to-l from-card via-card/60 to-transparent w-6 h-full absolute -left-4 top-0" />
+        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+          <ChevronRight className="w-3 h-3 text-primary/60" />
+        </div>
       </div>
     </div>
   );
