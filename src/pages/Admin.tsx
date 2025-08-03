@@ -71,17 +71,49 @@ const AdminPage = () => {
 
   const fetchTransactions = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch transactions first
+      const { data: transactionData, error: transactionError } = await supabase
         .from('transactions')
-        .select(`
-          *,
-          profiles:user_id (full_name, username, balance),
-          bank:bank_id (bank_name, account_number)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setTransactions((data as any) || []);
+      if (transactionError) throw transactionError;
+
+      // Fetch profiles for each unique user_id
+      const userIds = [...new Set(transactionData?.map(t => t.user_id) || [])];
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, username, balance')
+        .in('user_id', userIds);
+
+      if (profileError) throw profileError;
+
+      // Fetch banks for each unique bank_id
+      const bankIds = [...new Set(transactionData?.map(t => t.bank_id).filter(Boolean) || [])];
+      let bankData = [];
+      if (bankIds.length > 0) {
+        const { data: banks, error: bankError } = await supabase
+          .from('bank')
+          .select('id, bank_name, account_number')
+          .in('id', bankIds);
+        
+        if (bankError) throw bankError;
+        bankData = banks || [];
+      }
+
+      // Combine data
+      const enrichedTransactions = transactionData?.map(transaction => {
+        const profile = profileData?.find(p => p.user_id === transaction.user_id);
+        const bank = bankData?.find(b => b.id === transaction.bank_id);
+        
+        return {
+          ...transaction,
+          profiles: profile,
+          bank: bank
+        };
+      }) || [];
+
+      setTransactions(enrichedTransactions as any);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast({
