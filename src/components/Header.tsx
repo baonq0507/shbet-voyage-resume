@@ -297,51 +297,7 @@ const Header = () => {
               </>
             ) : (
               <>
-                {/* Not logged in state - Desktop */}
-                <div className="hidden lg:flex items-center space-x-2">
-                  <Button 
-                    variant="casino" 
-                    size="sm"
-                    onClick={() => setIsAuthModalOpen(true)}
-                  >
-                    <User className="w-4 h-4" />
-                    Đăng Nhập
-                  </Button>
-                  <Button 
-                    variant="gold" 
-                    size="sm"
-                    onClick={() => {
-                      setTransactionType('deposit');
-                      setIsTransactionModalOpen(true);
-                    }}
-                  >
-                    <ArrowDownToLine className="w-4 h-4" />
-                    Nạp Tiền
-                  </Button>
-                </div>
-
-                {/* Not logged in state - Mobile */}
-                <div className="lg:hidden flex items-center space-x-2">
-                  <Button 
-                    variant="casino" 
-                    size="sm"
-                    onClick={() => setIsAuthModalOpen(true)}
-                  >
-                    <User className="w-4 h-4" />
-                    Đăng Nhập
-                  </Button>
-                  <Button 
-                    variant="gold" 
-                    size="sm"
-                    onClick={() => {
-                      setTransactionType('deposit');
-                      setIsTransactionModalOpen(true);
-                    }}
-                  >
-                    <ArrowDownToLine className="w-4 h-4" />
-                    Nạp Tiền
-                  </Button>
-                </div>
+                {/* Not logged in state - No buttons, just mobile menu */}
               </>
             )}
 
