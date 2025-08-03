@@ -60,6 +60,7 @@ const AdminPage = () => {
   const [adminNote, setAdminNote] = useState('');
   const [balanceToAdd, setBalanceToAdd] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
 
   // Move all hooks before any conditional returns
   useEffect(() => {
@@ -201,6 +202,11 @@ const AdminPage = () => {
         title: "Thành công",
         description: `Giao dịch đã được ${status === 'approved' ? 'duyệt' : 'từ chối'}`,
       });
+
+      // Close modal after successful action
+      setIsTransactionDialogOpen(false);
+      setSelectedTransaction(null);
+      setAdminNote('');
 
       fetchTransactions();
       fetchUsers();
@@ -394,12 +400,15 @@ const AdminPage = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Dialog>
+                            <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setSelectedTransaction(transaction)}
+                                  onClick={() => {
+                                    setSelectedTransaction(transaction);
+                                    setIsTransactionDialogOpen(true);
+                                  }}
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
