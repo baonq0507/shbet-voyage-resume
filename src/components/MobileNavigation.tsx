@@ -16,8 +16,8 @@ const MobileNavigation = () => {
 
   return (
     <div className="lg:hidden bg-card/95 backdrop-blur-sm border-b border-border/50 py-2 relative">
-      <div className="overflow-x-auto scrollbar-hide touch-pan-x">
-        <div className="flex space-x-2 px-3 w-max">
+      <div className="md:flex md:justify-center overflow-x-auto scrollbar-hide touch-pan-x">
+        <div className="flex space-x-2 md:space-x-4 px-3 md:px-6 w-max md:justify-center md:mx-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
