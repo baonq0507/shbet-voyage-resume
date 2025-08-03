@@ -26,9 +26,27 @@ const Header = () => {
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm">
       {/* Top Banner */}
-      <div className="bg-gradient-primary text-center py-2 text-sm text-primary-foreground">
-        🎉 CHÀO MỪNG ĐẾN VỚI DINAMONDBET68 - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM 🎉
-      </div>
+      {/* Welcome Banner */}
+      <section className="relative py-2 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary animate-pulse">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-slide-in-right"></div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center">
+            <h1 className="text-lg md:text-xl lg:text-2xl font-black text-white animate-fade-in">
+              <span className="inline-block animate-pulse mr-2">🎉</span>
+              <span className="text-shadow-lg tracking-wide">
+                CHÀO MỪNG ĐẾN VỚI 
+                <span className="text-yellow-300 mx-2 font-extrabold text-xl md:text-2xl lg:text-3xl">
+                  DINAMONDBET68
+                </span>
+                - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
+              </span>
+              <span className="inline-block animate-pulse ml-2">🎉</span>
+            </h1>
+          </div>
+        </div>
+      </section>
 
       {/* Main Header */}
       <div className="container mx-auto px-4">
