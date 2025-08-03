@@ -13,38 +13,127 @@ import cardsGame from "@/assets/cards-game.jpg";
 import dagaGame from "@/assets/daga-game.jpg";
 
 const Index = () => {
-  const featuredGames = [
+  const casinoLobbies = [
     {
-      title: "Casino Trực Tuyến",
-      description: "Trải nghiệm casino đỉnh cao với dealer thật",
-      image: casinoHero,
-      featured: true
+      id: "evo",
+      name: "EVO Gaming",
+      games: [
+        {
+          title: "Live Baccarat",
+          description: "Baccarat trực tiếp với dealer xinh đẹp",
+          image: casinoHero,
+          featured: true
+        },
+        {
+          title: "Live Roulette",
+          description: "Roulette Châu Âu chuẩn quốc tế",
+          image: cardsGame
+        },
+        {
+          title: "Live Blackjack",
+          description: "Blackjack với tỷ lệ thắng cao",
+          image: cardsGame
+        }
+      ]
     },
     {
-      title: "Nổ Hũ Jackpot",
-      description: "Hàng nghìn game nổ hũ với giải thưởng khủng",
-      image: nohuGame,
-      featured: true
+      id: "pragmatic",
+      name: "Pragmatic Play",
+      games: [
+        {
+          title: "Sweet Bonanza",
+          description: "Slot game ngọt ngào với jackpot khủng",
+          image: nohuGame,
+          featured: true
+        },
+        {
+          title: "Gates of Olympus",
+          description: "Thần Zeus mang lại vận may",
+          image: nohuGame
+        },
+        {
+          title: "Sugar Rush",
+          description: "Kẹo ngọt mang lại tài lộc",
+          image: nohuGame
+        }
+      ]
     },
     {
-      title: "Bắn Cá Online",
-      description: "Game bắn cá 3D với đồ họa tuyệt đẹp",
-      image: bancaGame
+      id: "playtech",
+      name: "Playtech",
+      games: [
+        {
+          title: "Age of Gods",
+          description: "Slot thần thoại Hy Lạp",
+          image: nohuGame
+        },
+        {
+          title: "Marvel Slots",
+          description: "Siêu anh hùng Marvel",
+          image: nohuGame,
+          featured: true
+        }
+      ]
     },
     {
-      title: "Thể Thao",
-      description: "Cá cược thể thao với tỷ lệ cao nhất",
-      image: sportsGame
+      id: "microgaming",
+      name: "Microgaming",
+      games: [
+        {
+          title: "Mega Moolah",
+          description: "Jackpot triệu USD",
+          image: nohuGame,
+          featured: true
+        },
+        {
+          title: "Immortal Romance",
+          description: "Câu chuyện tình ma cà rồng",
+          image: nohuGame
+        }
+      ]
     },
     {
-      title: "Game Bài",
-      description: "Poker, Baccarat, Tiến lên miền Nam",
-      image: cardsGame
+      id: "netent",
+      name: "NetEnt",
+      games: [
+        {
+          title: "Starburst",
+          description: "Game slot kinh điển nhất",
+          image: nohuGame
+        },
+        {
+          title: "Gonzo's Quest",
+          description: "Cuộc phiêu lưu tìm kho báu",
+          image: nohuGame
+        }
+      ]
     },
     {
-      title: "Đá Gà",
-      description: "Đá gà truyền thống Việt Nam",
-      image: dagaGame
+      id: "sports",
+      name: "Thể Thao",
+      games: [
+        {
+          title: "Bóng Đá",
+          description: "Cá cược bóng đá quốc tế",
+          image: sportsGame,
+          featured: true
+        },
+        {
+          title: "Bóng Rổ",
+          description: "NBA, VBA và các giải đấu lớn",
+          image: sportsGame
+        },
+        {
+          title: "Bắn Cá 3D",
+          description: "Game bắn cá đồ họa 3D tuyệt đẹp",
+          image: bancaGame
+        },
+        {
+          title: "Đá Gà",
+          description: "Đá gà truyền thống Việt Nam",
+          image: dagaGame
+        }
+      ]
     }
   ];
 
@@ -139,7 +228,7 @@ const Index = () => {
 
 
       {/* Games Section */}
-      <GameSection title="GAME HOT NHẤT" games={featuredGames} />
+      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} />
 
       {/* Promotions */}
       <section className="py-16 bg-gradient-hero">

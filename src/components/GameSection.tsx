@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Star, Trophy, Gift } from "lucide-react";
 
 interface GameCardProps {
@@ -51,8 +52,9 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
   </Card>
 );
 
-interface GameSectionProps {
-  title: string;
+interface CasinoLobby {
+  id: string;
+  name: string;
   games: Array<{
     title: string;
     description: string;
@@ -61,7 +63,18 @@ interface GameSectionProps {
   }>;
 }
 
-const GameSection = ({ title, games }: GameSectionProps) => {
+interface GameSectionProps {
+  title: string;
+  lobbies?: CasinoLobby[];
+  games?: Array<{
+    title: string;
+    description: string;
+    image: string;
+    featured?: boolean;
+  }>;
+}
+
+const GameSection = ({ title, lobbies, games }: GameSectionProps) => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -72,11 +85,33 @@ const GameSection = ({ title, games }: GameSectionProps) => {
           <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {games.map((game, index) => (
-            <GameCard key={index} {...game} />
-          ))}
-        </div>
+        {lobbies ? (
+          <Tabs defaultValue={lobbies[0]?.id} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-8">
+              {lobbies.map((lobby) => (
+                <TabsTrigger key={lobby.id} value={lobby.id} className="text-sm">
+                  {lobby.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {lobbies.map((lobby) => (
+              <TabsContent key={lobby.id} value={lobby.id}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {lobby.games.map((game, index) => (
+                    <GameCard key={index} {...game} />
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {games?.map((game, index) => (
+              <GameCard key={index} {...game} />
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <Button variant="casino" size="lg" className="mr-4">
