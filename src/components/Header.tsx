@@ -1,20 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, Wallet, Bell } from "lucide-react";
+import { Menu, X, User, Wallet, Bell, Home } from "lucide-react";
+import casinoIcon from "@/assets/menu/casino.png";
+import nohuIcon from "@/assets/menu/nohu.png";
+import bancaIcon from "@/assets/menu/banca.png";
+import thethaoIcon from "@/assets/menu/thethao.png";
+import gamebaiIcon from "@/assets/menu/gamebai.png";
+import dagaIcon from "@/assets/menu/daga.png";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const navItems = [
-    { path: "/", label: "TRANG CHỦ" },
-    { path: "/casino", label: "CASINO" },
-    { path: "/nohu", label: "NỔ HŨ" },
-    { path: "/banca", label: "BẮN CÁ" },
-    { path: "/thethao", label: "THỂ THAO" },
-    { path: "/gamebai", label: "GAME BÀI" },
-    { path: "/daga", label: "ĐÁ GÀ" },
+    { path: "/", label: "TRANG CHỦ", icon: Home },
+    { path: "/casino", label: "CASINO", image: casinoIcon },
+    { path: "/nohu", label: "NỔ HŨ", image: nohuIcon },
+    { path: "/banca", label: "BẮN CÁ", image: bancaIcon },
+    { path: "/thethao", label: "THỂ THAO", image: thethaoIcon },
+    { path: "/gamebai", label: "GAME BÀI", image: gamebaiIcon },
+    { path: "/daga", label: "ĐÁ GÀ", image: dagaIcon },
   ];
 
   return (
@@ -41,13 +47,22 @@ const Header = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === item.path
                     ? "bg-primary text-primary-foreground casino-glow"
                     : "text-foreground hover:bg-primary/10 hover:text-primary"
                 }`}
               >
-                {item.label}
+                {item.icon ? (
+                  <item.icon className="w-4 h-4" />
+                ) : item.image ? (
+                  <img 
+                    src={item.image} 
+                    alt={item.label}
+                    className="w-4 h-4 object-contain"
+                  />
+                ) : null}
+                <span>{item.label}</span>
               </Link>
             ))}
           </nav>
@@ -87,14 +102,23 @@ const Header = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     location.pathname === item.path
                       ? "bg-primary text-primary-foreground casino-glow"
                       : "text-foreground hover:bg-primary/10 hover:text-primary"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {item.label}
+                  {item.icon ? (
+                    <item.icon className="w-5 h-5" />
+                  ) : item.image ? (
+                    <img 
+                      src={item.image} 
+                      alt={item.label}
+                      className="w-5 h-5 object-contain"
+                    />
+                  ) : null}
+                  <span>{item.label}</span>
                 </Link>
               ))}
             </nav>
