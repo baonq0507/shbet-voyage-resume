@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import AuthModal from "./AuthModal";
@@ -207,8 +208,13 @@ const Header = () => {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <UserCircle className="w-4 h-4 mr-2" />
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
+                          <AvatarFallback>
+                            {profile.full_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
                         {profile.username}
                       </Button>
                     </DropdownMenuTrigger>
@@ -259,7 +265,12 @@ const Header = () => {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
-                        <UserCircle className="w-4 h-4" />
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
+                          <AvatarFallback>
+                            {profile.full_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
