@@ -104,21 +104,27 @@ const GAME_TYPE_MAP: Record<number, string> = {
   100: "Live Casino"
 };
 
-async function fetchGamesFromAPI(category: string = "all"): Promise<GameResponse[]> {
+async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Promise<GameResponse[]> {
   const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    console.log(`[${requestId}] 🚀 Starting fetchGamesFromAPI - Category: ${category}`);
+    console.log(`[${requestId}] 🚀 Starting fetchGamesFromAPI - Category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
     console.log(`[${requestId}] 📊 Fetching games from local database`);
 
-    // Get games from local database by category
-    const { data: games, error } = await supabase
+    // Build query based on whether GPIDs are provided
+    let query = supabase
       .from('games')
       .select('*')
-      .eq('category', category)
-      .eq('is_active', true)
-      .order('rank', { ascending: true });
+      .eq('is_active', true);
+
+    if (gpids && gpids.length > 0) {
+      query = query.in('gpid', gpids);
+    } else if (category !== 'all') {
+      query = query.eq('category', category);
+    }
+
+    const { data: games, error } = await query.order('rank', { ascending: true });
 
     if (error) {
       console.error(`[${requestId}] ❌ Database query failed:`, error);
@@ -328,21 +334,27 @@ serve(async (req) => {
 
   try {
     let category = 'all';
+    let gpids: number[] | undefined;
 
     // Handle both GET (URL params) and POST (body) requests
     if (req.method === 'POST') {
       const body = await req.json();
       category = body.category || 'all';
+      gpids = body.gpids;
       console.log(`[${requestId}] 📥 POST request body:`, JSON.stringify(body, null, 2));
     } else {
       const url = new URL(req.url);
       category = url.searchParams.get('category') || 'all';
+      const gpidsParam = url.searchParams.get('gpids');
+      if (gpidsParam) {
+        gpids = gpidsParam.split(',').map(Number).filter(n => !isNaN(n));
+      }
       console.log(`[${requestId}] 📥 GET request params:`, Object.fromEntries(url.searchParams.entries()));
     }
 
-    console.log(`[${requestId}] 🎯 Processing request for category: ${category}`);
+    console.log(`[${requestId}] 🎯 Processing request for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
 
-    const games = await fetchGamesFromAPI(category);
+    const games = await fetchGamesFromAPI(category, gpids);
     
     console.log(`[${requestId}] 📊 Final games result:`, JSON.stringify(games, null, 2));
     

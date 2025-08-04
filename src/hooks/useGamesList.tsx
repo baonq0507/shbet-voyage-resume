@@ -25,7 +25,7 @@ interface GamesResponse {
   apiUsed?: boolean;
 }
 
-export const useGamesList = (page: number = 1, pageSize: number = 10, category: string = 'all', gpid?: number) => {
+export const useGamesList = (page: number = 1, pageSize: number = 10, category: string = 'all', gpids?: number[]) => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
       const { data, error: functionError } = await supabase.functions.invoke('get-games-list', {
         body: {
           category,
-          gpid
+          gpids
         }
       });
 
@@ -76,7 +76,7 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
 
   useEffect(() => {
     fetchGames();
-  }, [category, gpid]);
+  }, [category, JSON.stringify(gpids)]);
 
   return {
     games,

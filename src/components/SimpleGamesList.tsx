@@ -53,13 +53,13 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
 
 interface SimpleGamesListProps {
   title: string;
-  category: string;
-  gpid?: number;
+  category?: string;
+  gpids?: number[];
   maxGames?: number;
 }
 
-const SimpleGamesList = ({ title, category, gpid, maxGames = 12 }: SimpleGamesListProps) => {
-  const { games, loading } = useGamesList(1, maxGames, category, gpid);
+const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: SimpleGamesListProps) => {
+  const { games, loading } = useGamesList(1, maxGames, category, gpids);
 
   return (
     <section className="py-12 md:py-16">
