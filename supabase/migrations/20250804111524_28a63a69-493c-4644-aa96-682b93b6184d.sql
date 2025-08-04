@@ -1,26 +1,10 @@
 -- Add new columns without referencing old ones
-ALTER TABLE public.promotions 
-ADD COLUMN promotion_type TEXT DEFAULT 'time_based';
-
-ALTER TABLE public.promotions 
-ADD COLUMN bonus_percentage INTEGER;
-
-ALTER TABLE public.promotions 
-ADD COLUMN bonus_amount NUMERIC;
-
-ALTER TABLE public.promotions 
-ADD COLUMN promotion_code TEXT;
-
-ALTER TABLE public.promotions 
-ADD COLUMN is_first_deposit_only BOOLEAN DEFAULT false;
+-- Note: All columns were already added in previous migration 20250804111326_322b72e1-e61f-4685-af1b-5ec673e2203b.sql
 
 -- Update existing promotions to copy discount values to bonus values
 UPDATE public.promotions 
-SET bonus_percentage = discount_percentage,
-    bonus_amount = discount_amount
+SET bonus_percentage = old_discount_percentage,
+    bonus_amount = old_discount_amount
 WHERE bonus_percentage IS NULL AND bonus_amount IS NULL;
 
--- Add constraint for promotion types
-ALTER TABLE public.promotions 
-ADD CONSTRAINT promotions_promotion_type_check 
-CHECK (promotion_type IN ('first_deposit', 'time_based', 'code_based'));
+-- Note: Constraint was already added inline in previous migration

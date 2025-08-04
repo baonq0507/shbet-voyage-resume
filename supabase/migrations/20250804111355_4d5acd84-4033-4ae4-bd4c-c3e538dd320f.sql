@@ -1,15 +1,5 @@
 -- Update promotions table structure step by step
-ALTER TABLE public.promotions 
-ADD COLUMN promotion_type TEXT DEFAULT 'general' CHECK (promotion_type IN ('first_deposit', 'time_based', 'code_based'));
+-- Note: All columns (promotion_type, bonus_percentage, bonus_amount, promotion_code, is_first_deposit_only) 
+-- were already added in previous migration 20250804111326_322b72e1-e61f-4685-af1b-5ec673e2203b.sql
 
-ALTER TABLE public.promotions 
-ADD COLUMN bonus_percentage INTEGER;
-
-ALTER TABLE public.promotions 
-ADD COLUMN bonus_amount NUMERIC;
-
-ALTER TABLE public.promotions 
-ADD COLUMN promotion_code TEXT UNIQUE;
-
-ALTER TABLE public.promotions 
-ADD COLUMN is_first_deposit_only BOOLEAN DEFAULT false;
+-- This migration is now redundant and can be skipped

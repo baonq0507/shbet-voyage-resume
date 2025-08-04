@@ -44,7 +44,7 @@ BEGIN
             now(),
             now(),
             '{"username": "admin", "full_name": "Administrator"}',
-            false,
+            true,
             '',
             '',
             '',
@@ -63,7 +63,17 @@ BEGIN
         
         RAISE NOTICE 'Admin user created with email: % and password: %', admin_email, admin_password;
     ELSE
-        RAISE NOTICE 'Admin user already exists with email: %', admin_email;
+        -- Update existing admin user to have super admin privileges
+        UPDATE auth.users 
+        SET is_super_admin = true
+        WHERE id = admin_user_id;
+        
+        -- Ensure admin role exists for existing user
+        INSERT INTO public.user_roles (user_id, role)
+        VALUES (admin_user_id, 'admin')
+        ON CONFLICT (user_id, role) DO NOTHING;
+        
+        RAISE NOTICE 'Admin user updated with super admin privileges for email: %', admin_email;
     END IF;
 END;
 $$;

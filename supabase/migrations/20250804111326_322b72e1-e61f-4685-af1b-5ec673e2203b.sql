@@ -8,7 +8,9 @@ ADD COLUMN is_first_deposit_only BOOLEAN DEFAULT false;
 
 -- Rename existing discount columns to be clearer
 ALTER TABLE public.promotions 
-RENAME COLUMN discount_percentage TO old_discount_percentage,
+RENAME COLUMN discount_percentage TO old_discount_percentage;
+
+ALTER TABLE public.promotions 
 RENAME COLUMN discount_amount TO old_discount_amount;
 
 -- Create promotion codes table for tracking code usage
