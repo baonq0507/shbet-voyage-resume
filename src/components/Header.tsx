@@ -132,7 +132,7 @@ const Header = () => {
             <img 
               src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
               alt="DIAMONDBET68" 
-              className="h-8 w-auto md:h-10 lg:h-12 object-contain casino-glow"
+              className="h-8 w-auto md:h-10 lg:h-12 object-contain"
             />
           </Link>
 
@@ -332,7 +332,7 @@ const Header = () => {
                     <img 
                       src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
                       alt="DIAMONDBET68" 
-                      className="h-8 w-auto object-contain casino-glow"
+                      className="h-8 w-auto object-contain"
                     />
                   </div>
                 </div>
