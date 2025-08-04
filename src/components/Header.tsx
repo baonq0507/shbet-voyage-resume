@@ -112,7 +112,11 @@ const Header = () => {
                 <span className="inline-block animate-pulse mr-1">🎉</span>
                  <span className="text-shadow-lg tracking-tight">
                    CHÀO MỪNG ĐẾN VỚI 
-                   <span className="font-extrabold text-yellow-300 mx-1">DINAMONDBET68</span>
+                   <img 
+                     src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
+                     alt="DIAMONDBET68" 
+                     className="inline h-4 w-auto md:h-6 lg:h-8 object-contain mx-1"
+                   />
                    - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
                  </span>
                 <span className="inline-block animate-pulse ml-1">🎉</span>
@@ -127,9 +131,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
            {/* Logo */}
            <Link to="/" className="flex items-center">
-             <span className="text-xl md:text-2xl lg:text-3xl font-black text-primary">
-               DINAMONDBET68
-             </span>
+             <img 
+               src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
+               alt="DIAMONDBET68" 
+               className="h-10 w-auto md:h-12 lg:h-14 object-contain"
+             />
            </Link>
 
           {/* Desktop Navigation - only show on large screens */}
@@ -325,9 +331,11 @@ const Header = () => {
               <SheetContent side="left" className="w-80 p-0 overflow-y-auto max-h-screen custom-scrollbar">
                  <div className="px-6 py-4 border-b border-border">
                    <div className="flex items-center justify-center">
-                     <span className="text-xl font-black text-primary">
-                       DINAMONDBET68
-                     </span>
+                     <img 
+                       src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
+                       alt="DIAMONDBET68" 
+                       className="h-10 w-auto object-contain"
+                     />
                    </div>
                  </div>
                 <nav className="p-6">
