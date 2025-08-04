@@ -64,14 +64,18 @@ interface Promotion {
   id: string;
   title: string;
   description?: string;
-  discount_percentage?: number;
-  discount_amount?: number;
-  minimum_deposit?: number;
+  promotion_type: 'first_deposit' | 'time_based' | 'code_based';
+  bonus_percentage?: number;
+  bonus_amount?: number;
+  min_deposit?: number;
   max_uses?: number;
   current_uses: number;
   start_date: string;
   end_date: string;
   is_active: boolean;
+  promotion_code?: string;
+  is_first_deposit_only: boolean;
+  image_url?: string;
   created_at: string;
 }
 
@@ -1445,11 +1449,13 @@ const AdminPage = () => {
                     <TableRow key={promotion.id}>
                       <TableCell className="font-medium">{promotion.title}</TableCell>
                       <TableCell>{promotion.description}</TableCell>
-                      <TableCell>
-                        {promotion.discount_percentage 
-                          ? `${promotion.discount_percentage}%` 
-                          : `${promotion.discount_amount?.toLocaleString()} VND`}
-                      </TableCell>
+                       <TableCell>
+                         {(promotion as any).bonus_percentage 
+                           ? `+${(promotion as any).bonus_percentage}% Bonus` 
+                           : (promotion as any).bonus_amount 
+                           ? `+${(promotion as any).bonus_amount?.toLocaleString()} VND Bonus`
+                           : 'N/A'}
+                       </TableCell>
                       <TableCell>{promotion.current_uses}/{promotion.max_uses || '∞'}</TableCell>
                       <TableCell>
                         {new Date(promotion.start_date).toLocaleDateString('vi-VN')} - {new Date(promotion.end_date).toLocaleDateString('vi-VN')}
@@ -1630,6 +1636,7 @@ const AdminPage = () => {
               isActive: editingPromotion.is_active,
               isFirstDepositOnly: (editingPromotion as any).is_first_deposit_only || false,
               promotionCode: (editingPromotion as any).promotion_code || '',
+              image_url: (editingPromotion as any).image_url || null,
             } : undefined}
             isLoading={promotionLoading}
           />

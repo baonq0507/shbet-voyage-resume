@@ -27,6 +27,7 @@ const promotionSchema = z.object({
   isFirstDepositOnly: z.boolean().default(false),
   promotionCode: z.string().optional(),
   generateCodes: z.number().min(1).max(1000).optional(),
+  image_url: z.string().optional(),
 }).refine((data) => {
   if (data.bonusType === 'percentage' && !data.bonusPercentage) {
     return false;
