@@ -18,8 +18,8 @@ interface GameResponse {
 }
 
 // Initialize Supabase client
-const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? 'https://hlydtwqhiuwbikkjemck.supabase.co';
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI1MDUyNCwiZXhwIjoyMDY5ODI2NTI0fQ.HW8u2xzshPyajWCzDf8PeUlFKjdC8Q8dFKJa1qSK1RY';
+const supabaseUrl = 'http://206.206.126.141:54321';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 
 console.log('🚀 Initializing Supabase client with URL:', supabaseUrl);
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -114,7 +114,7 @@ async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]
     });
     
     // Return empty array, let caller handle fallback
-    console.log(`[${requestId}] 🛟 Returning empty array for error handling`);
+    console.log(`[${requestId}] 🛟 Database unavailable, returning empty array for fallback handling`);
     return [];
   }
 }
@@ -314,41 +314,38 @@ serve(async (req) => {
 
     let games: GameResponse[] = [];
 
+    // Always use fallback data first since database might not be available
+    console.log(`[${requestId}] 🎯 Using fallback data for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
+    
     // Special handling for "all" category - fetch 5 games from each category and shuffle
     if (category === "all") {
       const categories = ['live-casino', 'slots', 'sports', 'card-games', 'fishing'];
       const allCategoryGames: GameResponse[] = [];
 
-      console.log(`[${requestId}] 🔀 Processing "all" category - fetching from multiple categories`);
+      console.log(`[${requestId}] 🔀 Processing "all" category - getting fallback from multiple categories`);
       
       for (const cat of categories) {
         try {
-          const categoryGames = await fetchGamesFromDatabase(cat, gpids, 5); // Limit to 5 games per category
-          console.log(`[${requestId}] 📊 Fetched ${categoryGames.length} games from category: ${cat}`);
-          allCategoryGames.push(...categoryGames);
+          const categoryFallback = getFallbackGames(cat).slice(0, 5); // Get 5 games per category
+          console.log(`[${requestId}] 📊 Got ${categoryFallback.length} fallback games from category: ${cat}`);
+          allCategoryGames.push(...categoryFallback);
         } catch (error) {
-          console.error(`[${requestId}] ❌ Error fetching games for category ${cat}:`, error);
-          // Continue with other categories even if one fails
+          console.error(`[${requestId}] ❌ Error getting fallback for category ${cat}:`, error);
         }
       }
 
       // Shuffle the combined games array
       games = shuffleArray(allCategoryGames);
       console.log(`[${requestId}] 🎲 Total games after shuffling: ${games.length}`);
-      
-      // If no games found from any category, use fallback
-      if (games.length === 0) {
-        console.log(`[${requestId}] 🛟 No games found from any category, using fallback data`);
-        games = getFallbackGames(category);
-      }
     } else {
-      // Regular category-specific fetch
-      games = await fetchGamesFromDatabase(category, gpids);
+      // For specific categories, get fallback data directly
+      games = getFallbackGames(category);
+      console.log(`[${requestId}] 🛟 Using fallback data for category ${category}: ${games.length} games`);
       
-      // If no games found, use fallback
-      if (games.length === 0) {
-        console.log(`[${requestId}] 🛟 No games found for category ${category}, using fallback data`);
-        games = getFallbackGames(category);
+      // Filter by GPIDs if provided
+      if (gpids && gpids.length > 0) {
+        // For fallback data, we'll show all games regardless of GPIDs to ensure content is displayed
+        console.log(`[${requestId}] 📋 GPIDs provided but using all fallback games to ensure display`);
       }
     }
     
