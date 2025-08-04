@@ -55,6 +55,7 @@ const DaGa = () => {
       {/* Games */}
       <SimpleGamesList 
         title="TRƯỜNG GÀ UY TÍN" 
+        category="cockfight"
         gpids={menuItems.find(item => item.id === 'daga')?.dropdown?.map(item => Number(item.id)) || []} 
         maxGames={12} 
       />

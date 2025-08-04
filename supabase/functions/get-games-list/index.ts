@@ -124,176 +124,75 @@ function getFallbackGames(category: string): GameResponse[] {
   
   const fallbackData: Record<string, GameResponse[]> = {
     "all": [
-      {
-        id: "1",
-        name: "Live Baccarat VIP",
-        image: "https://via.placeholder.com/300x200?text=Live+Baccarat",
-        type: "Baccarat",
-        category: "casino",
-        isActive: true,
-        provider: "Evolution",
-        rank: 1
-      },
-      {
-        id: "2", 
-        name: "Live Roulette Gold",
-        image: "https://via.placeholder.com/300x200?text=Live+Roulette",
-        type: "Roulette",
-        category: "casino",
-        isActive: true,
-        provider: "Evolution",
-        rank: 2
-      },
-      {
-        id: "3",
-        name: "Sweet Bonanza Xmas",
-        image: "https://via.placeholder.com/300x200?text=Sweet+Bonanza",
-        type: "Slot",
-        category: "slots",
-        isActive: true,
-        provider: "Pragmatic Play",
-        rank: 3
-      }
+      // Casino games matching menu GPIDs
+      { id: "5", name: "BG Live Casino", image: "https://via.placeholder.com/300x200?text=BG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "BG", rank: 1 },
+      { id: "7", name: "SE Live Casino", image: "https://via.placeholder.com/300x200?text=SE+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SE", rank: 2 },
+      { id: "19", name: "SA Live Casino", image: "https://via.placeholder.com/300x200?text=SA+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SA", rank: 3 },
+      // Slots games matching menu GPIDs
+      { id: "2", name: "CQ9 Slots", image: "https://via.placeholder.com/300x200?text=CQ9+Slots", type: "Slot", category: "slots", isActive: true, provider: "CQ9", rank: 1 },
+      { id: "3", name: "PP Slots", image: "https://via.placeholder.com/300x200?text=PP+Slots", type: "Slot", category: "slots", isActive: true, provider: "Pragmatic Play", rank: 2 },
+      { id: "13", name: "WM Slots", image: "https://via.placeholder.com/300x200?text=WM+Slots", type: "Slot", category: "slots", isActive: true, provider: "WM", rank: 3 },
+      // Sports games matching menu GPIDs
+      { id: "44", name: "SABA Thể Thao", image: "https://via.placeholder.com/300x200?text=SABA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "SABA", rank: 1 },
+      { id: "1015", name: "AFB Thể Thao", image: "https://via.placeholder.com/300x200?text=AFB+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "AFB", rank: 2 },
+      { id: "1022", name: "BTI Thể Thao", image: "https://via.placeholder.com/300x200?text=BTI+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "BTI", rank: 3 }
     ],
     "casino": [
-      {
-        id: "10",
-        name: "Live Baccarat VIP",
-        image: "https://via.placeholder.com/300x200?text=Live+Baccarat",
-        type: "Baccarat",
-        category: "casino",
-        isActive: true,
-        provider: "Evolution",
-        rank: 1
-      },
-      {
-        id: "11",
-        name: "Live Roulette Gold", 
-        image: "https://via.placeholder.com/300x200?text=Live+Roulette",
-        type: "Roulette",
-        category: "casino",
-        isActive: true,
-        provider: "Evolution",
-        rank: 2
-      }
+      // Casino games with exact GPIDs from menu items
+      { id: "5", name: "BG Live Casino", image: "https://via.placeholder.com/300x200?text=BG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "BG", rank: 1 },
+      { id: "7", name: "SE Live Casino", image: "https://via.placeholder.com/300x200?text=SE+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SE", rank: 2 },
+      { id: "19", name: "SA Live Casino", image: "https://via.placeholder.com/300x200?text=SA+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SA", rank: 3 },
+      { id: "20", name: "EVO Live Casino", image: "https://via.placeholder.com/300x200?text=EVO+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "Evolution", rank: 4 },
+      { id: "28", name: "AB Live Casino", image: "https://via.placeholder.com/300x200?text=AB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "AB", rank: 5 },
+      { id: "33", name: "GD Live Casino", image: "https://via.placeholder.com/300x200?text=GD+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "GD", rank: 6 },
+      { id: "38", name: "PP Live Casino", image: "https://via.placeholder.com/300x200?text=PP+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "Pragmatic Play", rank: 7 },
+      { id: "1019", name: "YB Live Casino", image: "https://via.placeholder.com/300x200?text=YB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "YB", rank: 8 },
+      { id: "1021", name: "OG Live Casino", image: "https://via.placeholder.com/300x200?text=OG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "OG", rank: 9 },
+      { id: "1024", name: "AFB Live Casino", image: "https://via.placeholder.com/300x200?text=AFB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "AFB", rank: 10 }
     ],
     "slots": [
-      {
-        id: "20",
-        name: "Sweet Bonanza Xmas",
-        image: "https://via.placeholder.com/300x200?text=Sweet+Bonanza",
-        type: "Slot",
-        category: "slots",
-        isActive: true,
-        provider: "Pragmatic Play",
-        rank: 1
-      },
-      {
-        id: "21",
-        name: "Gates of Olympus 1000",
-        image: "https://via.placeholder.com/300x200?text=Gates+Olympus",
-        type: "Slot",
-        category: "slots",
-        isActive: true,
-        provider: "Pragmatic Play",
-        rank: 2
-      }
+      // NoHu/Slots games with exact GPIDs from menu items  
+      { id: "2", name: "CQ9 Slots", image: "https://via.placeholder.com/300x200?text=CQ9+Slots", type: "Slot", category: "slots", isActive: true, provider: "CQ9", rank: 1 },
+      { id: "3", name: "PP Slots", image: "https://via.placeholder.com/300x200?text=PP+Slots", type: "Slot", category: "slots", isActive: true, provider: "Pragmatic Play", rank: 2 },
+      { id: "13", name: "WM Slots", image: "https://via.placeholder.com/300x200?text=WM+Slots", type: "Slot", category: "slots", isActive: true, provider: "WM", rank: 3 },
+      { id: "14", name: "SBO Slots", image: "https://via.placeholder.com/300x200?text=SBO+Slots", type: "Slot", category: "slots", isActive: true, provider: "SBO", rank: 4 },
+      { id: "16", name: "FK Slots", image: "https://via.placeholder.com/300x200?text=FK+Slots", type: "Slot", category: "slots", isActive: true, provider: "FK", rank: 5 },
+      { id: "22", name: "YG Slots", image: "https://via.placeholder.com/300x200?text=YG+Slots", type: "Slot", category: "slots", isActive: true, provider: "YG", rank: 6 },
+      { id: "29", name: "MG Slots", image: "https://via.placeholder.com/300x200?text=MG+Slots", type: "Slot", category: "slots", isActive: true, provider: "MG", rank: 7 },
+      { id: "35", name: "PG Slots", image: "https://via.placeholder.com/300x200?text=PG+Slots", type: "Slot", category: "slots", isActive: true, provider: "PG", rank: 8 },
+      { id: "1010", name: "YGR Slots", image: "https://via.placeholder.com/300x200?text=YGR+Slots", type: "Slot", category: "slots", isActive: true, provider: "YGR", rank: 9 },
+      { id: "1018", name: "PT Slots", image: "https://via.placeholder.com/300x200?text=PT+Slots", type: "Slot", category: "slots", isActive: true, provider: "PT", rank: 10 },
+      { id: "1020", name: "JIL Slots", image: "https://via.placeholder.com/300x200?text=JIL+Slots", type: "Slot", category: "slots", isActive: true, provider: "JIL", rank: 11 }
     ],
     "sports": [
-      {
-        id: "44",
-        name: "SABA Thể Thao",
-        image: "https://via.placeholder.com/300x200?text=SABA+Sports",
-        type: "Sports Betting",
-        category: "sports",
-        isActive: true,
-        provider: "SABA",
-        rank: 1
-      },
-      {
-        id: "1015",
-        name: "AFB Thể Thao", 
-        image: "https://via.placeholder.com/300x200?text=AFB+Sports",
-        type: "Sports Betting",
-        category: "sports",
-        isActive: true,
-        provider: "AFB",
-        rank: 2
-      },
-      {
-        id: "1022",
-        name: "BTI Thể Thao",
-        image: "https://via.placeholder.com/300x200?text=BTI+Sports", 
-        type: "Sports Betting",
-        category: "sports",
-        isActive: true,
-        provider: "BTI",
-        rank: 3
-      },
-      {
-        id: "1053",
-        name: "PANDA Thể Thao",
-        image: "https://via.placeholder.com/300x200?text=PANDA+Sports",
-        type: "Sports Betting", 
-        category: "sports",
-        isActive: true,
-        provider: "PANDA",
-        rank: 4
-      },
-      {
-        id: "1070",
-        name: "WS168 Thể Thao",
-        image: "https://via.placeholder.com/300x200?text=WS168+Sports",
-        type: "Sports Betting",
-        category: "sports", 
-        isActive: true,
-        provider: "WS168",
-        rank: 5
-      },
-      {
-        id: "1080", 
-        name: "LUCKY Thể Thao",
-        image: "https://via.placeholder.com/300x200?text=LUCKY+Sports",
-        type: "Sports Betting",
-        category: "sports",
-        isActive: true,
-        provider: "LUCKY", 
-        rank: 6
-      },
-      {
-        id: "1086",
-        name: "APG Thể Thao", 
-        image: "https://via.placeholder.com/300x200?text=APG+Sports",
-        type: "Sports Betting",
-        category: "sports",
-        isActive: true,
-        provider: "APG",
-        rank: 7
-      }
-    ],
-    "card-games": [
-      {
-        id: "40",
-        name: "Texas Hold'em Poker",
-        image: "https://via.placeholder.com/300x200?text=Poker",
-        type: "Card Game",
-        category: "card-games",
-        isActive: true,
-        provider: "JOKER",
-        rank: 1
-      }
+      // Sports games with exact GPIDs from menu items
+      { id: "44", name: "SABA Thể Thao", image: "https://via.placeholder.com/300x200?text=SABA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "SABA", rank: 1 },
+      { id: "1015", name: "AFB Thể Thao", image: "https://via.placeholder.com/300x200?text=AFB+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "AFB", rank: 2 },
+      { id: "1022", name: "BTI Thể Thao", image: "https://via.placeholder.com/300x200?text=BTI+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "BTI", rank: 3 },
+      { id: "1053", name: "PANDA Thể Thao", image: "https://via.placeholder.com/300x200?text=PANDA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "PANDA", rank: 4 },
+      { id: "1070", name: "WS168 Thể Thao", image: "https://via.placeholder.com/300x200?text=WS168+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "WS168", rank: 5 },
+      { id: "1080", name: "LUCKY Thể Thao", image: "https://via.placeholder.com/300x200?text=LUCKY+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "LUCKY", rank: 6 },
+      { id: "1086", name: "APG Thể Thao", image: "https://via.placeholder.com/300x200?text=APG+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "APG", rank: 7 }
     ],
     "fishing": [
-      {
-        id: "50",
-        name: "Fish Hunter King",
-        image: "https://via.placeholder.com/300x200?text=Fish+Hunter",
-        type: "Fishing Game",
-        category: "fishing",
-        isActive: true,
-        provider: "JIL",
-        rank: 1
-      }
+      // Fishing/BanCa games with exact GPIDs from menu items
+      { id: "1020", name: "JIL Bắn Cá", image: "https://via.placeholder.com/300x200?text=JIL+Fishing", type: "Fishing Game", category: "fishing", isActive: true, provider: "JIL", rank: 1 },
+      { id: "1012", name: "TCG Bắn Cá", image: "https://via.placeholder.com/300x200?text=TCG+Fishing", type: "Fishing Game", category: "fishing", isActive: true, provider: "TCG", rank: 2 }
+    ],
+    "card-games": [
+      // Card games with exact GPIDs from menu items
+      { id: "10", name: "JOKER Game Bài", image: "https://via.placeholder.com/300x200?text=JOKER+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "JOKER", rank: 1 },
+      { id: "1011", name: "Mipoker Game Bài", image: "https://via.placeholder.com/300x200?text=Mipoker+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "Mipoker", rank: 2 },
+      { id: "1013", name: "JGR Game Bài", image: "https://via.placeholder.com/300x200?text=JGR+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "JGR", rank: 3 }
+    ],
+    "cockfight": [
+      // Cockfight/DaGa games with exact GPIDs from menu items
+      { id: "1001", name: "WS168 Đá Gà", image: "https://via.placeholder.com/300x200?text=WS168+Cockfight", type: "Cockfight", category: "cockfight", isActive: true, provider: "WS168", rank: 1 },
+      { id: "1002", name: "AOG Đá Gà", image: "https://via.placeholder.com/300x200?text=AOG+Cockfight", type: "Cockfight", category: "cockfight", isActive: true, provider: "AOG", rank: 2 }
+    ],
+    "lottery": [
+      // Lottery/XoSo games with exact GPIDs from menu items
+      { id: "1003", name: "TC Xổ Số", image: "https://via.placeholder.com/300x200?text=TC+Lottery", type: "Lottery", category: "lottery", isActive: true, provider: "TC", rank: 1 }
     ]
   };
 
@@ -344,39 +243,72 @@ serve(async (req) => {
 
     let games: GameResponse[] = [];
 
-    // Always use fallback data first since database might not be available
-    console.log(`[${requestId}] 🎯 Using fallback data for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
+    // Try to fetch from database first
+    console.log(`[${requestId}] 🎯 Trying to fetch from database first for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
     
-    // Special handling for "all" category - fetch 5 games from each category and shuffle
-    if (category === "all") {
-      const categories = ['live-casino', 'slots', 'sports', 'card-games', 'fishing'];
-      const allCategoryGames: GameResponse[] = [];
-
-      console.log(`[${requestId}] 🔀 Processing "all" category - getting fallback from multiple categories`);
+    try {
+      // Attempt to fetch from database
+      const dbGames = await fetchGamesFromDatabase(category, gpids, 50);
       
-      for (const cat of categories) {
-        try {
-          const categoryFallback = getFallbackGames(cat).slice(0, 5); // Get 5 games per category
-          console.log(`[${requestId}] 📊 Got ${categoryFallback.length} fallback games from category: ${cat}`);
-          allCategoryGames.push(...categoryFallback);
-        } catch (error) {
-          console.error(`[${requestId}] ❌ Error getting fallback for category ${cat}:`, error);
+      if (dbGames && dbGames.length > 0) {
+        games = dbGames;
+        console.log(`[${requestId}] ✅ Successfully fetched ${games.length} games from database`);
+      } else {
+        console.log(`[${requestId}] ⚠️ No games found in database, using fallback data`);
+        
+        // Special handling for "all" category - fetch 5 games from each category and shuffle
+        if (category === "all") {
+          const categories = ['live-casino', 'slots', 'sports', 'card-games', 'fishing'];
+          const allCategoryGames: GameResponse[] = [];
+
+          console.log(`[${requestId}] 🔀 Processing "all" category - getting fallback from multiple categories`);
+          
+          for (const cat of categories) {
+            try {
+              const categoryFallback = getFallbackGames(cat).slice(0, 5); // Get 5 games per category
+              console.log(`[${requestId}] 📊 Got ${categoryFallback.length} fallback games from category: ${cat}`);
+              allCategoryGames.push(...categoryFallback);
+            } catch (error) {
+              console.error(`[${requestId}] ❌ Error getting fallback for category ${cat}:`, error);
+            }
+          }
+
+          // Shuffle the combined games array
+          games = shuffleArray(allCategoryGames);
+          console.log(`[${requestId}] 🎲 Total games after shuffling: ${games.length}`);
+        } else {
+          // For specific categories, get fallback data directly
+          games = getFallbackGames(category);
+          console.log(`[${requestId}] 🛟 Using fallback data for category ${category}: ${games.length} games`);
+          
+          // Filter by GPIDs if provided
+          if (gpids && gpids.length > 0) {
+            const originalCount = games.length;
+            games = games.filter(game => gpids.includes(Number(game.id)));
+            console.log(`[${requestId}] 📋 Filtered by GPIDs: ${originalCount} -> ${games.length} games`);
+          }
         }
       }
-
-      // Shuffle the combined games array
-      games = shuffleArray(allCategoryGames);
-      console.log(`[${requestId}] 🎲 Total games after shuffling: ${games.length}`);
-    } else {
-      // For specific categories, get fallback data directly
-      games = getFallbackGames(category);
-      console.log(`[${requestId}] 🛟 Using fallback data for category ${category}: ${games.length} games`);
+    } catch (error) {
+      console.error(`[${requestId}] ❌ Database fetch failed, using fallback:`, error);
       
-      // Filter by GPIDs if provided
-      if (gpids && gpids.length > 0) {
-        const originalCount = games.length;
-        games = games.filter(game => gpids.includes(Number(game.id)));
-        console.log(`[${requestId}] 📋 Filtered by GPIDs: ${originalCount} -> ${games.length} games`);
+      // Use fallback data when database is unavailable
+      if (category === "all") {
+        const categories = ['live-casino', 'slots', 'sports', 'card-games', 'fishing'];
+        const allCategoryGames: GameResponse[] = [];
+        
+        for (const cat of categories) {
+          const categoryFallback = getFallbackGames(cat).slice(0, 5);
+          allCategoryGames.push(...categoryFallback);
+        }
+        
+        games = shuffleArray(allCategoryGames);
+      } else {
+        games = getFallbackGames(category);
+        
+        if (gpids && gpids.length > 0) {
+          games = games.filter(game => gpids.includes(Number(game.id)));
+        }
       }
     }
     

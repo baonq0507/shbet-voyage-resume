@@ -97,6 +97,7 @@ const NoHu = () => {
       {/* Games */}
       <SimpleGamesList 
         title="GAME NỔ HŨ HOT NHẤT" 
+        category="slots"
         gpids={menuItems.find(item => item.id === 'nohu')?.dropdown?.map(item => Number(item.id)) || []} 
         maxGames={12} 
       />

@@ -96,6 +96,7 @@ const Casino = () => {
       {/* Games */}
       <SimpleGamesList 
         title="GAME CASINO HOT NHẤT" 
+        category="casino"
         gpids={menuItems.find(item => item.id === 'casino')?.dropdown?.map(item => Number(item.id)) || []} 
         maxGames={12} 
       />

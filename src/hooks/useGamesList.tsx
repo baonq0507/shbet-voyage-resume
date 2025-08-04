@@ -41,9 +41,19 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
       setLoading(true);
       setError(null);
 
+      // Map frontend categories to backend categories for fallback data
+      let mappedCategory = category;
+      if (category === 'casino') mappedCategory = 'casino';
+      else if (category === 'slots') mappedCategory = 'slots'; 
+      else if (category === 'sports') mappedCategory = 'sports';
+      else if (category === 'fishing') mappedCategory = 'fishing';
+      else if (category === 'card-games') mappedCategory = 'card-games';
+      else if (category === 'cockfight') mappedCategory = 'cockfight';
+      else if (category === 'lottery') mappedCategory = 'lottery';
+
       const { data, error: functionError } = await supabase.functions.invoke('get-games-list', {
         body: {
-          category,
+          category: mappedCategory,
           gpids
         }
       });
