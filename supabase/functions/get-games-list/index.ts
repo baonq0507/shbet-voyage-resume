@@ -18,8 +18,8 @@ interface GameResponse {
 }
 
 // Initialize Supabase client
-const supabaseUrl = 'http://206.206.126.141:54321';
-const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? 'https://hlydtwqhiuwbikkjemck.supabase.co';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI1MDUyNCwiZXhwIjoyMDY5ODI2NTI0fQ.HW8u2xzshPyajWCzDf8PeUlFKjdC8Q8dFKJa1qSK1RY';
 
 console.log('🚀 Initializing Supabase client with URL:', supabaseUrl);
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -202,23 +202,67 @@ function getFallbackGames(category: string): GameResponse[] {
     "sports": [
       {
         id: "30",
-        name: "Football Manager 2024",
-        image: "https://via.placeholder.com/300x200?text=Football+Manager",
-        type: "Sports",
+        name: "Cá Cược Bóng Đá",
+        image: "https://via.placeholder.com/300x200?text=Football+Betting",
+        type: "Sports Betting",
         category: "sports",
         isActive: true,
-        provider: "Saba Sports",
+        provider: "SABA Sports",
         rank: 1
       },
       {
         id: "31",
-        name: "NBA Live Betting",
-        image: "https://via.placeholder.com/300x200?text=NBA+Betting",
-        type: "Sports",
+        name: "Cá Cược Bóng Rổ",
+        image: "https://via.placeholder.com/300x200?text=Basketball+Betting",
+        type: "Sports Betting",
         category: "sports",
         isActive: true,
         provider: "AFB Sports",
         rank: 2
+      },
+      {
+        id: "32",
+        name: "Cá Cược Tennis",
+        image: "https://via.placeholder.com/300x200?text=Tennis+Betting",
+        type: "Sports Betting",
+        category: "sports",
+        isActive: true,
+        provider: "BTI Sports",
+        rank: 3
+      },
+      {
+        id: "33",
+        name: "E-Sports Betting",
+        image: "https://via.placeholder.com/300x200?text=Esports+Betting",
+        type: "Sports Betting",
+        category: "sports",
+        isActive: true,
+        provider: "PANDA Sports",
+        rank: 4
+      }
+    ],
+    "card-games": [
+      {
+        id: "40",
+        name: "Texas Hold'em Poker",
+        image: "https://via.placeholder.com/300x200?text=Poker",
+        type: "Card Game",
+        category: "card-games",
+        isActive: true,
+        provider: "JOKER",
+        rank: 1
+      }
+    ],
+    "fishing": [
+      {
+        id: "50",
+        name: "Fish Hunter King",
+        image: "https://via.placeholder.com/300x200?text=Fish+Hunter",
+        type: "Fishing Game",
+        category: "fishing",
+        isActive: true,
+        provider: "JIL",
+        rank: 1
       }
     ]
   };
