@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          commission_percentage: number
+          created_at: string
+          id: string
+          is_active: boolean
+          referral_count: number
+          total_commission: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commission_percentage?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          referral_count?: number
+          total_commission?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commission_percentage?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          referral_count?: number
+          total_commission?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bank: {
         Row: {
           account_holder: string
@@ -44,6 +77,42 @@ export type Database = {
           is_active?: boolean
           qr_code_url?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          target_users: string[] | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          target_users?: string[] | null
+          title: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          target_users?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -83,6 +152,54 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string
+        }
+        Relationships: []
+      }
+      promotions: {
+        Row: {
+          created_at: string
+          current_uses: number
+          description: string | null
+          discount_amount: number | null
+          discount_percentage: number | null
+          end_date: string
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_deposit: number | null
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_uses?: number
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          end_date: string
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_deposit?: number | null
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_uses?: number
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_deposit?: number | null
+          start_date?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
