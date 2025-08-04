@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { Zap, Coins, Gift } from "lucide-react";
+import { menuItems } from "@/utils/menuItems";
 import nohuGame from "@/assets/nohu-game.jpg";
 
 const NoHu = () => {
@@ -94,7 +95,11 @@ const NoHu = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList title="GAME NỔ HŨ HOT NHẤT" category="slots" maxGames={12} />
+      <SimpleGamesList 
+        title="GAME NỔ HŨ HOT NHẤT" 
+        gpids={menuItems.find(item => item.id === 'nohu')?.dropdown?.map(item => Number(item.id)) || []} 
+        maxGames={12} 
+      />
 
       <Footer />
     </div>

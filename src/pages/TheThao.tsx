@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { Trophy, Target, TrendingUp } from "lucide-react";
+import { menuItems } from "@/utils/menuItems";
 import sportsGame from "@/assets/sports-game.jpg";
 
 const TheThao = () => {
@@ -76,7 +77,11 @@ const TheThao = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList title="THỂ THAO HOT NHẤT" category="sports" maxGames={12} />
+      <SimpleGamesList 
+        title="THỂ THAO HOT NHẤT" 
+        gpids={menuItems.find(item => item.id === 'thethao')?.dropdown?.map(item => Number(item.id)) || []} 
+        maxGames={12} 
+      />
 
       <Footer />
     </div>

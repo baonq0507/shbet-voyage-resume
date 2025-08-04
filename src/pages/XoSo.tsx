@@ -4,9 +4,10 @@ import SimpleGamesList from "@/components/SimpleGamesList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Play, Trophy, Star, DollarSign } from "lucide-react";
+import { menuItems } from "@/utils/menuItems";
 
 export default function XoSo() {
-  const xosoGpids = [1003]; // XỔ SỐ GPIDs from menuItems
+  const xosoGpids = menuItems.find(item => item.id === 'xoso')?.dropdown?.map(item => Number(item.id)) || [];
 
   return (
     <div className="min-h-screen">

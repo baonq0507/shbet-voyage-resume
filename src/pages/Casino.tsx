@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { Play, Users, Trophy, Star } from "lucide-react";
+import { menuItems } from "@/utils/menuItems";
 import casinoHero from "@/assets/casino-hero.jpg";
 
 const Casino = () => {
@@ -93,7 +94,11 @@ const Casino = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList title="GAME CASINO HOT NHẤT" category="casino" maxGames={12} />
+      <SimpleGamesList 
+        title="GAME CASINO HOT NHẤT" 
+        gpids={menuItems.find(item => item.id === 'casino')?.dropdown?.map(item => Number(item.id)) || []} 
+        maxGames={12} 
+      />
 
       {/* Live Dealers */}
       <section className="py-16 bg-gradient-hero">

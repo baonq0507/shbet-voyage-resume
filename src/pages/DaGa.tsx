@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
+import { menuItems } from "@/utils/menuItems";
 import dagaGame from "@/assets/daga-game.jpg";
 
 const DaGa = () => {
@@ -52,7 +53,11 @@ const DaGa = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList title="TRƯỜNG GÀ UY TÍN" category="sports" maxGames={12} />
+      <SimpleGamesList 
+        title="TRƯỜNG GÀ UY TÍN" 
+        gpids={menuItems.find(item => item.id === 'daga')?.dropdown?.map(item => Number(item.id)) || []} 
+        maxGames={12} 
+      />
 
       <Footer />
     </div>

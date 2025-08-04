@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
+import { menuItems } from "@/utils/menuItems";
 import cardsGame from "@/assets/cards-game.jpg";
 
 const GameBai = () => {
@@ -62,7 +63,11 @@ const GameBai = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList title="GAME BÀI HOT NHẤT" category="table" maxGames={12} />
+      <SimpleGamesList 
+        title="GAME BÀI HOT NHẤT" 
+        gpids={menuItems.find(item => item.id === 'gamebai')?.dropdown?.map(item => Number(item.id)) || []} 
+        maxGames={12} 
+      />
 
       <Footer />
     </div>

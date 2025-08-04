@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { Target, Fish, Waves } from "lucide-react";
+import { menuItems } from "@/utils/menuItems";
 import bancaGame from "@/assets/banca-game.jpg";
 
 const BanCa = () => {
@@ -94,7 +95,11 @@ const BanCa = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList title="GAME BẮN CÁ HOT NHẤT" category="arcade" maxGames={12} />
+      <SimpleGamesList 
+        title="GAME BẮN CÁ HOT NHẤT" 
+        gpids={menuItems.find(item => item.id === 'banca')?.dropdown?.map(item => Number(item.id)) || []} 
+        maxGames={12} 
+      />
 
       <Footer />
     </div>
