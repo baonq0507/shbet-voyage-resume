@@ -10,14 +10,11 @@ const LOCAL_SUPABASE_ANON_KEY = import.meta.env.VITE_LOCAL_SUPABASE_ANON_KEY || 
 const CLOUD_SUPABASE_URL = import.meta.env.VITE_CLOUD_SUPABASE_URL || "https://hlydtwqhiuwbikkjemck.supabase.co";
 const CLOUD_SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_CLOUD_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTA1MjQsImV4cCI6MjA2OTgyNjUyNH0.deIb21DJNmyM5ZjocFAl4j_47AF6CnY26LN0Bn9eB9k";
 
-// Determine which configuration to use
-const isLocalDevelopment = import.meta.env.DEV;
-const useLocalSupabase = isLocalDevelopment && import.meta.env.VITE_USE_LOCAL_SUPABASE === 'true';
+// Force use local database
+const SUPABASE_URL = LOCAL_SUPABASE_URL;
+const SUPABASE_ANON_KEY = LOCAL_SUPABASE_ANON_KEY;
 
-const SUPABASE_URL = useLocalSupabase ? LOCAL_SUPABASE_URL : CLOUD_SUPABASE_URL;
-const SUPABASE_ANON_KEY = useLocalSupabase ? LOCAL_SUPABASE_ANON_KEY : CLOUD_SUPABASE_PUBLISHABLE_KEY;
-
-console.log(`Using Supabase: ${useLocalSupabase ? 'LOCAL' : 'CLOUD'}`);
+console.log('Using Supabase: LOCAL');
 console.log(`Supabase URL: ${SUPABASE_URL}`);
 
 // Import the supabase client like this:
