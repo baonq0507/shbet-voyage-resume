@@ -66,7 +66,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
             <Gift className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold">Khuyến mãi hot</h2>
           </div>
-          <Link to="/khuyen-mai">
+          <Link to="/khuyenmai">
             <Button variant="outline" className="flex items-center gap-2">
               Xem tất cả
               <ArrowRight className="h-4 w-4" />
