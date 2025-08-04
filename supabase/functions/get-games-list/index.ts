@@ -201,44 +201,74 @@ function getFallbackGames(category: string): GameResponse[] {
     ],
     "sports": [
       {
-        id: "30",
-        name: "Cá Cược Bóng Đá",
-        image: "https://via.placeholder.com/300x200?text=Football+Betting",
+        id: "44",
+        name: "SABA Thể Thao",
+        image: "https://via.placeholder.com/300x200?text=SABA+Sports",
         type: "Sports Betting",
         category: "sports",
         isActive: true,
-        provider: "SABA Sports",
+        provider: "SABA",
         rank: 1
       },
       {
-        id: "31",
-        name: "Cá Cược Bóng Rổ",
-        image: "https://via.placeholder.com/300x200?text=Basketball+Betting",
+        id: "1015",
+        name: "AFB Thể Thao", 
+        image: "https://via.placeholder.com/300x200?text=AFB+Sports",
         type: "Sports Betting",
         category: "sports",
         isActive: true,
-        provider: "AFB Sports",
+        provider: "AFB",
         rank: 2
       },
       {
-        id: "32",
-        name: "Cá Cược Tennis",
-        image: "https://via.placeholder.com/300x200?text=Tennis+Betting",
+        id: "1022",
+        name: "BTI Thể Thao",
+        image: "https://via.placeholder.com/300x200?text=BTI+Sports", 
         type: "Sports Betting",
         category: "sports",
         isActive: true,
-        provider: "BTI Sports",
+        provider: "BTI",
         rank: 3
       },
       {
-        id: "33",
-        name: "E-Sports Betting",
-        image: "https://via.placeholder.com/300x200?text=Esports+Betting",
+        id: "1053",
+        name: "PANDA Thể Thao",
+        image: "https://via.placeholder.com/300x200?text=PANDA+Sports",
+        type: "Sports Betting", 
+        category: "sports",
+        isActive: true,
+        provider: "PANDA",
+        rank: 4
+      },
+      {
+        id: "1070",
+        name: "WS168 Thể Thao",
+        image: "https://via.placeholder.com/300x200?text=WS168+Sports",
+        type: "Sports Betting",
+        category: "sports", 
+        isActive: true,
+        provider: "WS168",
+        rank: 5
+      },
+      {
+        id: "1080", 
+        name: "LUCKY Thể Thao",
+        image: "https://via.placeholder.com/300x200?text=LUCKY+Sports",
         type: "Sports Betting",
         category: "sports",
         isActive: true,
-        provider: "PANDA Sports",
-        rank: 4
+        provider: "LUCKY", 
+        rank: 6
+      },
+      {
+        id: "1086",
+        name: "APG Thể Thao", 
+        image: "https://via.placeholder.com/300x200?text=APG+Sports",
+        type: "Sports Betting",
+        category: "sports",
+        isActive: true,
+        provider: "APG",
+        rank: 7
       }
     ],
     "card-games": [
@@ -344,8 +374,9 @@ serve(async (req) => {
       
       // Filter by GPIDs if provided
       if (gpids && gpids.length > 0) {
-        // For fallback data, we'll show all games regardless of GPIDs to ensure content is displayed
-        console.log(`[${requestId}] 📋 GPIDs provided but using all fallback games to ensure display`);
+        const originalCount = games.length;
+        games = games.filter(game => gpids.includes(Number(game.id)));
+        console.log(`[${requestId}] 📋 Filtered by GPIDs: ${originalCount} -> ${games.length} games`);
       }
     }
     
