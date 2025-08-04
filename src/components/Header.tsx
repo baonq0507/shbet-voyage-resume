@@ -178,7 +178,7 @@ const Header = () => {
                         {item.dropdown.map((dropdownItem) => (
                           <Link
                             key={dropdownItem.id}
-                            to={dropdownItem.path || '#'}
+                            to={`/lobby?provider=${dropdownItem.id}`}
                             className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors"
                           >
                             {dropdownItem.type === 'image' ? (
