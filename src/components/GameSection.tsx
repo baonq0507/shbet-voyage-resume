@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Star, Trophy, Gift, Globe } from "lucide-react";
 import { useGamesList } from "@/hooks/useGamesList";
+import { LazyImage } from "@/components/ui/lazy-image";
 
 interface GameCardProps {
   title: string;
@@ -18,10 +19,10 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
   } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}>
     <CardHeader className="p-2 sm:p-3">
       <div className="relative overflow-hidden rounded-xl shadow-lg">
-        <img 
+        <LazyImage 
           src={image} 
           alt={title}
-          className="w-full h-24 sm:h-28 md:h-32 object-cover group-hover:scale-125 transition-transform duration-500"
+          className="w-full h-24 sm:h-28 md:h-32 group-hover:scale-125 transition-transform duration-500"
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -167,11 +168,11 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                     
                      <div className="relative z-10 flex flex-col items-center gap-0.5">
                        <div className="relative">
-                         <img 
-                           src={lobby.logo} 
-                           alt={lobby.name}
-                           className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
-                         />
+                          <LazyImage 
+                            src={lobby.logo} 
+                            alt={lobby.name}
+                            className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
+                          />
                          {/* Glow effect for active state */}
                          <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                        </div>

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play, Star, Trophy, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGamesList } from "@/hooks/useGamesList";
+import { LazyImage } from "@/components/ui/lazy-image";
 
 interface GameCardProps {
   title: string;
@@ -16,10 +17,10 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
   } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}>
     <CardHeader className="p-2 sm:p-3">
       <div className="relative overflow-hidden rounded-xl shadow-lg">
-        <img 
+        <LazyImage 
           src={image} 
           alt={title}
-          className="w-full h-24 sm:h-28 md:h-32 object-cover group-hover:scale-125 transition-transform duration-500"
+          className="w-full h-24 sm:h-28 md:h-32 group-hover:scale-125 transition-transform duration-500"
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

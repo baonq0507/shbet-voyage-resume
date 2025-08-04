@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw, Gamepad2, Tag, Crown, Building2 } from 'lucide-react';
+import { LazyImage } from '@/components/ui/lazy-image';
 
 export const GamesList = () => {
   const [page, setPage] = useState(1);
@@ -71,12 +72,12 @@ export const GamesList = () => {
         {games.map((game) => (
           <Card key={game.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="aspect-video relative overflow-hidden">
-              <img 
+              <LazyImage 
                 src={game.image} 
                 alt={game.name}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "https://via.placeholder.com/300x200?text=No+Image";
+                onError={() => {
+                  // Error handling is built into LazyImage component
                 }}
               />
               <div className="absolute top-2 right-2 flex flex-col gap-1">
