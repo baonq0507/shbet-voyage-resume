@@ -77,7 +77,16 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
 
   if (variant === 'compact') {
     return (
-      <Card className="border-l-4 border-l-primary">
+      <Card className="border-l-4 border-l-primary overflow-hidden">
+        {promotion.image_url && (
+          <div className="aspect-video w-full overflow-hidden">
+            <img 
+              src={promotion.image_url} 
+              alt={promotion.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
