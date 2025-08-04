@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
@@ -30,6 +31,30 @@ const TheThao = () => {
             <Trophy className="w-6 h-6" />
             Đặt Cược Ngay
           </Button>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="py-12 bg-card">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="text-3xl font-bold text-gradient mb-2">50+</div>
+              <div className="text-muted-foreground">Môn Thể Thao</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-gradient mb-2">1000+</div>
+              <div className="text-muted-foreground">Trận Đấu/Ngày</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-gradient mb-2">99.2%</div>
+              <div className="text-muted-foreground">Tỷ Lệ Trả Thưởng</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-gradient mb-2">24/7</div>
+              <div className="text-muted-foreground">Hoạt Động</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -82,6 +107,32 @@ const TheThao = () => {
         gpids={menuItems.find(item => item.id === 'thethao')?.dropdown?.map(item => Number(item.id)) || []} 
         maxGames={12} 
       />
+
+      {/* Live Sports */}
+      <section className="py-16 bg-gradient-hero">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-8 text-white">
+            LIVE SPORTS - TỈ LỆ CHUẨN QUỐC TẾ
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-card/10 backdrop-blur-sm rounded-lg p-6 casino-glow">
+              <Target className="w-12 h-12 text-secondary mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2 text-gradient">Tỷ Lệ Cạnh Tranh</h3>
+              <p className="text-white/80">Odds cao nhất thị trường</p>
+            </div>
+            <div className="bg-card/10 backdrop-blur-sm rounded-lg p-6 casino-glow">
+              <TrendingUp className="w-12 h-12 text-secondary mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2 text-gradient">Live Streaming</h3>
+              <p className="text-white/80">Xem trực tiếp miễn phí</p>
+            </div>
+            <div className="bg-card/10 backdrop-blur-sm rounded-lg p-6 casino-glow">
+              <Trophy className="w-12 h-12 text-secondary mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2 text-gradient">Cash Out Nhanh</h3>
+              <p className="text-white/80">Rút tiền thắng tức thì</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </div>
