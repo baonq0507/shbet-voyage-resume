@@ -80,6 +80,87 @@ export type Database = {
         }
         Relationships: []
       }
+      games: {
+        Row: {
+          block_countries: string[] | null
+          category: string | null
+          created_at: string | null
+          game_id: string
+          game_provider_id: number | null
+          game_type: number | null
+          gpid: number
+          id: string
+          image: string | null
+          is_active: boolean | null
+          is_enabled: boolean | null
+          is_maintain: boolean | null
+          is_provider_online: boolean | null
+          lines: number | null
+          name: string
+          new_game_type: number | null
+          provider: string | null
+          rank: number | null
+          reels: number | null
+          rows: number | null
+          rtp: number | null
+          supported_currencies: string[] | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          block_countries?: string[] | null
+          category?: string | null
+          created_at?: string | null
+          game_id: string
+          game_provider_id?: number | null
+          game_type?: number | null
+          gpid: number
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          is_enabled?: boolean | null
+          is_maintain?: boolean | null
+          is_provider_online?: boolean | null
+          lines?: number | null
+          name: string
+          new_game_type?: number | null
+          provider?: string | null
+          rank?: number | null
+          reels?: number | null
+          rows?: number | null
+          rtp?: number | null
+          supported_currencies?: string[] | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          block_countries?: string[] | null
+          category?: string | null
+          created_at?: string | null
+          game_id?: string
+          game_provider_id?: number | null
+          game_type?: number | null
+          gpid?: number
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          is_enabled?: boolean | null
+          is_maintain?: boolean | null
+          is_provider_online?: boolean | null
+          lines?: number | null
+          name?: string
+          new_game_type?: number | null
+          provider?: string | null
+          rank?: number | null
+          reels?: number | null
+          rows?: number | null
+          rtp?: number | null
+          supported_currencies?: string[] | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
