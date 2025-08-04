@@ -11,13 +11,14 @@ BEGIN
     
     -- If no admin user found, create one
     IF existing_admin_user_id IS NULL THEN
-        INSERT INTO auth.users (email, encrypted_password, email_confirmed_at, confirmation_token, created_at, updated_at)
-        VALUES ('quangbaorp@gmail.com', crypt('123456', gen_salt('bf')), now(), '', now(), now())
+        INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, confirmation_token, created_at, updated_at)
+        VALUES (gen_random_uuid(), 'quangbaorp@gmail.com', crypt('123456', gen_salt('bf')), now(), '', now(), now())
         RETURNING id INTO existing_admin_user_id;
         
-        -- Create profile for new admin user
+        -- Create profile for new admin user (with conflict handling)
         INSERT INTO public.profiles (user_id, username, full_name, balance)
-        VALUES (existing_admin_user_id, 'admin', 'Administrator', 0.00);
+        VALUES (existing_admin_user_id, 'admin', 'Administrator', 0.00)
+        ON CONFLICT (user_id) DO NOTHING;
     END IF;
     
     -- Ensure admin role exists for this user
