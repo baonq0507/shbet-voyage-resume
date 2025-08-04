@@ -6,45 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface GameInfo {
-  language: string;
-  gameName: string;
-  gameIconUrl: string;
-}
-
-interface GameAPIResponse {
-  seamlessGameProviderGames: GameData[];
-  serverId: string;
-  error: {
-    id: number;
-    msg: string;
-  };
-}
-
-interface GameData {
-  gameProviderId: number;
-  gameID: number;
-  gameType: number;
-  newGameType: number;
-  rank: number;
-  device: any;
-  platform: any;
-  provider: string;
-  rtp: number;
-  rows: number;
-  reels: number;
-  lines: number;
-  gameInfos: GameInfo[];
-  supportedCurrencies: string[];
-  blockCountries: string[];
-  isMaintain: boolean;
-  isEnabled: boolean;
-  isProvideCommission: boolean;
-  hasHedgeBet: boolean;
-  providerStatus: string;
-  isProviderOnline: boolean;
-}
-
 interface GameResponse {
   id: string;
   name: string;
@@ -56,61 +17,19 @@ interface GameResponse {
   rank: number;
 }
 
-// API Configuration
-const API_CONFIG = {
-  baseUrl: "https://ex-api-yy5.tw946.com/web-root/restricted/information/get-game-list.aspx",
-  companyKey: "C6012BA39EB643FEA4F5CD49AF138B02",
-  serverId: "206.206.126.141"
-};
-
 // Initialize Supabase client
-// Note: In production, these should be environment variables
-// For now using placeholder values - replace with actual values
 const supabaseUrl = 'http://206.206.126.141:54321';
 const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+
+console.log('🚀 Initializing Supabase client with URL:', supabaseUrl);
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Function to get GPID from database by category
-async function getGpidByCategory(category: string): Promise<number> {
-  try {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('gpid')
-      .eq('name', category)
-      .single();
-
-    if (error) {
-      console.error(`Error fetching GPID for category ${category}:`, error);
-      return 1; // Default fallback
-    }
-
-    return data?.gpid || 1;
-  } catch (error) {
-    console.error(`Exception fetching GPID for category ${category}:`, error);
-    return 1; // Default fallback
-  }
-}
-
-// Map game types to readable names
-const GAME_TYPE_MAP: Record<number, string> = {
-  101: "Baccarat",
-  103: "Roulette", 
-  104: "Dragon Tiger",
-  105: "Sic Bo",
-  106: "Bull Bull",
-  108: "Se Die",
-  204: "Card Games",
-  203: "Fish Game",
-  100: "Live Casino"
-};
-
-async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Promise<GameResponse[]> {
+async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]): Promise<GameResponse[]> {
   const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    console.log(`[${requestId}] 🚀 Starting fetchGamesFromAPI - Category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
-    console.log(`[${requestId}] 📊 Fetching games from local database`);
+    console.log(`[${requestId}] 🚀 Starting fetchGamesFromDatabase - Category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
 
     // Build query based on whether GPIDs are provided
     let query = supabase
@@ -119,9 +38,13 @@ async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Pr
       .eq('is_active', true);
 
     if (gpids && gpids.length > 0) {
+      console.log(`[${requestId}] 🔍 Filtering by GPIDs: ${gpids}`);
       query = query.in('gpid', gpids);
     } else if (category !== 'all') {
+      console.log(`[${requestId}] 🔍 Filtering by category: ${category}`);
       query = query.eq('category', category);
+    } else {
+      console.log(`[${requestId}] 🔍 Fetching all games`);
     }
 
     const { data: games, error } = await query.order('rank', { ascending: true });
@@ -134,8 +57,8 @@ async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Pr
     console.log(`[${requestId}] 📋 Total games from database: ${games?.length || 0}`);
 
     if (!games || games.length === 0) {
-      console.log(`[${requestId}] ⚠️ No games found for category: ${category}`);
-      return [];
+      console.log(`[${requestId}] ⚠️ No games found for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
+      return getFallbackGames(category);
     }
 
     // Transform database data to our format
@@ -143,7 +66,7 @@ async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Pr
       const transformedGame = {
         id: game.id.toString(),
         name: game.name || `Game ${game.id}`,
-        image: game.image_url || "https://via.placeholder.com/300x200?text=No+Image",
+        image: game.image || "https://via.placeholder.com/300x200?text=No+Image",
         type: game.type || 'Unknown',
         category: game.category || category,
         isActive: game.is_active || false,
@@ -159,7 +82,6 @@ async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Pr
     const duration = endTime - startTime;
     
     console.log(`[${requestId}] ✅ Successfully fetched ${transformedGames.length} games in ${duration}ms`);
-    console.log(`[${requestId}] 📈 Performance: ${duration}ms total, ${transformedGames.length} games processed`);
     
     return transformedGames;
 
@@ -167,11 +89,12 @@ async function fetchGamesFromAPI(category: string = "all", gpids?: number[]): Pr
     const endTime = Date.now();
     const duration = endTime - startTime;
     
-    console.error(`[${requestId}] ❌ Error fetching games from database for category ${category} after ${duration}ms:`, error);
+    console.error(`[${requestId}] ❌ Error fetching games from database after ${duration}ms:`, error);
     console.error(`[${requestId}] 🔍 Error details:`, {
       message: error.message,
       stack: error.stack,
       category,
+      gpids,
       duration
     });
     
@@ -191,9 +114,9 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Live Baccarat VIP",
         image: "https://via.placeholder.com/300x200?text=Live+Baccarat",
         type: "Baccarat",
-        category: "Baccarat",
+        category: "casino",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Evolution",
         rank: 1
       },
       {
@@ -201,9 +124,9 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Live Roulette Gold",
         image: "https://via.placeholder.com/300x200?text=Live+Roulette",
         type: "Roulette",
-        category: "Roulette",
+        category: "casino",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Evolution",
         rank: 2
       },
       {
@@ -211,21 +134,21 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Sweet Bonanza Xmas",
         image: "https://via.placeholder.com/300x200?text=Sweet+Bonanza",
         type: "Slot",
-        category: "Slot Machine",
+        category: "slots",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Pragmatic Play",
         rank: 3
       }
     ],
-    "live-casino": [
+    "casino": [
       {
         id: "10",
         name: "Live Baccarat VIP",
         image: "https://via.placeholder.com/300x200?text=Live+Baccarat",
         type: "Baccarat",
-        category: "Baccarat",
+        category: "casino",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Evolution",
         rank: 1
       },
       {
@@ -233,20 +156,10 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Live Roulette Gold", 
         image: "https://via.placeholder.com/300x200?text=Live+Roulette",
         type: "Roulette",
-        category: "Roulette",
+        category: "casino",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Evolution",
         rank: 2
-      },
-      {
-        id: "12",
-        name: "Live Blackjack Premium",
-        image: "https://via.placeholder.com/300x200?text=Live+Blackjack",
-        type: "Blackjack",
-        category: "Blackjack",
-        isActive: true,
-        provider: "BigGaming",
-        rank: 3
       }
     ],
     "slots": [
@@ -255,9 +168,9 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Sweet Bonanza Xmas",
         image: "https://via.placeholder.com/300x200?text=Sweet+Bonanza",
         type: "Slot",
-        category: "Slot Machine",
+        category: "slots",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Pragmatic Play",
         rank: 1
       },
       {
@@ -265,20 +178,10 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Gates of Olympus 1000",
         image: "https://via.placeholder.com/300x200?text=Gates+Olympus",
         type: "Slot",
-        category: "Slot Machine",
+        category: "slots",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Pragmatic Play",
         rank: 2
-      },
-      {
-        id: "22",
-        name: "Sugar Rush Ultimate",
-        image: "https://via.placeholder.com/300x200?text=Sugar+Rush",
-        type: "Slot",
-        category: "Slot Machine",
-        isActive: true,
-        provider: "BigGaming",
-        rank: 3
       }
     ],
     "sports": [
@@ -287,30 +190,20 @@ function getFallbackGames(category: string): GameResponse[] {
         name: "Football Manager 2024",
         image: "https://via.placeholder.com/300x200?text=Football+Manager",
         type: "Sports",
-        category: "Sports",
+        category: "sports",
         isActive: true,
-        provider: "BigGaming",
+        provider: "Saba Sports",
         rank: 1
       },
       {
         id: "31",
-        name: "NBA 2K24",
-        image: "https://via.placeholder.com/300x200?text=NBA+2K24",
+        name: "NBA Live Betting",
+        image: "https://via.placeholder.com/300x200?text=NBA+Betting",
         type: "Sports",
-        category: "Sports",
+        category: "sports",
         isActive: true,
-        provider: "BigGaming",
+        provider: "AFB Sports",
         rank: 2
-      },
-      {
-        id: "32",
-        name: "FIFA 24",
-        image: "https://via.placeholder.com/300x200?text=FIFA+24",
-        type: "Sports",
-        category: "Sports",
-        isActive: true,
-        provider: "BigGaming",
-        rank: 3
       }
     ]
   };
@@ -325,6 +218,7 @@ serve(async (req) => {
   const startTime = Date.now();
   
   console.log(`[${requestId}] 🌐 New request received - Method: ${req.method}, URL: ${req.url}`);
+  console.log(`[${requestId}] 🌐 Headers:`, Object.fromEntries(req.headers.entries()));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -338,10 +232,15 @@ serve(async (req) => {
 
     // Handle both GET (URL params) and POST (body) requests
     if (req.method === 'POST') {
-      const body = await req.json();
-      category = body.category || 'all';
-      gpids = body.gpids;
-      console.log(`[${requestId}] 📥 POST request body:`, JSON.stringify(body, null, 2));
+      try {
+        const body = await req.json();
+        category = body.category || 'all';
+        gpids = body.gpids;
+        console.log(`[${requestId}] 📥 POST request body:`, JSON.stringify(body, null, 2));
+      } catch (parseError) {
+        console.error(`[${requestId}] ❌ Error parsing request body:`, parseError);
+        category = 'all';
+      }
     } else {
       const url = new URL(req.url);
       category = url.searchParams.get('category') || 'all';
@@ -354,30 +253,33 @@ serve(async (req) => {
 
     console.log(`[${requestId}] 🎯 Processing request for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
 
-    const games = await fetchGamesFromAPI(category, gpids);
+    const games = await fetchGamesFromDatabase(category, gpids);
     
-    console.log(`[${requestId}] 📊 Final games result:`, JSON.stringify(games, null, 2));
+    console.log(`[${requestId}] 📊 Final games result count: ${games.length}`);
     
     const endTime = Date.now();
     const duration = endTime - startTime;
 
     console.log(`[${requestId}] ✅ Request completed successfully in ${duration}ms - Returning ${games.length} games`);
 
+    const response = {
+      success: true,
+      data: games,
+      pagination: {
+        page: 1,
+        pageSize: games.length,
+        total: games.length
+      },
+      apiUsed: false,
+      databaseUsed: true,
+      requestId,
+      duration: `${duration}ms`,
+      category: category,
+      gpids: gpids
+    };
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        data: games,
-        pagination: {
-          page: 1,
-          pageSize: games.length,
-          total: games.length
-        },
-        apiUsed: false,
-        databaseUsed: true,
-        requestId,
-        duration: `${duration}ms`,
-        category: category
-      }),
+      JSON.stringify(response),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
