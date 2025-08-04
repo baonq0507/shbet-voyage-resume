@@ -90,7 +90,7 @@ export const GamesList = () => {
                   </Badge>
                 )}
                 {game.rank <= 3 && (
-                  <Badge variant="gold" className="text-xs">
+                  <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">
                     <Crown className="w-3 h-3 mr-1" />
                     Top {game.rank}
                   </Badge>

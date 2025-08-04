@@ -133,9 +133,9 @@ const Lobby = () => {
   
   // Filter games by type
   const gameTypes = ['all', ...Array.from(new Set(gamesToShow.map(game => {
-    if ('type' in game) {
+    if ('type' in game && game.type) {
       return game.type;
-    } else if ('category' in game) {
+    } else if ('category' in game && game.category) {
       return game.category;
     } else {
       return 'Game';
@@ -146,9 +146,9 @@ const Lobby = () => {
     ? gamesToShow 
     : gamesToShow.filter(game => {
         let gameType: string;
-        if ('type' in game) {
+        if ('type' in game && game.type) {
           gameType = game.type;
-        } else if ('category' in game) {
+        } else if ('category' in game && game.category) {
           gameType = game.category;
         } else {
           gameType = 'Game';
@@ -246,7 +246,7 @@ const Lobby = () => {
                   />
                   {/* Game type badge */}
                   <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
-                    {'type' in game ? game.type : game.category}
+                    {'type' in game && game.type ? game.type : ('category' in game && game.category ? game.category : 'Game')}
                   </Badge>
                 </div>
                 
@@ -270,7 +270,7 @@ const Lobby = () => {
                     <Button 
                       className="w-full h-8 text-xs" 
                       size="sm"
-                      onClick={() => handlePlayGame('id' in game ? game.id : index)}
+                      onClick={() => handlePlayGame('id' in game ? Number(game.id) : index)}
                     >
                       <Play className="w-3 h-3 mr-1" />
                       Chơi
