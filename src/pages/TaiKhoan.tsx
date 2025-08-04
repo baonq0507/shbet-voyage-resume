@@ -46,23 +46,31 @@ export default function TaiKhoan() {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !profile) return;
+    console.log('File selected:', file?.name, file?.size, file?.type);
+    
+    if (!file || !profile) {
+      console.log('No file or profile:', { file: !!file, profile: !!profile });
+      return;
+    }
 
     setIsLoading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${profile.user_id}-${Date.now()}.${fileExt}`;
+      console.log('Uploading file with name:', fileName);
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, file);
 
+      console.log('Upload result:', { error: uploadError });
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
+      console.log('Public URL generated:', data.publicUrl);
       setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }));
       
       toast({

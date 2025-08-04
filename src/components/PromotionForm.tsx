@@ -60,7 +60,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
   const [imageUploading, setImageUploading] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<PromotionFormData>({
+  const form = useForm({
     resolver: zodResolver(promotionSchema),
     defaultValues: {
       title: initialData?.title || '',
