@@ -110,15 +110,11 @@ const Header = () => {
             <div className="animate-marquee whitespace-nowrap">
               <h1 className="text-xs md:text-base lg:text-lg font-black text-white inline-block">
                 <span className="inline-block animate-pulse mr-1">🎉</span>
-                <span className="text-shadow-lg tracking-tight">
-                  CHÀO MỪNG ĐẾN VỚI 
-                  <img 
-                    src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
-                    alt="DIAMONDBET68" 
-                    className="inline h-4 w-auto md:h-6 lg:h-8 object-contain mx-1"
-                  />
-                  - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
-                </span>
+                 <span className="text-shadow-lg tracking-tight">
+                   CHÀO MỪNG ĐẾN VỚI 
+                   <span className="font-extrabold text-yellow-300 mx-1">DINAMONDBET68</span>
+                   - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
+                 </span>
                 <span className="inline-block animate-pulse ml-1">🎉</span>
               </h1>
             </div>
@@ -129,14 +125,12 @@ const Header = () => {
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img 
-              src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
-              alt="DIAMONDBET68" 
-              className="h-10 w-auto md:h-12 lg:h-14 object-contain"
-            />
-          </Link>
+           {/* Logo */}
+           <Link to="/" className="flex items-center">
+             <span className="text-xl md:text-2xl lg:text-3xl font-black text-primary">
+               DINAMONDBET68
+             </span>
+           </Link>
 
           {/* Desktop Navigation - only show on large screens */}
           <nav className="hidden lg:flex items-center space-x-2">
@@ -329,15 +323,13 @@ const Header = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-80 p-0 overflow-y-auto max-h-screen custom-scrollbar">
-                <div className="px-6 py-4 border-b border-border">
-                  <div className="flex items-center justify-center">
-                    <img 
-                      src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
-                      alt="DIAMONDBET68" 
-                      className="h-10 w-auto object-contain"
-                    />
-                  </div>
-                </div>
+                 <div className="px-6 py-4 border-b border-border">
+                   <div className="flex items-center justify-center">
+                     <span className="text-xl font-black text-primary">
+                       DINAMONDBET68
+                     </span>
+                   </div>
+                 </div>
                 <nav className="p-6">
                   <div className="space-y-3">
                     {/* Home link */}
