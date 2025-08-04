@@ -170,7 +170,7 @@ const Header = () => {
                 {/* Hover Dropdown */}
                 {item.dropdown && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                    <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-2xl p-4 min-w-[280px]">
+                    <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-2xl p-4 min-w-[200px]">
                       <div className="text-sm font-semibold text-primary mb-3 text-center">
                         {item.text}
                       </div>
