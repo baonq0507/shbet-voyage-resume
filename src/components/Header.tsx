@@ -162,41 +162,47 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Menu items with dropdowns */}
+            {/* Menu items with hover dropdowns */}
             {menuItems.map((item) => (
               <div key={item.id} className="relative group">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={`flex flex-col items-center gap-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-300 min-w-[70px] h-auto ${
-                        location.pathname === item.path
-                          ? "bg-primary text-primary-foreground casino-glow"
-                          : "text-foreground hover:bg-primary/10 hover:text-primary"
-                      }`}
-                    >
-                      {renderIcon(item.icon, 20)}
-                      <span className="text-center leading-tight whitespace-nowrap">{item.text}</span>
-                      {item.dropdown && <ChevronDown className="w-3 h-3 ml-1" />}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  {item.dropdown && (
-                    <DropdownMenuContent align="center" className="w-56 bg-background/95 backdrop-blur-sm border-border">
-                      <div className="p-2">
-                        <div className="text-sm font-semibold text-primary mb-2 text-center">
-                          {item.text}
-                        </div>
-                        {renderDropdownItems(item.dropdown)}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link to={item.path || '#'} className="flex items-center gap-2 w-full justify-center">
-                            <span className="text-sm font-medium">Xem tất cả</span>
-                          </Link>
-                        </DropdownMenuItem>
+                <Link
+                  to={item.path || '#'}
+                  className={`flex flex-col items-center gap-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-300 min-w-[70px] ${
+                    location.pathname === item.path
+                      ? "bg-primary text-primary-foreground casino-glow"
+                      : "text-foreground hover:bg-primary/10 hover:text-primary"
+                  }`}
+                >
+                  {renderIcon(item.icon, 20)}
+                  <span className="text-center leading-tight whitespace-nowrap">{item.text}</span>
+                </Link>
+                
+                {/* Hover Dropdown */}
+                {item.dropdown && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-2xl p-4 min-w-[280px]">
+                      <div className="text-sm font-semibold text-primary mb-3 text-center">
+                        {item.text}
                       </div>
-                    </DropdownMenuContent>
-                  )}
-                </DropdownMenu>
+                      <div className="space-y-2">
+                        {item.dropdown.map((dropdownItem) => (
+                          <Link
+                            key={dropdownItem.id}
+                            to={dropdownItem.path || '#'}
+                            className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors"
+                          >
+                            {dropdownItem.type === 'image' ? (
+                              <img src={dropdownItem.icon} alt={dropdownItem.text} className="w-5 h-5 object-contain" />
+                            ) : (
+                              renderIcon(dropdownItem.icon, 16)
+                            )}
+                            <span className="text-sm">{dropdownItem.text}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </nav>
