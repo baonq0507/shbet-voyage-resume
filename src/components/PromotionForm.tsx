@@ -86,6 +86,8 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log('Starting image upload:', file.name, file.size, file.type);
+
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'Lỗi',
@@ -108,11 +110,15 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      const filePath = `promotion-images/${fileName}`;
+      const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading to path:', filePath);
+
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('promotion-images')
         .upload(filePath, file);
+
+      console.log('Upload result:', { uploadError, uploadData });
 
       if (uploadError) throw uploadError;
 
@@ -120,6 +126,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
         .from('promotion-images')
         .getPublicUrl(filePath);
 
+      console.log('Public URL:', data.publicUrl);
       setUploadedImageUrl(data.publicUrl);
       toast({
         title: 'Thành công',
@@ -129,7 +136,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
       console.error('Error uploading image:', error);
       toast({
         title: 'Lỗi',
-        description: 'Không thể upload hình ảnh',
+        description: `Không thể upload hình ảnh: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'destructive',
       });
     } finally {
@@ -143,7 +150,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
         // Extract filename from URL
         const urlParts = uploadedImageUrl.split('/');
         const filename = urlParts[urlParts.length - 1];
-        const filePath = `promotion-images/${filename}`;
+        const filePath = `${filename}`;
 
         await supabase.storage
           .from('promotion-images')
