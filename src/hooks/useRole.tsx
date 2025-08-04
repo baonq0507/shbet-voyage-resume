@@ -28,13 +28,16 @@ export const useRole = (): UseRoleReturn => {
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
-        .single();
+        .order('role', { ascending: false }); // admin comes before user alphabetically when descending
 
       if (error) {
         console.error('Error fetching user role:', error);
         setRole('user'); // Default to user role
       } else {
-        setRole(data?.role || 'user');
+        // Get the highest priority role (admin > user)
+        const roles = data || [];
+        const hasAdmin = roles.some(r => r.role === 'admin');
+        setRole(hasAdmin ? 'admin' : (roles[0]?.role || 'user'));
       }
     } catch (error) {
       console.error('Error fetching user role:', error);
