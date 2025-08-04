@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash } from 'lucide-react';
+import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 
 interface Transaction {
   id: string;
@@ -486,6 +487,131 @@ const AdminPage = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Promotion CRUD operations
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
+  const [promotionLoading, setPromotionLoading] = useState(false);
+
+  const handleCreatePromotion = async (data: PromotionFormData) => {
+    setPromotionLoading(true);
+    try {
+      const promotionData = {
+        title: data.title,
+        description: data.description || null,
+        discount_percentage: data.discountType === 'percentage' ? data.discountPercentage : null,
+        discount_amount: data.discountType === 'amount' ? data.discountAmount : null,
+        min_deposit: data.minDeposit || null,
+        max_uses: data.maxUses || null,
+        start_date: data.startDate,
+        end_date: data.endDate,
+        is_active: data.isActive,
+      };
+
+      const { error } = await supabase
+        .from('promotions')
+        .insert(promotionData);
+
+      if (error) throw error;
+
+      toast({
+        title: "Thành công",
+        description: "Khuyến mại đã được tạo thành công",
+      });
+
+      setIsPromotionDialogOpen(false);
+      fetchPromotions();
+    } catch (error) {
+      console.error('Error creating promotion:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tạo khuyến mại",
+        variant: "destructive",
+      });
+    } finally {
+      setPromotionLoading(false);
+    }
+  };
+
+  const handleUpdatePromotion = async (data: PromotionFormData) => {
+    if (!editingPromotion) return;
+    
+    setPromotionLoading(true);
+    try {
+      const promotionData = {
+        title: data.title,
+        description: data.description || null,
+        discount_percentage: data.discountType === 'percentage' ? data.discountPercentage : null,
+        discount_amount: data.discountType === 'amount' ? data.discountAmount : null,
+        min_deposit: data.minDeposit || null,
+        max_uses: data.maxUses || null,
+        start_date: data.startDate,
+        end_date: data.endDate,
+        is_active: data.isActive,
+      };
+
+      const { error } = await supabase
+        .from('promotions')
+        .update(promotionData)
+        .eq('id', editingPromotion.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Thành công",
+        description: "Khuyến mại đã được cập nhật thành công",
+      });
+
+      setIsPromotionDialogOpen(false);
+      setEditingPromotion(null);
+      fetchPromotions();
+    } catch (error) {
+      console.error('Error updating promotion:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể cập nhật khuyến mại",
+        variant: "destructive",
+      });
+    } finally {
+      setPromotionLoading(false);
+    }
+  };
+
+  const handleDeletePromotion = async (promotionId: string) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa khuyến mại này?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('promotions')
+        .delete()
+        .eq('id', promotionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Thành công",
+        description: "Khuyến mại đã được xóa thành công",
+      });
+
+      fetchPromotions();
+    } catch (error) {
+      console.error('Error deleting promotion:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể xóa khuyến mại",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openCreatePromotionDialog = () => {
+    setEditingPromotion(null);
+    setIsPromotionDialogOpen(true);
+  };
+
+  const openEditPromotionDialog = (promotion: Promotion) => {
+    setEditingPromotion(promotion);
+    setIsPromotionDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -1267,7 +1393,7 @@ const AdminPage = () => {
                 <CardTitle>Quản lý khuyến mãi</CardTitle>
                 <CardDescription>Tạo và quản lý các chương trình khuyến mãi</CardDescription>
               </div>
-              <Button onClick={() => setIsPromotionDialogOpen(true)}>
+              <Button onClick={openCreatePromotionDialog}>
                 <Plus className="w-4 h-4 mr-2" />
                 Thêm khuyến mãi
               </Button>
@@ -1306,10 +1432,18 @@ const AdminPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openEditPromotionDialog(promotion)}
+                          >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeletePromotion(promotion.id)}
+                          >
                             <Trash className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1439,6 +1573,36 @@ const AdminPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Promotion Form Dialog */}
+      <Dialog open={isPromotionDialogOpen} onOpenChange={setIsPromotionDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingPromotion ? 'Chỉnh sửa khuyến mại' : 'Tạo khuyến mại mới'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingPromotion ? 'Cập nhật thông tin khuyến mại' : 'Điền thông tin để tạo khuyến mại mới'}
+            </DialogDescription>
+          </DialogHeader>
+          <PromotionForm
+            onSubmit={editingPromotion ? handleUpdatePromotion : handleCreatePromotion}
+            initialData={editingPromotion ? {
+              title: editingPromotion.title,
+              description: editingPromotion.description || '',
+              discountType: editingPromotion.discount_percentage ? 'percentage' : 'amount',
+              discountPercentage: editingPromotion.discount_percentage || undefined,
+              discountAmount: editingPromotion.discount_amount || undefined,
+              minDeposit: editingPromotion.minimum_deposit || undefined,
+              maxUses: editingPromotion.max_uses || undefined,
+              startDate: editingPromotion.start_date ? new Date(editingPromotion.start_date).toISOString().slice(0, 16) : '',
+              endDate: editingPromotion.end_date ? new Date(editingPromotion.end_date).toISOString().slice(0, 16) : '',
+              isActive: editingPromotion.is_active,
+            } : undefined}
+            isLoading={promotionLoading}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
