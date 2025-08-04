@@ -12,25 +12,29 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 const promotionSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  discountType: z.enum(['percentage', 'amount']),
-  discountPercentage: z.number().min(0).max(100).optional(),
-  discountAmount: z.number().min(0).optional(),
+  promotionType: z.enum(['first_deposit', 'time_based', 'code_based']),
+  bonusType: z.enum(['percentage', 'amount']),
+  bonusPercentage: z.number().min(0).max(100).optional(),
+  bonusAmount: z.number().min(0).optional(),
   minDeposit: z.number().min(0).optional(),
   maxUses: z.number().min(1).optional(),
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().min(1, 'End date is required'),
   isActive: z.boolean().default(true),
+  isFirstDepositOnly: z.boolean().default(false),
+  promotionCode: z.string().optional(),
+  generateCodes: z.number().min(1).max(1000).optional(),
 }).refine((data) => {
-  if (data.discountType === 'percentage' && !data.discountPercentage) {
+  if (data.bonusType === 'percentage' && !data.bonusPercentage) {
     return false;
   }
-  if (data.discountType === 'amount' && !data.discountAmount) {
+  if (data.bonusType === 'amount' && !data.bonusAmount) {
     return false;
   }
   return true;
 }, {
-  message: 'Discount value is required',
-  path: ['discountPercentage'],
+  message: 'Bonus value is required',
+  path: ['bonusPercentage'],
 });
 
 export type PromotionFormData = z.infer<typeof promotionSchema>;
@@ -51,18 +55,23 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
-      discountType: initialData?.discountType || 'percentage',
-      discountPercentage: initialData?.discountPercentage || undefined,
-      discountAmount: initialData?.discountAmount || undefined,
+      promotionType: initialData?.promotionType || 'time_based',
+      bonusType: initialData?.bonusType || 'percentage',
+      bonusPercentage: initialData?.bonusPercentage || undefined,
+      bonusAmount: initialData?.bonusAmount || undefined,
       minDeposit: initialData?.minDeposit || undefined,
       maxUses: initialData?.maxUses || undefined,
       startDate: initialData?.startDate || '',
       endDate: initialData?.endDate || '',
       isActive: initialData?.isActive ?? true,
+      isFirstDepositOnly: initialData?.isFirstDepositOnly ?? false,
+      promotionCode: initialData?.promotionCode || '',
+      generateCodes: undefined,
     },
   });
 
-  const discountType = form.watch('discountType');
+  const promotionType = form.watch('promotionType');
+  const bonusType = form.watch('bonusType');
 
   return (
     <Form {...form}>
@@ -72,9 +81,9 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tiêu đề khuyến mại</FormLabel>
+              <FormLabel>Tiêu đề khuyến mãi</FormLabel>
               <FormControl>
-                <Input placeholder="Nhập tiêu đề khuyến mại" {...field} />
+                <Input placeholder="Nhập tiêu đề khuyến mãi" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -88,7 +97,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
             <FormItem>
               <FormLabel>Mô tả</FormLabel>
               <FormControl>
-                <Textarea placeholder="Nhập mô tả khuyến mại" {...field} />
+                <Textarea placeholder="Nhập mô tả khuyến mãi" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,19 +106,119 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
 
         <FormField
           control={form.control}
-          name="discountType"
+          name="promotionType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Loại giảm giá</FormLabel>
+              <FormLabel>Loại khuyến mãi</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn loại giảm giá" />
+                    <SelectValue placeholder="Chọn loại khuyến mãi" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="percentage">Phần trăm (%)</SelectItem>
-                  <SelectItem value="amount">Số tiền cố định</SelectItem>
+                  <SelectItem value="first_deposit">Nạp tiền đầu tiên</SelectItem>
+                  <SelectItem value="time_based">Theo thời gian</SelectItem>
+                  <SelectItem value="code_based">Theo mã code</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                {promotionType === 'first_deposit' && 'Áp dụng cho lần nạp tiền đầu tiên của người dùng'}
+                {promotionType === 'time_based' && 'Áp dụng tự động trong khoảng thời gian nhất định'}
+                {promotionType === 'code_based' && 'Người dùng cần nhập mã code để sử dụng'}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {promotionType === 'time_based' && (
+          <FormField
+            control={form.control}
+            name="isFirstDepositOnly"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Chỉ áp dụng cho lần nạp đầu</FormLabel>
+                  <FormDescription>
+                    Khuyến mãi chỉ áp dụng cho lần nạp tiền đầu tiên trong khoảng thời gian này
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
+
+        {promotionType === 'code_based' && (
+          <>
+            <FormField
+              control={form.control}
+              name="promotionCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mã khuyến mãi chính</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="PROMO2024" 
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Mã khuyến mãi chính cho loại này (nếu để trống sẽ tự sinh)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="generateCodes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Số lượng mã phụ cần tạo (tùy chọn)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="1000"
+                      placeholder="0"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value) || undefined)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Tạo thêm các mã phụ để phân phối cho người dùng (1-1000 mã)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        <FormField
+          control={form.control}
+          name="bonusType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Loại bonus</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn loại bonus" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="percentage">Phần trăm cộng thêm (%)</SelectItem>
+                  <SelectItem value="amount">Số tiền cố định cộng thêm</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -117,13 +226,13 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           )}
         />
 
-        {discountType === 'percentage' && (
+        {bonusType === 'percentage' && (
           <FormField
             control={form.control}
-            name="discountPercentage"
+            name="bonusPercentage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phần trăm giảm giá (%)</FormLabel>
+                <FormLabel>Phần trăm bonus (%)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -134,19 +243,22 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                <FormDescription>
+                  Ví dụ: 50% nghĩa là nạp 100k sẽ nhận thêm 50k bonus
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         )}
 
-        {discountType === 'amount' && (
+        {bonusType === 'amount' && (
           <FormField
             control={form.control}
-            name="discountAmount"
+            name="bonusAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Số tiền giảm giá</FormLabel>
+                <FormLabel>Số tiền bonus cố định</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -156,6 +268,9 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                <FormDescription>
+                  Số tiền cố định sẽ được cộng vào tài khoản khi nạp tiền
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -238,9 +353,9 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">Kích hoạt khuyến mại</FormLabel>
+                <FormLabel className="text-base">Kích hoạt khuyến mãi</FormLabel>
                 <FormDescription>
-                  Khuyến mại sẽ hiển thị công khai khi được kích hoạt
+                  Khuyến mãi sẽ hiển thị công khai khi được kích hoạt
                 </FormDescription>
               </div>
               <FormControl>
@@ -254,7 +369,7 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
         />
 
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? 'Đang xử lý...' : (initialData ? 'Cập nhật khuyến mại' : 'Tạo khuyến mại')}
+          {isLoading ? 'Đang xử lý...' : (initialData ? 'Cập nhật khuyến mãi' : 'Tạo khuyến mãi')}
         </Button>
       </form>
     </Form>

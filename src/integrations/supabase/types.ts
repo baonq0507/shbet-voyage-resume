@@ -356,6 +356,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_first_deposit: {
+        Args: { user_id_param: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"

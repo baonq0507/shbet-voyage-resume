@@ -10,7 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle } from "lucide-react";
+import { usePromotionCodes } from "@/hooks/usePromotionCodes";
+import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle, Tag } from "lucide-react";
 
 interface Bank {
   id: string;
@@ -33,11 +34,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [promotionCode, setPromotionCode] = useState("");
   const [proofImage, setProofImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
   const { toast } = useToast();
   const { user, profile } = useAuth();
+  const { validatePromotionCode } = usePromotionCodes();
 
   // Update active tab when initialTab changes or modal opens
   useEffect(() => {
@@ -151,17 +154,22 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
     setLoading(true);
     try {
+      const transactionData: any = {
+        user_id: user.id,
+        type: 'deposit',
+        amount: parseFloat(depositAmount),
+        bank_id: selectedBank.id,
+        status: 'pending'
+      };
+
+      // Add promotion code to admin note if provided
+      if (promotionCode.trim()) {
+        transactionData.admin_note = `Mã khuyến mãi: ${promotionCode.trim()}`;
+      }
+
       const { error } = await supabase
         .from('transactions')
-        .insert([
-          {
-            user_id: user.id,
-            type: 'deposit',
-            amount: parseFloat(depositAmount),
-            bank_id: selectedBank.id,
-            status: 'pending'
-          }
-        ]);
+        .insert([transactionData]);
 
       if (error) throw error;
 
@@ -171,6 +179,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       });
 
       setDepositAmount("");
+      setPromotionCode("");
       setProofImage(null);
       onClose();
     } catch (error) {
@@ -386,6 +395,25 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                         value={depositAmount}
                         onChange={(e) => setDepositAmount(e.target.value)}
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="promotion-code" className="flex items-center gap-2">
+                        <Tag className="w-4 h-4" />
+                        Mã khuyến mãi (tùy chọn)
+                      </Label>
+                      <Input
+                        id="promotion-code"
+                        type="text"
+                        placeholder="Nhập mã khuyến mãi nếu có"
+                        value={promotionCode}
+                        onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
+                      />
+                      {promotionCode && (
+                        <p className="text-xs text-muted-foreground">
+                          Mã khuyến mãi sẽ được áp dụng khi admin duyệt giao dịch
+                        </p>
+                      )}
                     </div>
 
                     <Button 

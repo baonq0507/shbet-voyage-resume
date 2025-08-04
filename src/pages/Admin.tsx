@@ -312,11 +312,15 @@ const AdminPage = () => {
 
         if (balanceError) throw balanceError;
 
+        // Extract promotion code from admin note if present
+        const promotionCode = transaction.admin_note?.match(/Mã khuyến mãi: ([A-Z0-9]+)/)?.[1];
+
         // Apply promotion if available
         await applyPromotionToDeposit(
           transaction.user_id, 
           transaction.amount, 
-          user?.id
+          user?.id,
+          promotionCode
         );
       }
 
@@ -505,17 +509,24 @@ const AdminPage = () => {
   const handleCreatePromotion = async (data: PromotionFormData) => {
     setPromotionLoading(true);
     try {
-      const promotionData = {
+      const promotionData: any = {
         title: data.title,
         description: data.description || null,
-        discount_percentage: data.discountType === 'percentage' ? data.discountPercentage : null,
-        discount_amount: data.discountType === 'amount' ? data.discountAmount : null,
+        promotion_type: data.promotionType,
+        bonus_percentage: data.bonusType === 'percentage' ? data.bonusPercentage : null,
+        bonus_amount: data.bonusType === 'amount' ? data.bonusAmount : null,
         min_deposit: data.minDeposit || null,
         max_uses: data.maxUses || null,
         start_date: data.startDate,
         end_date: data.endDate,
         is_active: data.isActive,
+        is_first_deposit_only: data.isFirstDepositOnly || false,
       };
+
+      // Handle promotion code for code-based promotions
+      if (data.promotionType === 'code_based') {
+        promotionData.promotion_code = data.promotionCode || `PROMO${Date.now()}`;
+      }
 
       const { error } = await supabase
         .from('promotions')
@@ -547,17 +558,24 @@ const AdminPage = () => {
     
     setPromotionLoading(true);
     try {
-      const promotionData = {
+      const promotionData: any = {
         title: data.title,
         description: data.description || null,
-        discount_percentage: data.discountType === 'percentage' ? data.discountPercentage : null,
-        discount_amount: data.discountType === 'amount' ? data.discountAmount : null,
+        promotion_type: data.promotionType,
+        bonus_percentage: data.bonusType === 'percentage' ? data.bonusPercentage : null,
+        bonus_amount: data.bonusType === 'amount' ? data.bonusAmount : null,
         min_deposit: data.minDeposit || null,
         max_uses: data.maxUses || null,
         start_date: data.startDate,
         end_date: data.endDate,
         is_active: data.isActive,
+        is_first_deposit_only: data.isFirstDepositOnly || false,
       };
+
+      // Handle promotion code for code-based promotions
+      if (data.promotionType === 'code_based') {
+        promotionData.promotion_code = data.promotionCode || (editingPromotion as any).promotion_code;
+      }
 
       const { error } = await supabase
         .from('promotions')
@@ -1599,14 +1617,17 @@ const AdminPage = () => {
             initialData={editingPromotion ? {
               title: editingPromotion.title,
               description: editingPromotion.description || '',
-              discountType: editingPromotion.discount_percentage ? 'percentage' : 'amount',
-              discountPercentage: editingPromotion.discount_percentage || undefined,
-              discountAmount: editingPromotion.discount_amount || undefined,
-              minDeposit: editingPromotion.minimum_deposit || undefined,
+              promotionType: (editingPromotion as any).promotion_type || 'time_based',
+              bonusType: (editingPromotion as any).bonus_percentage ? 'percentage' : 'amount',
+              bonusPercentage: (editingPromotion as any).bonus_percentage || undefined,
+              bonusAmount: (editingPromotion as any).bonus_amount || undefined,
+              minDeposit: (editingPromotion as any).min_deposit || undefined,
               maxUses: editingPromotion.max_uses || undefined,
               startDate: editingPromotion.start_date ? new Date(editingPromotion.start_date).toISOString().slice(0, 16) : '',
               endDate: editingPromotion.end_date ? new Date(editingPromotion.end_date).toISOString().slice(0, 16) : '',
               isActive: editingPromotion.is_active,
+              isFirstDepositOnly: (editingPromotion as any).is_first_deposit_only || false,
+              promotionCode: (editingPromotion as any).promotion_code || '',
             } : undefined}
             isLoading={promotionLoading}
           />

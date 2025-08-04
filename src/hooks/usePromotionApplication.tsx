@@ -6,14 +6,17 @@ interface Promotion {
   id: string;
   title: string;
   description?: string;
-  discount_percentage?: number;
-  discount_amount?: number;
+  promotion_type: 'first_deposit' | 'time_based' | 'code_based';
+  bonus_percentage?: number;
+  bonus_amount?: number;
   min_deposit?: number;
   max_uses?: number;
   current_uses: number;
   start_date: string;
   end_date: string;
   is_active: boolean;
+  promotion_code?: string;
+  is_first_deposit_only: boolean;
 }
 
 export const usePromotionApplication = () => {
@@ -23,11 +26,19 @@ export const usePromotionApplication = () => {
   const applyPromotionToDeposit = async (
     userId: string, 
     depositAmount: number, 
-    adminUserId?: string
+    adminUserId?: string,
+    promotionCode?: string
   ) => {
     setLoading(true);
     try {
-      // Fetch active promotions
+      // Check if this is user's first deposit
+      const { data: isFirstDepositResult, error: firstDepositError } = await supabase
+        .rpc('is_first_deposit', { user_id_param: userId });
+
+      if (firstDepositError) throw firstDepositError;
+      const isFirstDeposit = isFirstDepositResult;
+
+      // Fetch active promotions based on type and conditions
       const { data: promotions, error: promotionError } = await supabase
         .from('promotions')
         .select('*')
@@ -38,16 +49,38 @@ export const usePromotionApplication = () => {
 
       if (promotionError) throw promotionError;
 
-      // Find applicable promotion
-      const applicablePromotion = promotions?.find((promo: Promotion) => {
-        // Check if promotion has remaining uses
-        const hasRemainingUses = !promo.max_uses || promo.current_uses < promo.max_uses;
-        
-        // Check if deposit meets minimum requirement
-        const meetsMinDeposit = !promo.min_deposit || depositAmount >= (promo.min_deposit || 0);
-        
-        return hasRemainingUses && meetsMinDeposit;
-      });
+      // Find applicable promotion based on type
+      let applicablePromotion = null;
+
+      if (promotionCode) {
+        // If promotion code provided, find code-based promotion
+        applicablePromotion = promotions?.find((promo: any) => {
+          return promo.promotion_type === 'code_based' && 
+                 promo.promotion_code === promotionCode &&
+                 (!promo.max_uses || promo.current_uses < promo.max_uses) &&
+                 (!promo.min_deposit || depositAmount >= (promo.min_deposit || 0));
+        }) as Promotion || null;
+      } else {
+        // Find automatic promotions (first_deposit or time_based)
+        for (const promo of (promotions as any[]) || []) {
+          const hasRemainingUses = !promo.max_uses || promo.current_uses < promo.max_uses;
+          const meetsMinDeposit = !promo.min_deposit || depositAmount >= (promo.min_deposit || 0);
+          
+          if (!hasRemainingUses || !meetsMinDeposit) continue;
+          
+          // Check promotion type conditions
+          if (promo.promotion_type === 'first_deposit' && isFirstDeposit) {
+            applicablePromotion = promo;
+            break;
+          } else if (promo.promotion_type === 'time_based' && !promo.is_first_deposit_only) {
+            applicablePromotion = promo;
+            break;
+          } else if (promo.promotion_type === 'time_based' && promo.is_first_deposit_only && isFirstDeposit) {
+            applicablePromotion = promo;
+            break;
+          }
+        }
+      }
 
       if (!applicablePromotion) {
         return { success: true, bonusAmount: 0, promotion: null };
@@ -55,10 +88,10 @@ export const usePromotionApplication = () => {
 
       // Calculate bonus amount
       let bonusAmount = 0;
-      if (applicablePromotion.discount_percentage) {
-        bonusAmount = (depositAmount * applicablePromotion.discount_percentage) / 100;
-      } else if (applicablePromotion.discount_amount) {
-        bonusAmount = applicablePromotion.discount_amount;
+      if (applicablePromotion.bonus_percentage) {
+        bonusAmount = (depositAmount * applicablePromotion.bonus_percentage) / 100;
+      } else if (applicablePromotion.bonus_amount) {
+        bonusAmount = applicablePromotion.bonus_amount;
       }
 
       if (bonusAmount <= 0) {
@@ -93,10 +126,11 @@ export const usePromotionApplication = () => {
           amount: bonusAmount,
           status: 'approved',
           admin_note: `Khuyến mãi "${applicablePromotion.title}" - ${
-            applicablePromotion.discount_percentage 
-              ? `${applicablePromotion.discount_percentage}%` 
-              : `${applicablePromotion.discount_amount?.toLocaleString()} VND`
-          }`,
+            applicablePromotion.bonus_percentage 
+              ? `${applicablePromotion.bonus_percentage}%` 
+              : `${applicablePromotion.bonus_amount?.toLocaleString()} VND`
+          } ${applicablePromotion.promotion_type === 'first_deposit' ? '(Nạp đầu)' : 
+              applicablePromotion.promotion_type === 'code_based' ? `(Mã: ${promotionCode})` : ''}`,
           approved_by: adminUserId,
           approved_at: new Date().toISOString()
         });
@@ -112,6 +146,21 @@ export const usePromotionApplication = () => {
         .eq('id', applicablePromotion.id);
 
       if (promotionUpdateError) throw promotionUpdateError;
+
+      // If promotion code was used, mark it as used
+      if (promotionCode && applicablePromotion.promotion_type === 'code_based') {
+        const { error: codeUpdateError } = await supabase
+          .from('promotion_codes')
+          .update({
+            is_used: true,
+            used_by: userId,
+            used_at: new Date().toISOString()
+          })
+          .eq('code', promotionCode)
+          .eq('promotion_id', applicablePromotion.id);
+
+        if (codeUpdateError) throw codeUpdateError;
+      }
 
       toast({
         title: "Khuyến mãi đã được áp dụng! 🎉",
