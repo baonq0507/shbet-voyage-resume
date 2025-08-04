@@ -112,7 +112,7 @@ const Header = () => {
                 <span className="inline-block animate-pulse mr-1">🎉</span>
                  <span className="text-shadow-lg tracking-tight">
                    CHÀO MỪNG ĐẾN VỚI 
-                    <span className="text-gradient font-black mx-1">DINAMONDBET68</span>
+                    <span className="text-yellow-400 font-black mx-1 text-shadow-lg drop-shadow-lg">DINAMONDBET68</span>
                    - NHÀ CÁI UY TÍN HÀNG ĐẦU VIỆT NAM
                  </span>
                 <span className="inline-block animate-pulse ml-1">🎉</span>
