@@ -76,9 +76,10 @@ interface GameSectionProps {
   }>;
   showApiGames?: boolean;
   defaultCategory?: string;
+  gpid?: number;
 }
 
-const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory }: GameSectionProps) => {
+const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpid }: GameSectionProps) => {
   const [activeTab, setActiveTab] = useState<string>(showApiGames ? "api-games" : lobbies?.[0]?.id || "");
   
   // Map lobby IDs to API categories
@@ -100,7 +101,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory }: G
     return categoryMap[tabId] || "all";
   };
 
-  const { games: apiGames, loading: apiLoading } = useGamesList(1, 6, getCategoryForTab(activeTab));
+  const { games: apiGames, loading: apiLoading } = useGamesList(1, 6, getCategoryForTab(activeTab), gpid);
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

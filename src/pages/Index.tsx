@@ -274,7 +274,7 @@ const Index = () => {
       <MobileNavigation />
 
       {/* Games Section */}
-      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} showApiGames={true} />
+      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} showApiGames={true} gpid={5} />
 
       {/* Dynamic Promotions Section */}
       <section className="py-12 md:py-16 bg-muted/30">
