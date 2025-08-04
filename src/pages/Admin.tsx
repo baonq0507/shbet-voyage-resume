@@ -14,7 +14,7 @@ import { useRole } from '@/hooks/useRole';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
-import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -48,6 +48,52 @@ interface UserProfile {
   last_login_at?: string;
 }
 
+interface Bank {
+  id: string;
+  bank_name: string;
+  account_number: string;
+  account_holder: string;
+  qr_code_url?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+interface Promotion {
+  id: string;
+  title: string;
+  description?: string;
+  discount_percentage?: number;
+  discount_amount?: number;
+  minimum_deposit?: number;
+  max_uses?: number;
+  current_uses: number;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+interface Agent {
+  id: string;
+  full_name: string;
+  username: string;
+  phone_number?: string;
+  commission_rate: number;
+  total_commission: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+interface Notification {
+  id: string;
+  title: string;
+  content: string;
+  type: 'info' | 'warning' | 'success' | 'error';
+  target_audience: 'all' | 'users' | 'agents';
+  is_published: boolean;
+  created_at: string;
+}
+
 const AdminPage = () => {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const { user } = useAuth();
@@ -55,6 +101,10 @@ const AdminPage = () => {
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [banks, setBanks] = useState<Bank[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [adminNote, setAdminNote] = useState('');
@@ -63,6 +113,16 @@ const AdminPage = () => {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isUserTransactionDialogOpen, setIsUserTransactionDialogOpen] = useState(false);
   const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
+
+  // New entity dialog states
+  const [isBankDialogOpen, setIsBankDialogOpen] = useState(false);
+  const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
+  const [isAgentDialogOpen, setIsAgentDialogOpen] = useState(false);
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
+  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   
   // Search states
   const [searchName, setSearchName] = useState('');
@@ -86,6 +146,10 @@ const AdminPage = () => {
     if (isAdmin && !roleLoading) {
       fetchTransactions();
       fetchUsers();
+      fetchBanks();
+      fetchPromotions();
+      fetchAgents();
+      fetchNotifications();
       
       // Set up real-time subscription for transactions
       const channel = supabase
@@ -342,6 +406,83 @@ const AdminPage = () => {
       toast({
         title: "Lỗi",
         description: "Không thể cộng tiền vào tài khoản",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // New fetch functions
+  const fetchBanks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bank')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBanks(data || []);
+    } catch (error) {
+      console.error('Error fetching banks:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách ngân hàng",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchPromotions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('promotions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPromotions(data || []);
+    } catch (error) {
+      console.error('Error fetching promotions:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách khuyến mãi",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchAgents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agents')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAgents(data || []);
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách đại lý",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNotifications(data || []);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách thông báo",
         variant: "destructive",
       });
     }
