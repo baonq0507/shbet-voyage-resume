@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import GameSection from "@/components/GameSection";
+import SimpleGamesList from "@/components/SimpleGamesList";
 import dagaGame from "@/assets/daga-game.jpg";
 
 const DaGa = () => {
@@ -52,7 +52,7 @@ const DaGa = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="TRƯỜNG GÀ UY TÍN" showApiGames={true} defaultCategory="sports" />
+      <SimpleGamesList title="TRƯỜNG GÀ UY TÍN" category="sports" maxGames={12} />
 
       <Footer />
     </div>

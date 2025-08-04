@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import GameSection from "@/components/GameSection";
+import SimpleGamesList from "@/components/SimpleGamesList";
 import { Play, Users, Trophy, Star } from "lucide-react";
 import casinoHero from "@/assets/casino-hero.jpg";
 
@@ -93,7 +93,7 @@ const Casino = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME CASINO HOT NHẤT" showApiGames={true} defaultCategory="casino" />
+      <SimpleGamesList title="GAME CASINO HOT NHẤT" category="casino" maxGames={12} />
 
       {/* Live Dealers */}
       <section className="py-16 bg-gradient-hero">

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import GameSection from "@/components/GameSection";
+import SimpleGamesList from "@/components/SimpleGamesList";
 import { Target, Fish, Waves } from "lucide-react";
 import bancaGame from "@/assets/banca-game.jpg";
 
@@ -94,7 +94,7 @@ const BanCa = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME BẮN CÁ HOT NHẤT" showApiGames={true} defaultCategory="arcade" />
+      <SimpleGamesList title="GAME BẮN CÁ HOT NHẤT" category="arcade" maxGames={12} />
 
       <Footer />
     </div>

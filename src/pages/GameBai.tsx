@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import GameSection from "@/components/GameSection";
+import SimpleGamesList from "@/components/SimpleGamesList";
 import cardsGame from "@/assets/cards-game.jpg";
 
 const GameBai = () => {
@@ -62,7 +62,7 @@ const GameBai = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME BÀI HOT NHẤT" showApiGames={true} defaultCategory="table" />
+      <SimpleGamesList title="GAME BÀI HOT NHẤT" category="table" maxGames={12} />
 
       <Footer />
     </div>

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import GameSection from "@/components/GameSection";
+import SimpleGamesList from "@/components/SimpleGamesList";
 import { Zap, Coins, Gift } from "lucide-react";
 import nohuGame from "@/assets/nohu-game.jpg";
 
@@ -94,7 +94,7 @@ const NoHu = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME NỔ HŨ HOT NHẤT" showApiGames={true} defaultCategory="slots" />
+      <SimpleGamesList title="GAME NỔ HŨ HOT NHẤT" category="slots" maxGames={12} />
 
       <Footer />
     </div>
