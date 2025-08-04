@@ -11,14 +11,14 @@ import Header from '@/components/Header';
 import { useToast } from '@/hooks/use-toast';
 import { User, Eye, EyeOff, Upload, Camera } from 'lucide-react';
 
-// Import sample avatars
-import avatar1 from '@/assets/avatars/avatar-1.jpg';
-import avatar2 from '@/assets/avatars/avatar-2.jpg';
-import avatar3 from '@/assets/avatars/avatar-3.jpg';
-import avatar4 from '@/assets/avatars/avatar-4.jpg';
-import avatar5 from '@/assets/avatars/avatar-5.jpg';
-
-const sampleAvatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
+// Sample avatar URLs - using placeholder service for now
+const sampleAvatars = [
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face'
+];
 
 export default function TaiKhoan() {
   const { user, profile, refreshProfile } = useAuth();
