@@ -203,7 +203,11 @@ const Index = () => {
             <div className="text-left space-y-3 md:space-y-4 lg:space-y-8">
               <div className="space-y-2 md:space-y-3 lg:space-y-4">
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-6xl xl:text-7xl font-black mb-2 md:mb-3 lg:mb-4 leading-tight">
-                  <span className="text-gradient drop-shadow-2xl">DINAMONDBET68</span>
+                  <img 
+                    src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
+                    alt="DINAMONDBET68" 
+                    className="h-8 sm:h-12 md:h-16 lg:h-28 xl:h-32 w-auto object-contain drop-shadow-2xl"
+                  />
                 </h1>
                 <div className="w-16 md:w-20 lg:w-32 h-1 md:h-1.5 lg:h-2 bg-gradient-primary rounded-full casino-glow"></div>
               </div>
