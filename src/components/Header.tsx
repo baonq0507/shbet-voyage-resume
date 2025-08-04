@@ -66,29 +66,19 @@ const Header = () => {
     ]
   };
 
-  // Helper function to render Lucide icons
+  // Helper function to render icons (FontAwesome or Lucide)
   const renderIcon = (iconName: string, size: number = 20) => {
+    // Handle FontAwesome icons
+    if (iconName.startsWith('fas fa-')) {
+      return <i className={`${iconName} text-${size === 16 ? 'sm' : 'lg'}`} style={{ fontSize: `${size}px` }} />;
+    }
+    
+    // Handle Lucide icons
     const IconComponent = (LucideIcons as any)[iconName];
     if (IconComponent) {
       return <IconComponent size={size} />;
     }
     return <Coins size={size} />; // Fallback icon
-  };
-
-  // Helper function to render dropdown items
-  const renderDropdownItems = (items: MenuDropdownItem[]) => {
-    return items.map((item) => (
-      <DropdownMenuItem key={item.id} asChild>
-        <Link to={item.path || '#'} className="flex items-center gap-2 w-full">
-          {item.type === 'image' ? (
-            <img src={item.icon} alt={item.text} className="w-5 h-5 object-contain" />
-          ) : (
-            renderIcon(item.icon, 16)
-          )}
-          <span className="text-sm">{item.text}</span>
-        </Link>
-      </DropdownMenuItem>
-    ));
   };
 
   const handleAuthSuccess = () => {
