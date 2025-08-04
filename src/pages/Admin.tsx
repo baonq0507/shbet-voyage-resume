@@ -521,6 +521,7 @@ const AdminPage = () => {
         end_date: data.endDate,
         is_active: data.isActive,
         is_first_deposit_only: data.isFirstDepositOnly || false,
+        image_url: (data as any).image_url || null,
       };
 
       // Handle promotion code for code-based promotions
@@ -570,6 +571,7 @@ const AdminPage = () => {
         end_date: data.endDate,
         is_active: data.isActive,
         is_first_deposit_only: data.isFirstDepositOnly || false,
+        image_url: (data as any).image_url || null,
       };
 
       // Handle promotion code for code-based promotions
