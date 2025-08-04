@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { Menu, X, User, Wallet, Bell, Home, Coins, Zap, Fish, Trophy, Spade, Bird, Gift, Users, MessageSquare, LogOut, UserCircle, Settings, ArrowDownToLine, ArrowUpFromLine, ChevronDown, Circle, Diamond, Heart, Anchor, Waves, Star, Cherry, Eye, Hash, Ticket } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { menuItems, MenuItem, MenuDropdownItem } from "@/utils/menuItems";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -64,17 +66,30 @@ const Header = () => {
     ]
   };
 
-  const navItems = [
-    { path: "/", label: "TRANG CHỦ", icon: Home },
-    { path: "/casino", label: "CASINO", icon: Coins, hasDropdown: true, lobbies: gameLobbies.casino },
-    { path: "/nohu", label: "NỔ HŨ", icon: Zap, hasDropdown: true, lobbies: gameLobbies.nohu },
-    { path: "/banca", label: "BẮN CÁ", icon: Fish, hasDropdown: true, lobbies: gameLobbies.banca },
-    { path: "/thethao", label: "THỂ THAO", icon: Trophy, hasDropdown: true, lobbies: gameLobbies.thethao },
-    { path: "/gamebai", label: "GAME BÀI", icon: Spade, hasDropdown: true, lobbies: gameLobbies.gamebai },
-    { path: "/daga", label: "ĐÁ GÀ", icon: Bird, hasDropdown: true, lobbies: gameLobbies.daga },
-    { path: "/khuyenmai", label: "KHUYẾN MẠI", icon: Gift },
-    { path: "/daily", label: "ĐẠI LÝ", icon: Users },
-  ];
+  // Helper function to render Lucide icons
+  const renderIcon = (iconName: string, size: number = 20) => {
+    const IconComponent = (LucideIcons as any)[iconName];
+    if (IconComponent) {
+      return <IconComponent size={size} />;
+    }
+    return <Coins size={size} />; // Fallback icon
+  };
+
+  // Helper function to render dropdown items
+  const renderDropdownItems = (items: MenuDropdownItem[]) => {
+    return items.map((item) => (
+      <DropdownMenuItem key={item.id} asChild>
+        <Link to={item.path || '#'} className="flex items-center gap-2 w-full">
+          {item.type === 'image' ? (
+            <img src={item.icon} alt={item.text} className="w-5 h-5 object-contain" />
+          ) : (
+            renderIcon(item.icon, 16)
+          )}
+          <span className="text-sm">{item.text}</span>
+        </Link>
+      </DropdownMenuItem>
+    ));
+  };
 
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
@@ -132,66 +147,56 @@ const Header = () => {
 
           {/* Desktop Navigation - only show on large screens */}
           <nav className="hidden lg:flex items-center space-x-2">
-            {navItems.map((item) => (
-              <div key={item.path} className="relative group">
-                <Link
-                  to={item.path}
-                  className={`flex flex-col items-center gap-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-300 min-w-[70px] ${
-                    location.pathname === item.path
-                      ? "bg-primary text-primary-foreground casino-glow"
-                      : "text-foreground hover:bg-primary/10 hover:text-primary"
-                  }`}
-                >
-                  {item.icon && (
-                    <item.icon className="w-5 h-5" />
-                  )}
-                  <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
-                </Link>
+            {/* Home button */}
+            <div className="relative">
+              <Link
+                to="/"
+                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-300 min-w-[70px] ${
+                  location.pathname === "/"
+                    ? "bg-primary text-primary-foreground casino-glow"
+                    : "text-foreground hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                <Home className="w-5 h-5" />
+                <span className="text-center leading-tight whitespace-nowrap">TRANG CHỦ</span>
+              </Link>
+            </div>
 
-                {/* Dropdown Menu on Hover */}
-                {item.hasDropdown && item.lobbies && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                    <div className="bg-card border border-border rounded-lg shadow-2xl p-4 min-w-[320px] backdrop-blur-sm animate-fade-in">
-                      <div className="text-sm font-semibold text-primary mb-3 text-center">
-                        Chọn sảnh {item.label.toLowerCase()}
+            {/* Menu items with dropdowns */}
+            {menuItems.map((item) => (
+              <div key={item.id} className="relative group">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={`flex flex-col items-center gap-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-300 min-w-[70px] h-auto ${
+                        location.pathname === item.path
+                          ? "bg-primary text-primary-foreground casino-glow"
+                          : "text-foreground hover:bg-primary/10 hover:text-primary"
+                      }`}
+                    >
+                      {renderIcon(item.icon, 20)}
+                      <span className="text-center leading-tight whitespace-nowrap">{item.text}</span>
+                      {item.dropdown && <ChevronDown className="w-3 h-3 ml-1" />}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  {item.dropdown && (
+                    <DropdownMenuContent align="center" className="w-56 bg-background/95 backdrop-blur-sm border-border">
+                      <div className="p-2">
+                        <div className="text-sm font-semibold text-primary mb-2 text-center">
+                          {item.text}
+                        </div>
+                        {renderDropdownItems(item.dropdown)}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to={item.path || '#'} className="flex items-center gap-2 w-full justify-center">
+                            <span className="text-sm font-medium">Xem tất cả</span>
+                          </Link>
+                        </DropdownMenuItem>
                       </div>
-                      <div className="grid gap-3">
-                        {item.lobbies.map((lobby, index) => (
-                          <div
-                            key={index}
-                            onClick={() => handleLobbyClick(item.path, lobby.name)}
-                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-all duration-200 cursor-pointer hover-scale group/lobby"
-                          >
-                            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 casino-glow">
-                              <img
-                                src={lobby.image}
-                                alt={lobby.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover/lobby:scale-110"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm text-foreground mb-1 truncate">
-                                {lobby.name}
-                              </div>
-                              <div className="text-xs text-muted-foreground line-clamp-2">
-                                {lobby.description}
-                              </div>
-                            </div>
-                            <div className="w-2 h-2 bg-primary rounded-full opacity-0 group-hover/lobby:opacity-100 transition-opacity duration-200"></div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-border">
-                        <Link
-                          to={item.path}
-                          className="block text-center text-xs text-primary hover:text-primary/80 font-medium transition-colors duration-200"
-                        >
-                          Xem tất cả →
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    </DropdownMenuContent>
+                  )}
+                </DropdownMenu>
               </div>
             ))}
           </nav>
@@ -335,10 +340,25 @@ const Header = () => {
                 </div>
                 <nav className="p-6">
                   <div className="space-y-3">
-                    {navItems.map((item) => (
+                    {/* Home link */}
+                    <Link
+                      to="/"
+                      className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                        location.pathname === "/"
+                          ? "bg-primary text-primary-foreground casino-glow"
+                          : "text-foreground hover:bg-primary/10 hover:text-primary"
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Home className="w-5 h-5" />
+                      <span>TRANG CHỦ</span>
+                    </Link>
+                    
+                    {/* Menu items */}
+                    {menuItems.map((item) => (
                       <Link
-                        key={item.path}
-                        to={item.path}
+                        key={item.id}
+                        to={item.path || '#'}
                         className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${
                           location.pathname === item.path
                             ? "bg-primary text-primary-foreground casino-glow"
@@ -346,10 +366,8 @@ const Header = () => {
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        {item.icon && (
-                          <item.icon className="w-5 h-5" />
-                        )}
-                        <span>{item.label}</span>
+                        {renderIcon(item.icon, 20)}
+                        <span>{item.text}</span>
                       </Link>
                     ))}
                   </div>
