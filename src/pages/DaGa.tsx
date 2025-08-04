@@ -52,7 +52,7 @@ const DaGa = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="TRƯỜNG GÀ UY TÍN" games={dagaGames} />
+      <GameSection title="TRƯỜNG GÀ UY TÍN" showApiGames={true} defaultCategory="sports" />
 
       <Footer />
     </div>

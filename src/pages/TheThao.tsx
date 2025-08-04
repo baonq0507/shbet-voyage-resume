@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import GameSection from "@/components/GameSection";
 import { Trophy, Target, TrendingUp } from "lucide-react";
 import sportsGame from "@/assets/sports-game.jpg";
 
@@ -73,6 +74,9 @@ const TheThao = () => {
           </div>
         </div>
       </section>
+
+      {/* Games */}
+      <GameSection title="THỂ THAO HOT NHẤT" showApiGames={true} defaultCategory="sports" />
 
       <Footer />
     </div>

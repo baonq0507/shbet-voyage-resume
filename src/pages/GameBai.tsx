@@ -62,7 +62,7 @@ const GameBai = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME BÀI HOT NHẤT" games={cardGames} />
+      <GameSection title="GAME BÀI HOT NHẤT" showApiGames={true} defaultCategory="table" />
 
       <Footer />
     </div>

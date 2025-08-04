@@ -94,7 +94,7 @@ const BanCa = () => {
       </section>
 
       {/* Games */}
-      <GameSection title="GAME BẮN CÁ HOT NHẤT" games={bancaGames} />
+      <GameSection title="GAME BẮN CÁ HOT NHẤT" showApiGames={true} defaultCategory="arcade" />
 
       <Footer />
     </div>
