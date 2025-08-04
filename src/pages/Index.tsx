@@ -23,6 +23,7 @@ import playtechLogo from "@/assets/lobbies/playtech.png";
 import microgamingLogo from "@/assets/lobbies/microgaming.png";
 import netentLogo from "@/assets/lobbies/netent.jpg";
 import sportsLogo from "@/assets/lobbies/sports.png";
+import { PAGE_GPID_CONFIG } from "@/config/gameConfig";
 
 const Index = () => {
   const casinoLobbies = [
@@ -274,7 +275,7 @@ const Index = () => {
       <MobileNavigation />
 
       {/* Games Section */}
-      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} showApiGames={true} gpid={5} />
+      <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} showApiGames={true} gpid={PAGE_GPID_CONFIG.HOME} />
 
       {/* Dynamic Promotions Section */}
       <section className="py-12 md:py-16 bg-muted/30">
