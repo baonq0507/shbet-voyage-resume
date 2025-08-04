@@ -128,11 +128,12 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
-              <span className="text-white font-bold text-lg lg:text-xl">D68</span>
-            </div>
-            <div className="text-gradient font-bold text-sm lg:text-xl">DINAMONDBET68</div>
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/2e87ff69-d6d2-4160-9676-e0330ee4d989.png" 
+              alt="DIAMONDBET68" 
+              className="h-8 w-auto md:h-10 lg:h-12 object-contain casino-glow"
+            />
           </Link>
 
           {/* Desktop Navigation - only show on large screens */}
@@ -327,11 +328,12 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-80 p-0 overflow-y-auto max-h-screen custom-scrollbar">
                 <div className="px-6 py-4 border-b border-border">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center casino-glow">
-                      <span className="text-white font-bold text-lg">D68</span>
-                    </div>
-                    <div className="text-gradient font-bold text-lg">DINAMONDBET68</div>
+                  <div className="flex items-center justify-center">
+                    <img 
+                      src="/lovable-uploads/2e87ff69-d6d2-4160-9676-e0330ee4d989.png" 
+                      alt="DIAMONDBET68" 
+                      className="h-8 w-auto object-contain casino-glow"
+                    />
                   </div>
                 </div>
                 <nav className="p-6">
