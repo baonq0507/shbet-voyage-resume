@@ -30,8 +30,7 @@ max_client_conn = 100
 
 [realtime]
 enabled = true
-ip_version = "ipv6"
-tenant_permissions = ["postgres"]
+ip_version = "IPv6"
 
 [studio]
 enabled = true
@@ -41,7 +40,6 @@ api_url = "http://127.0.0.1:54321"
 [inbucket]
 enabled = true
 port = 54324
-openweb_port = 54325
 
 [storage]
 enabled = true
@@ -62,7 +60,6 @@ enable_confirmations = false
 
 [edge_runtime]
 enabled = true
-port = 54326
 
 [analytics]
 enabled = false
