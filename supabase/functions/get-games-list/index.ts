@@ -24,12 +24,22 @@ const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXB
 console.log('🚀 Initializing Supabase client with URL:', supabaseUrl);
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]): Promise<GameResponse[]> {
+// Shuffle array utility function
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+async function fetchGamesFromDatabase(category: string = "all", gpids?: number[], limit?: number): Promise<GameResponse[]> {
   const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    console.log(`[${requestId}] 🚀 Starting fetchGamesFromDatabase - Category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
+    console.log(`[${requestId}] 🚀 Starting fetchGamesFromDatabase - Category: ${category}, GPIDs: ${JSON.stringify(gpids)}, Limit: ${limit}`);
 
     // Build query based on whether GPIDs are provided
     let query = supabase
@@ -47,6 +57,11 @@ async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]
       console.log(`[${requestId}] 🔍 Fetching all games`);
     }
 
+    // Add limit if specified
+    if (limit) {
+      query = query.limit(limit);
+    }
+
     const { data: games, error } = await query.order('rank', { ascending: true });
 
     if (error) {
@@ -58,7 +73,7 @@ async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]
 
     if (!games || games.length === 0) {
       console.log(`[${requestId}] ⚠️ No games found for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
-      return getFallbackGames(category);
+      return [];
     }
 
     // Transform database data to our format
@@ -98,9 +113,9 @@ async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]
       duration
     });
     
-    // Return fallback data if database fails
-    console.log(`[${requestId}] 🛟 Returning fallback data for category: ${category}`);
-    return getFallbackGames(category);
+    // Return empty array, let caller handle fallback
+    console.log(`[${requestId}] 🛟 Returning empty array for error handling`);
+    return [];
   }
 }
 
@@ -253,7 +268,45 @@ serve(async (req) => {
 
     console.log(`[${requestId}] 🎯 Processing request for category: ${category}, GPIDs: ${JSON.stringify(gpids)}`);
 
-    const games = await fetchGamesFromDatabase(category, gpids);
+    let games: GameResponse[] = [];
+
+    // Special handling for "all" category - fetch 5 games from each category and shuffle
+    if (category === "all") {
+      const categories = ['live-casino', 'slots', 'sports', 'card-games', 'fishing'];
+      const allCategoryGames: GameResponse[] = [];
+
+      console.log(`[${requestId}] 🔀 Processing "all" category - fetching from multiple categories`);
+      
+      for (const cat of categories) {
+        try {
+          const categoryGames = await fetchGamesFromDatabase(cat, gpids, 5); // Limit to 5 games per category
+          console.log(`[${requestId}] 📊 Fetched ${categoryGames.length} games from category: ${cat}`);
+          allCategoryGames.push(...categoryGames);
+        } catch (error) {
+          console.error(`[${requestId}] ❌ Error fetching games for category ${cat}:`, error);
+          // Continue with other categories even if one fails
+        }
+      }
+
+      // Shuffle the combined games array
+      games = shuffleArray(allCategoryGames);
+      console.log(`[${requestId}] 🎲 Total games after shuffling: ${games.length}`);
+      
+      // If no games found from any category, use fallback
+      if (games.length === 0) {
+        console.log(`[${requestId}] 🛟 No games found from any category, using fallback data`);
+        games = getFallbackGames(category);
+      }
+    } else {
+      // Regular category-specific fetch
+      games = await fetchGamesFromDatabase(category, gpids);
+      
+      // If no games found, use fallback
+      if (games.length === 0) {
+        console.log(`[${requestId}] 🛟 No games found for category ${category}, using fallback data`);
+        games = getFallbackGames(category);
+      }
+    }
     
     console.log(`[${requestId}] 📊 Final games result count: ${games.length}`);
     
