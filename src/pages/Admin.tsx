@@ -433,13 +433,13 @@ const AdminPage = () => {
 
   const fetchPromotions = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('promotions')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPromotions(data || []);
+      setPromotions((data || []) as Promotion[]);
     } catch (error) {
       console.error('Error fetching promotions:', error);
       toast({
@@ -452,13 +452,13 @@ const AdminPage = () => {
 
   const fetchAgents = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('agents')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAgents(data || []);
+      setAgents((data || []) as Agent[]);
     } catch (error) {
       console.error('Error fetching agents:', error);
       toast({
@@ -471,13 +471,13 @@ const AdminPage = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('notifications')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotifications(data || []);
+      setNotifications((data || []) as Notification[]);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       toast({
@@ -740,6 +740,9 @@ const AdminPage = () => {
         <TabsList>
           <TabsTrigger value="transactions">Quản lý giao dịch</TabsTrigger>
           <TabsTrigger value="users">Quản lý người dùng</TabsTrigger>
+          <TabsTrigger value="promotions">Khuyến mãi</TabsTrigger>
+          <TabsTrigger value="agents">Đại lý</TabsTrigger>
+          <TabsTrigger value="notifications">Thông báo</TabsTrigger>
         </TabsList>
         
         <TabsContent value="transactions" className="space-y-4">
@@ -1253,6 +1256,185 @@ const AdminPage = () => {
                   </TableBody>
                 </Table>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="promotions" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Quản lý khuyến mãi</CardTitle>
+                <CardDescription>Tạo và quản lý các chương trình khuyến mãi</CardDescription>
+              </div>
+              <Button onClick={() => setIsPromotionDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Thêm khuyến mãi
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tiêu đề</TableHead>
+                    <TableHead>Mô tả</TableHead>
+                    <TableHead>Giảm giá</TableHead>
+                    <TableHead>Số lần dùng</TableHead>
+                    <TableHead>Thời gian</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Thao tác</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {promotions.map((promotion) => (
+                    <TableRow key={promotion.id}>
+                      <TableCell className="font-medium">{promotion.title}</TableCell>
+                      <TableCell>{promotion.description}</TableCell>
+                      <TableCell>
+                        {promotion.discount_percentage 
+                          ? `${promotion.discount_percentage}%` 
+                          : `${promotion.discount_amount?.toLocaleString()} VND`}
+                      </TableCell>
+                      <TableCell>{promotion.current_uses}/{promotion.max_uses || '∞'}</TableCell>
+                      <TableCell>
+                        {new Date(promotion.start_date).toLocaleDateString('vi-VN')} - {new Date(promotion.end_date).toLocaleDateString('vi-VN')}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={promotion.is_active ? "default" : "secondary"}>
+                          {promotion.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="agents" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Quản lý đại lý</CardTitle>
+                <CardDescription>Quản lý hệ thống đại lý và hoa hồng</CardDescription>
+              </div>
+              <Button onClick={() => setIsAgentDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Thêm đại lý
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Họ tên</TableHead>
+                    <TableHead>Username</TableHead>
+                    <TableHead>SĐT</TableHead>
+                    <TableHead>Tỷ lệ hoa hồng</TableHead>
+                    <TableHead>Tổng hoa hồng</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Thao tác</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {agents.map((agent) => (
+                    <TableRow key={agent.id}>
+                      <TableCell className="font-medium">{agent.full_name}</TableCell>
+                      <TableCell>@{agent.username}</TableCell>
+                      <TableCell>{agent.phone_number}</TableCell>
+                      <TableCell>{agent.commission_rate}%</TableCell>
+                      <TableCell>{agent.total_commission.toLocaleString()} VND</TableCell>
+                      <TableCell>
+                        <Badge variant={agent.is_active ? "default" : "secondary"}>
+                          {agent.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Quản lý thông báo</CardTitle>
+                <CardDescription>Tạo và gửi thông báo đến người dùng</CardDescription>
+              </div>
+              <Button onClick={() => setIsNotificationDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Tạo thông báo
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tiêu đề</TableHead>
+                    <TableHead>Nội dung</TableHead>
+                    <TableHead>Đối tượng</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
+                    <TableHead>Thao tác</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {notifications.map((notification) => (
+                    <TableRow key={notification.id}>
+                      <TableCell className="font-medium">{notification.title}</TableCell>
+                      <TableCell className="max-w-xs truncate">{notification.content}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {notification.target_audience === 'all' ? 'Tất cả' : 
+                           notification.target_audience === 'users' ? 'Người dùng' : 'Đại lý'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={notification.is_published ? "default" : "secondary"}>
+                          {notification.is_published ? 'Đã xuất bản' : 'Nháp'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(notification.created_at).toLocaleDateString('vi-VN')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
