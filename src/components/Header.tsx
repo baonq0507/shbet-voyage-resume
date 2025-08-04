@@ -130,7 +130,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src="/lovable-uploads/2e87ff69-d6d2-4160-9676-e0330ee4d989.png" 
+              src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
               alt="DIAMONDBET68" 
               className="h-8 w-auto md:h-10 lg:h-12 object-contain casino-glow"
             />
@@ -330,7 +330,7 @@ const Header = () => {
                 <div className="px-6 py-4 border-b border-border">
                   <div className="flex items-center justify-center">
                     <img 
-                      src="/lovable-uploads/2e87ff69-d6d2-4160-9676-e0330ee4d989.png" 
+                      src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
                       alt="DIAMONDBET68" 
                       className="h-8 w-auto object-contain casino-glow"
                     />
