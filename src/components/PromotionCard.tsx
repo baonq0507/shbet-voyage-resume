@@ -8,14 +8,17 @@ interface Promotion {
   id: string;
   title: string;
   description?: string;
-  discount_percentage?: number;
-  discount_amount?: number;
+  promotion_type: 'first_deposit' | 'time_based' | 'code_based';
+  bonus_percentage?: number;
+  bonus_amount?: number;
   min_deposit?: number;
   max_uses?: number;
   current_uses: number;
   start_date: string;
   end_date: string;
   is_active: boolean;
+  promotion_code?: string;
+  is_first_deposit_only: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -30,13 +33,26 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
   variant = 'default' 
 }) => {
   const formatDiscount = () => {
-    if (promotion.discount_percentage) {
-      return `${promotion.discount_percentage}% OFF`;
+    if (promotion.bonus_percentage) {
+      return `+${promotion.bonus_percentage}% Bonus`;
     }
-    if (promotion.discount_amount) {
-      return `Giảm ${promotion.discount_amount.toLocaleString()} VND`;
+    if (promotion.bonus_amount) {
+      return `+${promotion.bonus_amount.toLocaleString()} VND Bonus`;
     }
     return 'Khuyến mãi đặc biệt';
+  };
+
+  const getPromotionTypeLabel = () => {
+    switch (promotion.promotion_type) {
+      case 'first_deposit':
+        return 'Nạp Đầu';
+      case 'time_based':
+        return promotion.is_first_deposit_only ? 'Nạp Đầu Theo Thời Gian' : 'Theo Thời Gian';
+      case 'code_based':
+        return 'Mã Code';
+      default:
+        return 'Khuyến Mãi';
+    }
   };
 
   const formatDateRange = () => {
@@ -67,9 +83,14 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
               <Gift className="h-5 w-5 text-primary" />
               <div>
                 <h4 className="font-semibold text-sm">{promotion.title}</h4>
-                <Badge variant="secondary" className="text-xs">
-                  {formatDiscount()}
-                </Badge>
+                <div className="flex gap-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {formatDiscount()}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {getPromotionTypeLabel()}
+                  </Badge>
+                </div>
               </div>
             </div>
             <Button size="sm" variant="outline">
@@ -85,7 +106,7 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
     return (
       <Card className="relative overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/5 to-primary/10">
         <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold">
-          KHUYẾN MÃI HOT
+          {getPromotionTypeLabel().toUpperCase()}
         </div>
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
@@ -137,9 +158,14 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
             <Gift className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">{promotion.title}</CardTitle>
           </div>
-          <Badge variant="default">
-            {formatDiscount()}
-          </Badge>
+          <div className="flex gap-2">
+            <Badge variant="default">
+              {formatDiscount()}
+            </Badge>
+            <Badge variant="outline">
+              {getPromotionTypeLabel()}
+            </Badge>
+          </div>
         </div>
         {promotion.description && (
           <CardDescription>{promotion.description}</CardDescription>

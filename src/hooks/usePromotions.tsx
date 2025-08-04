@@ -6,14 +6,17 @@ interface Promotion {
   id: string;
   title: string;
   description?: string;
-  discount_percentage?: number;
-  discount_amount?: number;
+  promotion_type: 'first_deposit' | 'time_based' | 'code_based';
+  bonus_percentage?: number;
+  bonus_amount?: number;
   min_deposit?: number;
   max_uses?: number;
   current_uses: number;
   start_date: string;
   end_date: string;
   is_active: boolean;
+  promotion_code?: string;
+  is_first_deposit_only: boolean;
   created_at: string;
   updated_at: string;
 }
