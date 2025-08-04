@@ -104,6 +104,7 @@ const TheThao = () => {
       {/* Games */}
       <SimpleGamesList 
         title="THỂ THAO HOT NHẤT" 
+        category="sports"
         gpids={menuItems.find(item => item.id === 'thethao')?.dropdown?.map(item => Number(item.id)) || []} 
         maxGames={12} 
       />
