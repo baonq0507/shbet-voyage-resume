@@ -54,12 +54,15 @@ export const usePromotions = () => {
 
   const getActivePromotions = () => {
     const now = new Date();
-    return promotions.filter(promo => 
-      promo.is_active && 
-      new Date(promo.start_date) <= now && 
-      new Date(promo.end_date) >= now &&
-      (!promo.max_uses || promo.current_uses < promo.max_uses)
-    );
+    return promotions.filter(promo => {
+      const startDate = new Date(promo.start_date);
+      const endDate = new Date(promo.end_date);
+      
+      return promo.is_active && 
+        startDate <= now && 
+        endDate >= now &&
+        (!promo.max_uses || promo.current_uses < promo.max_uses);
+    });
   };
 
   return {
