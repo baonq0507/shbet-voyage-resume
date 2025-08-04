@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Upload } from 'lucide-react';
+import { Camera, Upload, ArrowLeft } from 'lucide-react';
 import avatar1 from '@/assets/avatars/avatar-1.jpg';
 import avatar2 from '@/assets/avatars/avatar-2.jpg';
 import avatar3 from '@/assets/avatars/avatar-3.jpg';
@@ -19,6 +20,7 @@ const sampleAvatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 export default function TaiKhoan() {
   const { profile, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
@@ -174,7 +176,18 @@ export default function TaiKhoan() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="container mx-auto max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Thông tin tài khoản</h1>
+        {/* Header with Back Button */}
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-3xl font-bold">Thông tin tài khoản</h1>
+        </div>
         
         <div className="grid gap-6 md:grid-cols-2">
           {/* Avatar Section */}
