@@ -89,9 +89,9 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
               <GameCard 
                 key={game.id} 
                 title={game.name}
-                description={game.type || game.category || 'Game'}
+                description={`${game.provider} - ${game.type}`}
                 image={game.image}
-                featured={game.isActive === true}
+                featured={game.rank <= 3}
               />
             ))}
           </div>
