@@ -157,6 +157,8 @@ export type Database = {
       }
       promotions: {
         Row: {
+          bonus_amount: number | null
+          bonus_percentage: number | null
           created_at: string
           current_uses: number
           description: string | null
@@ -165,13 +167,18 @@ export type Database = {
           end_date: string
           id: string
           is_active: boolean
+          is_first_deposit_only: boolean | null
           max_uses: number | null
           min_deposit: number | null
+          promotion_code: string | null
+          promotion_type: string | null
           start_date: string
           title: string
           updated_at: string
         }
         Insert: {
+          bonus_amount?: number | null
+          bonus_percentage?: number | null
           created_at?: string
           current_uses?: number
           description?: string | null
@@ -180,13 +187,18 @@ export type Database = {
           end_date: string
           id?: string
           is_active?: boolean
+          is_first_deposit_only?: boolean | null
           max_uses?: number | null
           min_deposit?: number | null
+          promotion_code?: string | null
+          promotion_type?: string | null
           start_date: string
           title: string
           updated_at?: string
         }
         Update: {
+          bonus_amount?: number | null
+          bonus_percentage?: number | null
           created_at?: string
           current_uses?: number
           description?: string | null
@@ -195,8 +207,11 @@ export type Database = {
           end_date?: string
           id?: string
           is_active?: boolean
+          is_first_deposit_only?: boolean | null
           max_uses?: number | null
           min_deposit?: number | null
+          promotion_code?: string | null
+          promotion_type?: string | null
           start_date?: string
           title?: string
           updated_at?: string
