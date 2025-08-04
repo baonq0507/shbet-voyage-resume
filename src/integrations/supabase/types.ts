@@ -168,6 +168,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_or_update_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["app_role"]
