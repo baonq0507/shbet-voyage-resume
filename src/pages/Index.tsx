@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GameSection from "@/components/GameSection";
 import { GamesList } from "@/components/GamesList";
+import { PromotionSection } from "@/components/PromotionSection";
 import { Play, Star, Gift, Trophy, Shield, Clock, Users, Zap, UserPlus, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -271,45 +272,10 @@ const Index = () => {
       {/* Games Section */}
       <GameSection title="GAME HOT NHẤT" lobbies={casinoLobbies} showApiGames={true} />
 
-      {/* Promotions */}
-      <section className="py-12 md:py-16 bg-gradient-hero">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-white">
-            🎁 Khuyến Mãi Đặc Biệt 🎁
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
-            <Card className="casino-glow">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-gradient text-lg sm:text-xl">Thưởng Nạp Đầu</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">100%</div>
-                <p className="text-muted-foreground text-sm sm:text-base">Tối đa 5,000,000 VNĐ</p>
-              </CardContent>
-            </Card>
-            <Card className="casino-glow">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-gradient text-lg sm:text-xl">Cashback</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">10%</div>
-                <p className="text-muted-foreground text-sm sm:text-base">Hoàn tiền hàng tuần</p>
-              </CardContent>
-            </Card>
-            <Card className="casino-glow sm:col-span-2 lg:col-span-1">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-gradient text-lg sm:text-xl">Giải Đấu</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">1 Tỷ</div>
-                <p className="text-muted-foreground text-sm sm:text-base">Giải thưởng tháng</p>
-              </CardContent>
-            </Card>
-          </div>
-          <Button variant="gold" size="lg" className="mt-6 md:mt-8 w-full sm:w-auto">
-            <Trophy className="w-5 h-5" />
-            Tham Gia Ngay
-          </Button>
+      {/* Dynamic Promotions Section */}
+      <section className="py-12 md:py-16 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <PromotionSection variant="home" maxItems={4} />
         </div>
       </section>
 

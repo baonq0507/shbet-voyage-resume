@@ -1,9 +1,12 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Gift, Clock, Star, TrendingUp, Zap, Trophy } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileNavigation from "@/components/MobileNavigation";
+import { PromotionSection } from "@/components/PromotionSection";
 
 const KhuyenMai = () => {
   const promotions = [
@@ -73,22 +76,32 @@ const KhuyenMai = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
+      {/* Mobile Navigation */}
+      <MobileNavigation />
+
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 bg-gradient-to-r from-primary/20 to-secondary/20">
+      <section className="relative py-12 md:py-20 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              <span className="text-gradient">KHUYẾN MẠI HOT</span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
+              🎁 KHUYẾN MẠI HOT 🎁
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Nhận ngay những ưu đãi đặc biệt và khuyến mại hấp dẫn chỉ có tại DINAMONDBET68
+            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
+              Tham gia ngay các chương trình khuyến mãi hấp dẫn từ dữ liệu admin và nhận thưởng khủng
             </p>
           </div>
         </div>
       </section>
 
-      {/* Promotions Grid */}
-      <section className="py-12 md:py-20">
+      {/* Dynamic Promotions from Admin */}
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <PromotionSection variant="full" />
+        </div>
+      </section>
+
+      {/* Fallback Static Promotions */}
+      <section className="py-12 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {promotions.map((promo) => {
