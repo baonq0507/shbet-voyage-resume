@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from '@supabase/supabase-js';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,9 +60,36 @@ interface GameResponse {
 const API_CONFIG = {
   baseUrl: "https://ex-api-yy5.tw946.com/web-root/restricted/information/get-game-list.aspx",
   companyKey: "C6012BA39EB643FEA4F5CD49AF138B02",
-  serverId: "206.206.126.141",
-  gpid: 5
+  serverId: "206.206.126.141"
 };
+
+// Initialize Supabase client
+// Note: In production, these should be environment variables
+// For now using placeholder values - replace with actual values
+const supabaseUrl = 'http://206.206.126.141:54321';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Function to get GPID from database by category
+async function getGpidByCategory(category: string): Promise<number> {
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('gpid')
+      .eq('name', category)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching GPID for category ${category}:`, error);
+      return 1; // Default fallback
+    }
+
+    return data?.gpid || 1;
+  } catch (error) {
+    console.error(`Exception fetching GPID for category ${category}:`, error);
+    return 1; // Default fallback
+  }
+}
 
 // Map game types to readable names
 const GAME_TYPE_MAP: Record<number, string> = {
@@ -76,109 +104,72 @@ const GAME_TYPE_MAP: Record<number, string> = {
   100: "Live Casino"
 };
 
-async function fetchGamesFromAPI(category: string = "all", gpid?: number): Promise<GameResponse[]> {
+async function fetchGamesFromAPI(category: string = "all"): Promise<GameResponse[]> {
   const startTime = Date.now();
   const requestId = Math.random().toString(36).substring(7);
   
-  // Use provided gpid or fallback to default
-  const finalGpid = gpid || API_CONFIG.gpid;
-  
   try {
-    console.log(`[${requestId}] 🚀 Starting fetchGamesFromAPI - Category: ${category}, GPID: ${finalGpid}`);
-    console.log(`[${requestId}] 📡 API URL: ${API_CONFIG.baseUrl}`);
+    console.log(`[${requestId}] 🚀 Starting fetchGamesFromAPI - Category: ${category}`);
+    console.log(`[${requestId}] 📊 Fetching games from local database`);
 
-    const requestBody = {
-      CompanyKey: API_CONFIG.companyKey,
-      ServerId: API_CONFIG.serverId,
-      Gpid: finalGpid
-    };
-    
-    console.log(`[${requestId}] 📤 Request payload:`, JSON.stringify(requestBody, null, 2));
+    // Get games from local database by category
+    const { data: games, error } = await supabase
+      .from('games')
+      .select('*')
+      .eq('category', category)
+      .eq('is_active', true)
+      .order('rank', { ascending: true });
 
-    const response = await fetch(API_CONFIG.baseUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody)
+    if (error) {
+      console.error(`[${requestId}] ❌ Database query failed:`, error);
+      throw new Error(`Database query failed: ${error.message}`);
+    }
+
+    console.log(`[${requestId}] 📋 Total games from database: ${games?.length || 0}`);
+
+    if (!games || games.length === 0) {
+      console.log(`[${requestId}] ⚠️ No games found for category: ${category}`);
+      return [];
+    }
+
+    // Transform database data to our format
+    const transformedGames: GameResponse[] = games.map((game: any) => {
+      const transformedGame = {
+        id: game.id.toString(),
+        name: game.name || `Game ${game.id}`,
+        image: game.image_url || "https://via.placeholder.com/300x200?text=No+Image",
+        type: game.type || 'Unknown',
+        category: game.category || category,
+        isActive: game.is_active || false,
+        provider: game.provider || 'Unknown',
+        rank: game.rank || 0
+      };
+      
+      console.log(`[${requestId}] 🎮 Transformed game: ${transformedGame.name} (ID: ${transformedGame.id}, Type: ${transformedGame.type})`);
+      return transformedGame;
     });
-
-    console.log(`[${requestId}] 📥 Response status: ${response.status} ${response.statusText}`);
-    console.log(`[${requestId}] 📥 Response headers:`, Object.fromEntries(response.headers.entries()));
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[${requestId}] ❌ API request failed - Status: ${response.status}, Body: ${errorText}`);
-      throw new Error(`API request failed with status: ${response.status} - ${errorText}`);
-    }
-
-    const data: GameAPIResponse = await response.json();
-    console.log(`[${requestId}] 📊 Raw API response:`, JSON.stringify(data, null, 2));
-    
-    if (data.error.id !== 0) {
-      console.error(`[${requestId}] ❌ API returned error - ID: ${data.error.id}, Message: ${data.error.msg}`);
-      throw new Error(data.error.msg || 'API returned error');
-    }
-
-    if (!data.seamlessGameProviderGames || !Array.isArray(data.seamlessGameProviderGames)) {
-      console.error(`[${requestId}] ❌ Invalid data format - seamlessGameProviderGames is not an array`);
-      throw new Error('Invalid data format from API');
-    }
-
-    console.log(`[${requestId}] 📋 Total games from API: ${data.seamlessGameProviderGames.length}`);
-
-    // Transform API data to our format
-    const games: GameResponse[] = data.seamlessGameProviderGames
-      .filter(game => {
-        const isEnabled = game.isEnabled && !game.isMaintain;
-        if (!isEnabled) {
-          console.log(`[${requestId}] ⏭️ Skipping disabled/maintenance game: ${game.gameID} (enabled: ${game.isEnabled}, maintain: ${game.isMaintain})`);
-        }
-        return isEnabled;
-      })
-      .map((game: GameData) => {
-        // Get English game info, fallback to first available
-        const gameInfo = game.gameInfos.find(info => info.language !== null) || game.gameInfos[0];
-        const gameType = GAME_TYPE_MAP[game.newGameType] || `Type ${game.newGameType}`;
-        
-        const transformedGame = {
-          id: `${game.gameProviderId}_${game.gameID}`,
-          name: gameInfo?.gameName || `Game ${game.gameID}`,
-          image: gameInfo?.gameIconUrl || "https://via.placeholder.com/300x200?text=No+Image",
-          type: gameType,
-          category: gameType,
-          isActive: game.isEnabled && game.isProviderOnline,
-          provider: game.provider,
-          rank: game.rank
-        };
-        
-        console.log(`[${requestId}] 🎮 Transformed game: ${transformedGame.name} (ID: ${transformedGame.id}, Type: ${transformedGame.type})`);
-        return transformedGame;
-      })
-      .sort((a, b) => a.rank - b.rank); // Sort by rank
 
     const endTime = Date.now();
     const duration = endTime - startTime;
     
-    console.log(`[${requestId}] ✅ Successfully fetched ${games.length} games in ${duration}ms`);
-    console.log(`[${requestId}] 📈 Performance: ${duration}ms total, ${games.length} games processed`);
+    console.log(`[${requestId}] ✅ Successfully fetched ${transformedGames.length} games in ${duration}ms`);
+    console.log(`[${requestId}] 📈 Performance: ${duration}ms total, ${transformedGames.length} games processed`);
     
-    return games;
+    return transformedGames;
 
   } catch (error) {
     const endTime = Date.now();
     const duration = endTime - startTime;
     
-    console.error(`[${requestId}] ❌ Error fetching games from API for category ${category} with GPID ${finalGpid} after ${duration}ms:`, error);
+    console.error(`[${requestId}] ❌ Error fetching games from database for category ${category} after ${duration}ms:`, error);
     console.error(`[${requestId}] 🔍 Error details:`, {
       message: error.message,
       stack: error.stack,
       category,
-      gpid: finalGpid,
       duration
     });
     
-    // Return fallback data if API fails
+    // Return fallback data if database fails
     console.log(`[${requestId}] 🛟 Returning fallback data for category: ${category}`);
     return getFallbackGames(category);
   }
@@ -337,25 +328,22 @@ serve(async (req) => {
 
   try {
     let category = 'all';
-    let gpid: number | undefined;
 
     // Handle both GET (URL params) and POST (body) requests
     if (req.method === 'POST') {
       const body = await req.json();
       category = body.category || 'all';
-      gpid = body.gpid ? parseInt(body.gpid) : undefined;
       console.log(`[${requestId}] 📥 POST request body:`, JSON.stringify(body, null, 2));
     } else {
       const url = new URL(req.url);
       category = url.searchParams.get('category') || 'all';
-      const gpidParam = url.searchParams.get('gpid');
-      gpid = gpidParam ? parseInt(gpidParam) : undefined;
       console.log(`[${requestId}] 📥 GET request params:`, Object.fromEntries(url.searchParams.entries()));
     }
 
-    console.log(`[${requestId}] 🎯 Processing request for category: ${category}, GPID: ${gpid || 'default'}`);
+    console.log(`[${requestId}] 🎯 Processing request for category: ${category}`);
 
-    const games = await fetchGamesFromAPI(category, gpid);
+    const games = await fetchGamesFromAPI(category);
+    
     console.log(`[${requestId}] 📊 Final games result:`, JSON.stringify(games, null, 2));
     
     const endTime = Date.now();
@@ -372,10 +360,11 @@ serve(async (req) => {
           pageSize: games.length,
           total: games.length
         },
-        apiUsed: true,
+        apiUsed: false,
+        databaseUsed: true,
         requestId,
         duration: `${duration}ms`,
-        gpid: gpid || API_CONFIG.gpid
+        category: category
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -401,13 +390,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: 'Failed to fetch games from API',
+        error: 'Failed to fetch games from database',
         data: fallbackGames,
         fallback: true,
         apiUsed: false,
+        databaseUsed: false,
         requestId,
         duration: `${duration}ms`,
-        gpid: API_CONFIG.gpid // Use default gpid in error case
+        category: 'all'
       }),
       {
         status: 200, // Still return 200 but with fallback data
