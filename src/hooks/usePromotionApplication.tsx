@@ -17,6 +17,9 @@ interface Promotion {
   is_active: boolean;
   promotion_code?: string;
   is_first_deposit_only: boolean;
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const usePromotionApplication = () => {
