@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,6 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Upload, X, Image } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const promotionSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -50,6 +53,12 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
   initialData,
   isLoading = false,
 }) => {
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
+    (initialData as any)?.image_url || null
+  );
+  const [imageUploading, setImageUploading] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<PromotionFormData>({
     resolver: zodResolver(promotionSchema),
     defaultValues: {
@@ -73,9 +82,90 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
   const promotionType = form.watch('promotionType');
   const bonusType = form.watch('bonusType');
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Lỗi',
+        description: 'Vui lòng chọn file hình ảnh',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'Lỗi',
+        description: 'Kích thước file không được vượt quá 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setImageUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `promotion-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('promotion-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('promotion-images')
+        .getPublicUrl(filePath);
+
+      setUploadedImageUrl(data.publicUrl);
+      toast({
+        title: 'Thành công',
+        description: 'Upload hình ảnh thành công',
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể upload hình ảnh',
+        variant: 'destructive',
+      });
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const removeImage = async () => {
+    if (uploadedImageUrl) {
+      try {
+        // Extract filename from URL
+        const urlParts = uploadedImageUrl.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        const filePath = `promotion-images/${filename}`;
+
+        await supabase.storage
+          .from('promotion-images')
+          .remove([filePath]);
+      } catch (error) {
+        console.error('Error removing image:', error);
+      }
+    }
+    setUploadedImageUrl(null);
+  };
+
+  const handleFormSubmit = (data: PromotionFormData) => {
+    const formDataWithImage = {
+      ...data,
+      image_url: uploadedImageUrl,
+    };
+    onSubmit(formDataWithImage as any);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="title"
@@ -345,6 +435,63 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Image Upload Section */}
+        <div className="space-y-4">
+          <FormLabel>Hình ảnh khuyến mãi (tùy chọn)</FormLabel>
+          
+          {uploadedImageUrl ? (
+            <div className="relative inline-block">
+              <img 
+                src={uploadedImageUrl} 
+                alt="Promotion" 
+                className="w-full max-w-md h-48 object-cover rounded-lg border"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                className="absolute top-2 right-2"
+                onClick={removeImage}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <div className="flex flex-col items-center space-y-2">
+                <Image className="h-12 w-12 text-gray-400" />
+                <div className="text-sm text-gray-600">
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <span className="font-medium text-primary hover:text-primary/80">
+                      Click to upload
+                    </span>{' '}
+                    hoặc kéo thả hình ảnh vào đây
+                  </label>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={imageUploading}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  PNG, JPG, GIF up to 5MB
+                </p>
+              </div>
+              {imageUploading && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Upload className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-gray-600">Đang upload...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <FormField

@@ -19,6 +19,7 @@ interface Promotion {
   is_active: boolean;
   promotion_code?: string;
   is_first_deposit_only: boolean;
+  image_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -108,6 +109,15 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
         <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold">
           {getPromotionTypeLabel().toUpperCase()}
         </div>
+        {promotion.image_url && (
+          <div className="aspect-video w-full overflow-hidden">
+            <img 
+              src={promotion.image_url} 
+              alt={promotion.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
             <Gift className="h-6 w-6 text-primary" />
@@ -151,7 +161,16 @@ export const PromotionCard: React.FC<PromotionCardProps> = ({
   }
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow overflow-hidden">
+      {promotion.image_url && (
+        <div className="aspect-video w-full overflow-hidden">
+          <img 
+            src={promotion.image_url} 
+            alt={promotion.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

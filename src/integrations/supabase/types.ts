@@ -207,6 +207,7 @@ export type Database = {
           discount_percentage: number | null
           end_date: string
           id: string
+          image_url: string | null
           is_active: boolean
           is_first_deposit_only: boolean | null
           max_uses: number | null
@@ -227,6 +228,7 @@ export type Database = {
           discount_percentage?: number | null
           end_date: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_first_deposit_only?: boolean | null
           max_uses?: number | null
@@ -247,6 +249,7 @@ export type Database = {
           discount_percentage?: number | null
           end_date?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_first_deposit_only?: boolean | null
           max_uses?: number | null
