@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash } from 'lucide-react';
 import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
+import { usePromotionApplication } from '@/hooks/usePromotionApplication';
 
 interface Transaction {
   id: string;
@@ -99,6 +100,7 @@ const AdminPage = () => {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { applyPromotionToDeposit } = usePromotionApplication();
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -299,7 +301,7 @@ const AdminPage = () => {
 
       if (updateError) throw updateError;
 
-      // If approving a deposit, update user balance
+      // If approving a deposit, update user balance and apply promotions
       if (status === 'approved' && transaction.type === 'deposit') {
         const { error: balanceError } = await supabase
           .from('profiles')
@@ -309,6 +311,13 @@ const AdminPage = () => {
           .eq('user_id', transaction.user_id);
 
         if (balanceError) throw balanceError;
+
+        // Apply promotion if available
+        await applyPromotionToDeposit(
+          transaction.user_id, 
+          transaction.amount, 
+          user?.id
+        );
       }
 
       // If approving a withdrawal, deduct from user balance
