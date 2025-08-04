@@ -2,13 +2,28 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://hlydtwqhiuwbikkjemck.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTA1MjQsImV4cCI6MjA2OTgyNjUyNH0.deIb21DJNmyM5ZjocFAl4j_47AF6CnY26LN0Bn9eB9k";
+// Local Supabase configuration
+const LOCAL_SUPABASE_URL = import.meta.env.VITE_LOCAL_SUPABASE_URL || "http://206.206.126.141:54321";
+const LOCAL_SUPABASE_ANON_KEY = import.meta.env.VITE_LOCAL_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+
+// Cloud Supabase configuration (fallback)
+const CLOUD_SUPABASE_URL = import.meta.env.VITE_CLOUD_SUPABASE_URL || "https://hlydtwqhiuwbikkjemck.supabase.co";
+const CLOUD_SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_CLOUD_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTA1MjQsImV4cCI6MjA2OTgyNjUyNH0.deIb21DJNmyM5ZjocFAl4j_47AF6CnY26LN0Bn9eB9k";
+
+// Determine which configuration to use
+const isLocalDevelopment = import.meta.env.DEV;
+const useLocalSupabase = isLocalDevelopment && import.meta.env.VITE_USE_LOCAL_SUPABASE === 'true';
+
+const SUPABASE_URL = useLocalSupabase ? LOCAL_SUPABASE_URL : CLOUD_SUPABASE_URL;
+const SUPABASE_ANON_KEY = useLocalSupabase ? LOCAL_SUPABASE_ANON_KEY : CLOUD_SUPABASE_PUBLISHABLE_KEY;
+
+console.log(`Using Supabase: ${useLocalSupabase ? 'LOCAL' : 'CLOUD'}`);
+console.log(`Supabase URL: ${SUPABASE_URL}`);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,

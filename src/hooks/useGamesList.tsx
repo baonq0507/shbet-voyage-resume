@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Game {
-  id: number;
+  id: string;
   name: string;
   image: string;
-  rating: number;
-  genre: string;
-  platform: string;
-  releaseDate: string;
-  metacritic: number;
+  type: string;
+  category: string;
+  isActive: boolean;
+  provider: string;
+  rank: number;
 }
 
 interface GamesResponse {
@@ -22,6 +22,7 @@ interface GamesResponse {
   };
   fallback?: boolean;
   error?: string;
+  apiUsed?: boolean;
 }
 
 export const useGamesList = (page: number = 1, pageSize: number = 10, category: string = 'all') => {
@@ -33,6 +34,7 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
     pageSize: 10,
     total: 0
   });
+  const [apiUsed, setApiUsed] = useState(false);
 
   const fetchGames = async () => {
     try {
@@ -41,8 +43,6 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
 
       const { data, error: functionError } = await supabase.functions.invoke('get-games-list', {
         body: {
-          page,
-          pageSize,
           category
         }
       });
@@ -56,6 +56,7 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
       if (response.success) {
         setGames(response.data);
         setPagination(response.pagination);
+        setApiUsed(response.apiUsed || false);
         
         if (response.fallback) {
           console.warn('Using fallback data - API may be unavailable');
@@ -74,13 +75,14 @@ export const useGamesList = (page: number = 1, pageSize: number = 10, category: 
 
   useEffect(() => {
     fetchGames();
-  }, [page, pageSize, category]);
+  }, [category]);
 
   return {
     games,
     loading,
     error,
     pagination,
+    apiUsed,
     refetch: fetchGames
   };
 };

@@ -202,9 +202,9 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory }: G
                         <GameCard 
                           key={game.id} 
                           title={game.name}
-                          description={game.genre}
+                          description={game.type || game.category || 'Game'}
                           image={game.image}
-                          featured={game.rating > 4.5}
+                          featured={game.isActive === true}
                         />
                       ))}
                     </div>
@@ -232,9 +232,9 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory }: G
                         <GameCard 
                           key={game.id} 
                           title={game.name}
-                          description={game.genre}
+                          description={game.type || game.category || 'Game'}
                           image={game.image}
-                          featured={game.rating > 4.5}
+                          featured={game.isActive === true}
                         />
                       ))}
                     </div>

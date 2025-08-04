@@ -132,14 +132,27 @@ const Lobby = () => {
   const gamesToShow: (Game | StaticGame)[] = apiGames.length > 0 ? apiGames : lobbyData.games;
   
   // Filter games by type
-  const gameTypes = ['all', ...Array.from(new Set(gamesToShow.map(game => 
-    'type' in game ? game.type : game.genre.split(', ')[0]
-  )))];
+  const gameTypes = ['all', ...Array.from(new Set(gamesToShow.map(game => {
+    if ('type' in game) {
+      return game.type;
+    } else if ('category' in game) {
+      return game.category;
+    } else {
+      return 'Game';
+    }
+  })))];
   
   const filteredGames = selectedType === 'all' 
     ? gamesToShow 
     : gamesToShow.filter(game => {
-        const gameType = 'type' in game ? game.type : game.genre.split(', ')[0];
+        let gameType: string;
+        if ('type' in game) {
+          gameType = game.type;
+        } else if ('category' in game) {
+          gameType = game.category;
+        } else {
+          gameType = 'Game';
+        }
         return gameType === selectedType;
       });
 
@@ -233,7 +246,7 @@ const Lobby = () => {
                   />
                   {/* Game type badge */}
                   <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
-                    {'type' in game ? game.type : game.genre.split(', ')[0]}
+                    {'type' in game ? game.type : game.category}
                   </Badge>
                 </div>
                 

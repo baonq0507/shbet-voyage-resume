@@ -4,12 +4,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RefreshCw, Star, Calendar, Monitor } from 'lucide-react';
+import { RefreshCw, Gamepad2, Tag, Crown, Building2 } from 'lucide-react';
 
 export const GamesList = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
-  const { games, loading, error, pagination, refetch } = useGamesList(page, pageSize);
+  const { games, loading, error, pagination, apiUsed, refetch } = useGamesList(page, pageSize);
 
   if (loading) {
     return (
@@ -58,7 +58,7 @@ export const GamesList = () => {
         <div>
           <h1 className="text-3xl font-bold">Danh sách Game</h1>
           <p className="text-muted-foreground">
-            Hiển thị {games.length} game từ API
+            Hiển thị {games.length} game {apiUsed ? 'từ API' : '(dữ liệu dự phòng)'}
           </p>
         </div>
         <Button onClick={refetch} variant="outline" size="sm">
@@ -79,47 +79,62 @@ export const GamesList = () => {
                   e.currentTarget.src = "https://via.placeholder.com/300x200?text=No+Image";
                 }}
               />
-              {game.metacritic > 0 && (
-                <Badge 
-                  className="absolute top-2 right-2" 
-                  variant={game.metacritic >= 80 ? "default" : "secondary"}
-                >
-                  {game.metacritic}
-                </Badge>
-              )}
+              <div className="absolute top-2 right-2 flex flex-col gap-1">
+                {game.isActive ? (
+                  <Badge variant="default" className="text-xs">
+                    Hoạt động
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-xs">
+                    Không hoạt động
+                  </Badge>
+                )}
+                {game.rank <= 3 && (
+                  <Badge variant="gold" className="text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Top {game.rank}
+                  </Badge>
+                )}
+              </div>
             </div>
             
             <CardHeader className="pb-2">
               <CardTitle className="text-lg line-clamp-2">{game.name}</CardTitle>
               <CardDescription className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span>{game.rating.toFixed(1)}</span>
+                <Gamepad2 className="w-4 h-4" />
+                <span>{game.type}</span>
               </CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Monitor className="w-4 h-4" />
-                <span className="line-clamp-1">{game.platform}</span>
+                <Building2 className="w-4 h-4" />
+                <span className="line-clamp-1">{game.provider}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span>{game.releaseDate}</span>
+                <Tag className="w-4 h-4" />
+                <span className="line-clamp-1">{game.category}</span>
               </div>
               
               <div className="flex flex-wrap gap-1">
-                {game.genre.split(', ').slice(0, 2).map((genre, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {genre}
+                <Badge variant="outline" className="text-xs">
+                  {game.type}
+                </Badge>
+                {game.category !== game.type && (
+                  <Badge variant="outline" className="text-xs">
+                    {game.category}
                   </Badge>
-                ))}
+                )}
+                <Badge variant="outline" className="text-xs">
+                  Rank #{game.rank}
+                </Badge>
               </div>
             </CardContent>
             
             <CardFooter>
-              <Button className="w-full" size="sm">
-                Xem chi tiết
+              <Button className="w-full" size="sm" disabled={!game.isActive}>
+                {game.isActive ? 'Chơi ngay' : 'Không khả dụng'}
               </Button>
             </CardFooter>
           </Card>

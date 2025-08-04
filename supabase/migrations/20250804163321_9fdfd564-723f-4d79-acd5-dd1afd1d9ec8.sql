@@ -1,11 +1,25 @@
 -- Delete the existing admin@admin.com user and use the existing admin user
 DELETE FROM auth.users WHERE email = 'admin@admin.com';
 
--- Update the existing admin user (quangbaorp@gmail.com) to have admin role
+-- Update the existing admin user to have admin role
 DO $$
 DECLARE
-    existing_admin_user_id uuid := 'a590655e-edf2-42c0-b0b5-94abc57723e1';
+    existing_admin_user_id uuid;
 BEGIN
+    -- Get the first admin user that exists
+    SELECT id INTO existing_admin_user_id FROM auth.users WHERE email = 'quangbaorp@gmail.com' LIMIT 1;
+    
+    -- If no admin user found, create one
+    IF existing_admin_user_id IS NULL THEN
+        INSERT INTO auth.users (email, encrypted_password, email_confirmed_at, confirmation_token, created_at, updated_at)
+        VALUES ('quangbaorp@gmail.com', crypt('123456', gen_salt('bf')), now(), '', now(), now())
+        RETURNING id INTO existing_admin_user_id;
+        
+        -- Create profile for new admin user
+        INSERT INTO public.profiles (user_id, username, full_name, balance)
+        VALUES (existing_admin_user_id, 'admin', 'Administrator', 0.00);
+    END IF;
+    
     -- Ensure admin role exists for this user
     INSERT INTO public.user_roles (user_id, role)
     VALUES (existing_admin_user_id, 'admin')
