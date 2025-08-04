@@ -9,6 +9,7 @@ interface Profile {
   phone_number?: string;
   username: string;
   balance: number;
+  avatar_url?: string;
   last_login_at?: string;
   last_login_ip?: string | null;
   created_at: string;

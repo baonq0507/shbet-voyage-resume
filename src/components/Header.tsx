@@ -213,9 +213,11 @@ const Header = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <UserCircle className="w-4 h-4 mr-2" />
-                        Thông tin tài khoản
+                      <DropdownMenuItem asChild>
+                        <Link to="/taikhoan">
+                          <UserCircle className="w-4 h-4 mr-2" />
+                          Thông tin tài khoản
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
                         setTransactionType('deposit');
@@ -261,9 +263,11 @@ const Header = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <UserCircle className="w-4 h-4 mr-2" />
-                        Thông tin tài khoản
+                      <DropdownMenuItem asChild>
+                        <Link to="/taikhoan">
+                          <UserCircle className="w-4 h-4 mr-2" />
+                          Thông tin tài khoản
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
                         setTransactionType('deposit');
@@ -346,9 +350,11 @@ const Header = () => {
                           <div className="text-primary font-bold">{profile.balance.toLocaleString()} VND</div>
                           <div className="text-xs text-muted-foreground">@{profile.username}</div>
                         </div>
-                        <Button variant="outline" className="w-full justify-start">
-                          <UserCircle className="w-4 h-4 mr-2" />
-                          Thông tin tài khoản
+                        <Button variant="outline" className="w-full justify-start" asChild>
+                          <Link to="/taikhoan" onClick={() => setIsMobileMenuOpen(false)}>
+                            <UserCircle className="w-4 h-4 mr-2" />
+                            Thông tin tài khoản
+                          </Link>
                         </Button>
                         <Button variant="gold" className="w-full justify-start" onClick={() => {
                           setTransactionType('deposit');
