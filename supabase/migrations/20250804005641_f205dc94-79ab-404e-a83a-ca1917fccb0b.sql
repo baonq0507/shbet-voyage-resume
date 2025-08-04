@@ -54,7 +54,12 @@ FROM pg_constraint
 WHERE conrelid = 'public.user_roles'::regclass 
 AND contype = 'f';
 
--- Now try to insert the admin role
+-- Now try to insert the admin role for existing user
 INSERT INTO public.user_roles (user_id, role)
-VALUES ('7a2c924b-4c0a-420e-ad6f-bff38d6981d5', 'admin')
-ON CONFLICT (user_id, role) DO NOTHING;
+SELECT id, 'admin'::app_role 
+FROM auth.users 
+WHERE email = 'admin@admin.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_id = auth.users.id AND role = 'admin'
+  );

@@ -51,13 +51,15 @@ BEGIN
             ''
         ) RETURNING id INTO admin_user_id;
         
-        -- Insert into profiles table
+        -- Insert into profiles table (only if not exists)
         INSERT INTO public.profiles (user_id, username, full_name)
-        VALUES (admin_user_id, 'admin', 'Administrator');
+        VALUES (admin_user_id, 'admin', 'Administrator')
+        ON CONFLICT (user_id) DO NOTHING;
         
-        -- Insert admin role
+        -- Insert admin role (only if not exists)
         INSERT INTO public.user_roles (user_id, role)
-        VALUES (admin_user_id, 'admin');
+        VALUES (admin_user_id, 'admin')
+        ON CONFLICT (user_id, role) DO NOTHING;
         
         RAISE NOTICE 'Admin user created with email: % and password: %', admin_email, admin_password;
     ELSE
