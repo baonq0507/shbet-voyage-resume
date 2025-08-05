@@ -1,17 +1,31 @@
 import { Link, useLocation } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Coins, Zap, Fish, Trophy, Spade, Bird, ChevronRight } from "lucide-react";
+import { 
+  Coins, 
+  Zap, 
+  Fish, 
+  Trophy, 
+  Spade,
+  Bird,
+  Dices,
+  ChevronRight,
+  Crown,
+  Target,
+  Gamepad2,
+  Swords
+} from "lucide-react";
 
 const MobileNavigation = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: "/casino", label: "CASINO", icon: Coins },
+    { path: "/casino", label: "CASINO", icon: Crown },
     { path: "/nohu", label: "NỔ HŨ", icon: Zap },
-    { path: "/banca", label: "BẮN CÁ", icon: Fish },
+    { path: "/banca", label: "BẮN CÁ", icon: Target },
     { path: "/thethao", label: "THỂ THAO", icon: Trophy },
     { path: "/gamebai", label: "GAME BÀI", icon: Spade },
-    { path: "/daga", label: "ĐÁ GÀ", icon: Bird },
+    { path: "/daga", label: "ĐÁ GÀ", icon: Swords },
+    { path: "/xoso", label: "XỔ SỐ", icon: Dices },
   ];
 
   return (
