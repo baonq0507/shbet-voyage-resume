@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Maximize } from "lucide-react";
 import { useGameFrame } from "@/hooks/useGameFrame";
 import { useGameLogin } from "@/hooks/useGameLogin";
 import { useState } from "react";
@@ -29,6 +29,21 @@ const GameFrame = () => {
     closeGame();
   };
 
+  const handleFullscreen = () => {
+    const gameContainer = document.querySelector('#game-container');
+    if (gameContainer) {
+      if (gameContainer.requestFullscreen) {
+        gameContainer.requestFullscreen();
+      } else if ((gameContainer as any).webkitRequestFullscreen) {
+        (gameContainer as any).webkitRequestFullscreen();
+      } else if ((gameContainer as any).mozRequestFullScreen) {
+        (gameContainer as any).mozRequestFullScreen();
+      } else if ((gameContainer as any).msRequestFullscreen) {
+        (gameContainer as any).msRequestFullscreen();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Back Button Section */}
@@ -46,15 +61,29 @@ const GameFrame = () => {
               Quay lại
             </Button>
             
-            <div className="text-sm text-muted-foreground">
-              {showLoading ? 'Đang tải game...' : 'Game đang chạy'}
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                {showLoading ? 'Đang tải game...' : 'Game đang chạy'}
+              </div>
+              {!showLoading && (
+                <Button
+                  onClick={handleFullscreen}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  title="Toàn màn hình"
+                >
+                  <Maximize className="w-3 h-3" />
+                  <span className="hidden sm:inline">Toàn màn hình</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Game Content */}
-      <div className="relative">
+      <div id="game-container" className="relative">
         {/* Loading Overlay */}
         {showLoading && (
           <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center z-10 min-h-[80vh]">
