@@ -16,6 +16,15 @@ export const useGameLogin = () => {
   const { user, profile } = useAuth();
   const { showLoading, hideLoading, isLoading } = useLoading();
 
+  const detectDevice = (): 'm' | 'd' => {
+    if (typeof window !== 'undefined') {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      return isMobile ? 'm' : 'd';
+    }
+    return 'd';
+  };
+
   const loginToGame = async (gpid: number, isSports: boolean = false): Promise<string | null> => {
     if (!user || !profile?.username) {
       setError('Vui lòng đăng nhập trước khi chơi game');
@@ -42,41 +51,50 @@ export const useGameLogin = () => {
         description: "Đang đăng nhập vào game, vui lòng chờ...",
       });
 
-      const { data, error: functionError } = await supabase.functions.invoke('game-login', {
-        body: {
-          gpid: gpid,
-          isSports: isSports
-        }
+      // Prepare game login data
+      const gameLoginData = {
+        Username: profile.username,
+        IsWapSports: isSports,
+        CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
+        Portfolio: isSports ? 'ThirdPartySportsBook' : 'SeamlessGame',
+        ServerId: '206.206.126.141'
+      };
+
+      console.log('🚀 Calling game API with data:', gameLoginData);
+
+      // Call game login API directly
+      const response = await fetch('http://206.206.126.141/web-root/restricted/player/login.aspx', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(gameLoginData)
       });
 
-      console.log('📤 Game login response:', data);
+      console.log('📞 Game API response status:', response.status);
 
-      if (functionError) {
-        console.error('❌ Supabase function error:', functionError);
-        throw new Error(functionError.message || 'Lỗi kết nối đến server');
+      if (response.status !== 200) {
+        throw new Error('Không thể kết nối đến game server');
       }
 
-      const response = data as GameLoginResponse;
+      const result = await response.json();
+      console.log('📤 Game API response data:', result);
 
-      if (!response.success || !response.gameUrl) {
-        const errorMessage = response.error || 'Không thể lấy URL game';
-        console.error('❌ Game login failed:', errorMessage);
-        setError(errorMessage);
-        toast({
-          title: "Lỗi đăng nhập game",
-          description: errorMessage,
-          variant: "destructive"
-        });
-        return null;
+      if (!result.url) {
+        throw new Error('Game server không trả về URL hợp lệ');
       }
 
-      console.log('✅ Game login successful, URL:', response.gameUrl);
+      // Detect device type and construct final game URL
+      const device = detectDevice();
+      const gameUrl = `https://${result.url}&gpid=${gpid}&gameid=0&device=${device}&lang=vi-VN`;
+      console.log('🎯 Final game URL constructed:', gameUrl);
+
       toast({
         title: "Thành công!",
         description: "Đăng nhập game thành công, đang mở game...",
       });
 
-      return response.gameUrl;
+      return gameUrl;
 
     } catch (err) {
       console.error('💥 Game login error:', err);
