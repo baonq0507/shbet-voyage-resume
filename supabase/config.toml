@@ -1,1 +1,34 @@
 project_id = "hlydtwqhiuwbikkjemck"
+
+[functions.login-by-username]
+verify_jwt = false
+
+[functions.get-paginated-users]
+verify_jwt = false
+
+[functions.get-paginated-transactions]
+verify_jwt = false
+
+[functions.deposit-game-api]
+verify_jwt = false
+
+[functions.withdraw-game-api]
+verify_jwt = false
+
+[functions.user-register]
+verify_jwt = false
+
+[functions.get-games-list]
+verify_jwt = false
+
+[functions.get-games-from-database]
+verify_jwt = false
+
+[functions.sync-games-database]
+verify_jwt = false
+
+[functions.game-login]
+verify_jwt = false
+
+[functions.register-player]
+verify_jwt = false
