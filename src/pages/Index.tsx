@@ -57,7 +57,6 @@ const Index = () => {
       {/* Promotion Banner */}
       <PromotionBanner />
 
-
       {/* Mobile Navigation */}
       <MobileNavigation />
 
