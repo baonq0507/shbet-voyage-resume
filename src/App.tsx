@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { GameFrameProvider, useGameFrame } from "@/hooks/useGameFrame";
 import { LoadingProvider } from "@/hooks/useLoading";
@@ -30,6 +30,7 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { isGameActive } = useGameFrame();
+  const location = useLocation();
 
   if (isGameActive) {
     return (
@@ -40,8 +41,10 @@ const AppContent = () => {
     );
   }
 
+  // Check if current route is admin route
+  const isAdminRoute = location.pathname.startsWith('/admin');
   return (
-    <div className="pb-16 lg:pb-0">
+    <div className={isAdminRoute ? "" : "pb-16 lg:pb-0"}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/casino" element={<Casino />} />
@@ -60,7 +63,8 @@ const AppContent = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <MobileFooter />
+      {/* Only show MobileFooter if not on admin route */}
+      {!isAdminRoute && <MobileFooter />}
     </div>
   );
 };
