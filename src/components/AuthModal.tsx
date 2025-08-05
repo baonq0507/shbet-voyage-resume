@@ -151,12 +151,29 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       console.log('📥 Registration response:', registerResponse);
       console.log('🔌 Connection error:', registerError);
 
-      // Kiểm tra lỗi kết nối trước
+      // Nếu có lỗi từ edge function (HTTP 400-500), extract error message
       if (registerError) {
-        console.error('❌ Connection error:', registerError);
+        console.error('❌ Edge function error:', registerError);
+        
+        // Thử parse error message từ edge function response
+        let errorMessage = "Có lỗi xảy ra khi đăng ký";
+        
+        if (registerError.message) {
+          try {
+            // Edge function error thường chứa JSON response trong message
+            const errorData = JSON.parse(registerError.message);
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch {
+            // Nếu không parse được, dùng message gốc
+            errorMessage = registerError.message;
+          }
+        }
+        
         toast({
-          title: "Lỗi kết nối",
-          description: "Không thể kết nối đến máy chủ. Vui lòng thử lại.",
+          title: "Lỗi đăng ký",
+          description: errorMessage,
           variant: "destructive"
         });
         setIsLoading(false);
