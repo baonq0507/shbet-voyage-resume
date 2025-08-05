@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Menu } from "lucide-react";
 import { useGameFrame } from "@/hooks/useGameFrame";
 import { useGameLogin } from "@/hooks/useGameLogin";
 import { useState } from "react";
@@ -8,6 +8,7 @@ const GameFrame = () => {
   const { gameUrl, closeGame } = useGameFrame();
   const { loading: gameLoading } = useGameLogin();
   const [isIframeLoading, setIsIframeLoading] = useState(true);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   // Show loading overlay when logging in or iframe is loading
   const showLoading = gameLoading || isIframeLoading;
@@ -30,6 +31,10 @@ const GameFrame = () => {
 
   const handleIframeLoad = () => {
     setIsIframeLoading(false);
+    // Auto hide header after game loads
+    setTimeout(() => {
+      setIsHeaderVisible(false);
+    }, 3000);
   };
 
   const handleIframeError = () => {
@@ -38,28 +43,51 @@ const GameFrame = () => {
 
   const handleBackClick = () => {
     setIsIframeLoading(true);
+    setIsHeaderVisible(true);
     closeGame();
+  };
+
+  const toggleHeader = () => {
+    setIsHeaderVisible(!isHeaderVisible);
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-background">
-      {/* Back Button */}
-      <div className="flex items-center justify-between p-4 bg-card border-b border-border">
-        <Button
-          onClick={handleBackClick}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          disabled={gameLoading}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Quay lại
-        </Button>
-        
-        <div className="text-sm text-muted-foreground">
-          {showLoading ? 'Đang tải game...' : 'Game đang chạy'}
+      {/* Header - can be hidden */}
+      <div 
+        className={`absolute top-0 left-0 right-0 z-20 transition-transform duration-300 ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 bg-card border-b border-border backdrop-blur-md bg-card/95">
+          <Button
+            onClick={handleBackClick}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={gameLoading}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại
+          </Button>
+          
+          <div className="text-sm text-muted-foreground">
+            {showLoading ? 'Đang tải game...' : 'Game đang chạy'}
+          </div>
         </div>
       </div>
+
+      {/* Toggle header button - floating button */}
+      {!isHeaderVisible && (
+        <Button
+          onClick={toggleHeader}
+          variant="outline"
+          size="sm"
+          className="absolute top-4 left-4 z-30 bg-card/95 backdrop-blur-md border-border hover:bg-card"
+        >
+          <Menu className="w-4 h-4" />
+        </Button>
+      )}
 
       {/* Loading Overlay */}
       {showLoading && (
@@ -79,10 +107,12 @@ const GameFrame = () => {
         </div>
       )}
 
-      {/* Game iframe */}
+      {/* Game iframe - full screen when header is hidden */}
       <iframe
         src={gameUrl}
-        className="w-full h-[calc(100vh-73px)] border-0"
+        className={`w-full border-0 transition-all duration-300 ${
+          isHeaderVisible ? 'h-[calc(100vh-73px)] mt-[73px]' : 'h-screen mt-0'
+        }`}
         onLoad={handleIframeLoad}
         onError={handleIframeError}
         title="Game"
