@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
+import MobileNavigation from "@/components/MobileNavigation";
 import { Target, Fish, Waves } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
 import bancaGame from "@/assets/banca-game.jpg";
@@ -49,6 +50,9 @@ const BanCa = () => {
       
       {/* Banner */}
       <PromotionBanner />
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
 
 
       {/* Games */}

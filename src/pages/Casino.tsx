@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
+import MobileNavigation from "@/components/MobileNavigation";
 import { Users, Trophy, Star } from "lucide-react";
 
 const Casino = () => {
@@ -13,6 +14,9 @@ const Casino = () => {
       
       {/* Banner */}
       <PromotionBanner />
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
 
 
       {/* Games */}

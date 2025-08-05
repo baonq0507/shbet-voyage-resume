@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
+import MobileNavigation from "@/components/MobileNavigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Play, Trophy, Star, DollarSign } from "lucide-react";
@@ -16,6 +17,9 @@ export default function XoSo() {
       
       {/* Banner */}
       <PromotionBanner />
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
 
 
       {/* Games */}

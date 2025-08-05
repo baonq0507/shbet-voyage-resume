@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
+import MobileNavigation from "@/components/MobileNavigation";
 import { Trophy, Target, TrendingUp, Users, Star } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
 import sportsGame from "@/assets/sports-game.jpg";
@@ -50,6 +51,9 @@ const TheThao = () => {
       
       {/* Banner */}
       <PromotionBanner />
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
 
 
       {/* Games */}

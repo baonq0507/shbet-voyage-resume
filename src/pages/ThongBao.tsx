@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, Clock, Star, AlertTriangle, Info, Gift, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileNavigation from "@/components/MobileNavigation";
 
 const ThongBao = () => {
   const notifications = [
@@ -91,6 +92,9 @@ const ThongBao = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Mobile Navigation */}
+      <MobileNavigation />
       
       {/* Hero Section */}
       <section className="relative py-12 md:py-20 bg-gradient-to-r from-primary/20 to-secondary/20">

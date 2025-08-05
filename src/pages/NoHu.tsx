@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
+import MobileNavigation from "@/components/MobileNavigation";
 
 const NoHu = () => {
   return (
@@ -10,6 +11,9 @@ const NoHu = () => {
       
       {/* Banner */}
       <PromotionBanner />
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
 
       {/* Games */}
       <CategoryGamesList 

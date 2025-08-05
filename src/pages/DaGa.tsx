@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
+import MobileNavigation from "@/components/MobileNavigation";
 import { menuItems } from "@/utils/menuItems";
 import dagaGame from "@/assets/daga-game.jpg";
 
@@ -37,6 +38,9 @@ const DaGa = () => {
       
       {/* Banner */}
       <PromotionBanner />
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
 
       {/* Games */}
       <SimpleGamesList 

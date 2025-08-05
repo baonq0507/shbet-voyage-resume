@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Users, TrendingUp, DollarSign, Award, Phone, Mail, MessageCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileNavigation from "@/components/MobileNavigation";
 
 const DaiLy = () => {
   const commissionLevels = [
@@ -63,6 +64,9 @@ const DaiLy = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Mobile Navigation */}
+      <MobileNavigation />
       
       {/* Hero Section */}
       <section className="relative py-12 md:py-20 bg-gradient-to-r from-primary/20 to-secondary/20">
