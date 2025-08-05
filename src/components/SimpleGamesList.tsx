@@ -21,7 +21,7 @@ const GameCard = ({ title, description, image, featured, onClick }: GameCardProp
       featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
     } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}
   >
-    <CardHeader className="p-2 sm:p-3">
+    <CardHeader className="p-1 sm:p-2">
       <div className="relative overflow-hidden rounded-xl shadow-lg w-full" style={{ aspectRatio: '1 / 1' }}>
         <LazyImage 
           src={image} 
@@ -51,7 +51,7 @@ const GameCard = ({ title, description, image, featured, onClick }: GameCardProp
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/20 via-transparent to-transparent rotate-45 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000"></div>
       </div>
       
-      <CardTitle className="text-xs sm:text-sm md:text-base font-semibold group-hover:text-primary transition-colors mt-3 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
+      <CardTitle className="text-xs sm:text-sm font-semibold group-hover:text-primary transition-colors mt-2 text-center line-clamp-2 min-h-[2rem] flex items-center justify-center px-1">
         {title}
       </CardTitle>
     </CardHeader>
