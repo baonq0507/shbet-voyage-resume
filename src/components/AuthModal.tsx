@@ -136,17 +136,20 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
     setIsLoading(true);
     try {
-      // First, try to register player with external API
-      console.log('📤 Calling register-player API');
-      const { data: registerResponse, error: registerError } = await supabase.functions.invoke('register-player', {
+      // Call backend registration API that handles external API call
+      console.log('📤 Calling backend user-register API');
+      const { data: registerResponse, error: registerError } = await supabase.functions.invoke('user-register', {
         body: {
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber,
           username: formData.username,
-          displayName: formData.fullName
+          email: formData.email,
+          password: formData.password
         }
       });
 
       if (registerError) {
-        console.error('❌ Register player API error:', registerError);
+        console.error('❌ Registration API error:', registerError);
         toast({
           title: "Lỗi",
           description: "Có lỗi xảy ra khi đăng ký",
@@ -157,88 +160,37 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       }
 
       if (!registerResponse?.success) {
-        console.log('❌ Register player failed:', registerResponse?.error);
+        console.log('❌ Registration failed:', registerResponse?.error);
+        const errorMessage = registerResponse?.error === 'Username already exists' 
+          ? "Tên đăng nhập đã tồn tại"
+          : "Có lỗi xảy ra khi đăng ký";
+        
         toast({
           title: "Lỗi",
-          description: "Tên đăng nhập đã tồn tại",
+          description: errorMessage,
           variant: "destructive"
         });
         setIsLoading(false);
         return;
       }
 
-      console.log('✅ Register player successful, proceeding with Supabase registration');
+      console.log('✅ Registration successful, attempting auto-login');
 
-      // Check if username already exists in local database
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', formData.username)
-        .single();
-
-      if (existingUser) {
-        toast({
-          title: "Lỗi",
-          description: "Tên đăng nhập đã tồn tại",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { data, error } = await supabase.auth.signUp({
+      // Try to sign in the newly created user
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: formData.fullName,
-            username: formData.username,
-            phone_number: formData.phoneNumber
-          }
-        }
+        password: formData.password
       });
 
-      if (error) {
+      if (signInError) {
+        console.error('Auto sign-in error:', signInError);
         toast({
-          title: "Đăng ký thất bại",
-          description: error.message === "User already registered"
-            ? "Email đã được sử dụng"
-            : error.message,
-          variant: "destructive"
+          title: "Đăng ký thành công",
+          description: "Tài khoản đã được tạo. Vui lòng đăng nhập.",
+          variant: "default"
         });
+        setIsLoading(false);
         return;
-      }
-
-      // Automatically sign in the user after successful registration
-      if (data.user && !data.session) {
-        // Try to sign in, but handle email confirmation error gracefully
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password
-        });
-
-        if (signInError) {
-          console.error('Auto sign-in error:', signInError);
-          
-          // If it's an email confirmation error, show a different message
-          if (signInError.message.includes('email_not_confirmed') || signInError.message.includes('Email not confirmed')) {
-            toast({
-              title: "Đăng ký thành công",
-              description: "Tài khoản đã được tạo và email đã được xác nhận tự động. Vui lòng thử đăng nhập lại.",
-              variant: "default"
-            });
-          } else {
-            toast({
-              title: "Đăng ký thành công",
-              description: "Tài khoản đã được tạo. Vui lòng đăng nhập.",
-              variant: "default"
-            });
-          }
-          return;
-        }
       }
 
       toast({
@@ -249,6 +201,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       onAuthSuccess();
       onClose();
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: "Lỗi",
         description: "Có lỗi xảy ra khi đăng ký",
