@@ -66,9 +66,14 @@ interface SimpleGamesListProps {
 }
 
 const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: SimpleGamesListProps) => {
-  const { games, loading } = useGamesList(1, maxGames, category, gpids);
+  const { games, loading } = useGamesList(1, 50, category, gpids);
   const { loginToGame, loginToSportsGame } = useGameLogin();
   const { openGame } = useGameFrame();
+
+  // Sort games by rank (lower rank number = higher priority) and limit to maxGames
+  const sortedAndLimitedGames = games
+    .sort((a, b) => (a.rank || 999) - (b.rank || 999))
+    .slice(0, maxGames);
 
   const handleGameClick = async (game: any) => {
     console.log('🎯 Game clicked:', game);
@@ -104,7 +109,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: maxGames }).map((_, index) => (
               <Card key={index} className="overflow-hidden animate-pulse">
                 <div className="h-24 sm:h-28 md:h-32 bg-muted"></div>
@@ -114,9 +119,9 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
               </Card>
             ))}
           </div>
-        ) : games.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-            {games.map((game) => (
+        ) : sortedAndLimitedGames.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {sortedAndLimitedGames.map((game) => (
               <GameCard 
                 key={game.id} 
                 title={game.name}
