@@ -92,7 +92,6 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
   const { loginToGame } = useGameLogin();
   const { openGame } = useGameFrame();
   
-  
   // Map lobby IDs to API categories
   const getCategoryForTab = (tabId: string) => {
     // If defaultCategory is provided (for dedicated pages), use it
@@ -130,6 +129,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
       console.error('Error launching game:', error);
     }
   };
+
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -148,15 +148,14 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
             <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full relative z-10">
-              {/* Scroll hint for all devices */}
-              <div className="text-center text-xs text-muted-foreground mb-2 opacity-75">
+              {/* Scroll hint for mobile */}
+              <div className="text-center text-xs text-muted-foreground mb-2 opacity-75 md:hidden">
                 ← Vuốt để xem thêm →
               </div>
               
               <TabsList className="
                 flex 
                 justify-center
-                md:justify-center
                 overflow-x-auto overflow-y-hidden 
                 scrollbar-hide
                 gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 
@@ -167,17 +166,17 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                 touch-pan-x
                 [-webkit-overflow-scrolling:touch]
               ">
-                  {/* API Games Tab */}
-                  {showApiGames && (
-                    <TabsTrigger 
-                      value="api-games"
-                      className="group flex flex-col items-center justify-center gap-0.5 p-1.5 sm:p-2 h-auto min-h-[50px] sm:min-h-[55px] text-xs font-semibold rounded-lg min-w-[70px] max-w-[90px] flex-shrink-0 snap-start
-                        data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
-                        data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:scale-105 data-[state=active]:casino-glow
-                        hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-md
-                        transition-all duration-300 ease-out border border-transparent data-[state=active]:border-primary-glow/50
-                        relative overflow-hidden"
-                    >
+                {/* API Games Tab */}
+                {showApiGames && (
+                  <TabsTrigger 
+                    value="api-games"
+                    className="group flex flex-col items-center justify-center gap-0.5 p-1.5 sm:p-2 h-auto min-h-[50px] sm:min-h-[55px] text-xs font-semibold rounded-lg min-w-[70px] max-w-[90px] flex-shrink-0 snap-start
+                      data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
+                      data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:scale-105 data-[state=active]:casino-glow
+                      hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-md
+                      transition-all duration-300 ease-out border border-transparent data-[state=active]:border-primary-glow/50
+                      relative overflow-hidden"
+                  >
                     {/* Animated background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                     
@@ -214,7 +213,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
                   </TabsTrigger>
                 ))}
-               </TabsList>
+              </TabsList>
 
               {/* API Games Tab Content */}
               {showApiGames && (
