@@ -287,8 +287,6 @@ export type Database = {
           created_at: string
           current_uses: number
           description: string | null
-          discount_amount: number | null
-          discount_percentage: number | null
           end_date: string
           id: string
           image_url: string | null
@@ -308,8 +306,6 @@ export type Database = {
           created_at?: string
           current_uses?: number
           description?: string | null
-          discount_amount?: number | null
-          discount_percentage?: number | null
           end_date: string
           id?: string
           image_url?: string | null
@@ -329,8 +325,6 @@ export type Database = {
           created_at?: string
           current_uses?: number
           description?: string | null
-          discount_amount?: number | null
-          discount_percentage?: number | null
           end_date?: string
           id?: string
           image_url?: string | null
