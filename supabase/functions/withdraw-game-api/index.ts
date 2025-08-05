@@ -48,36 +48,53 @@ serve(async (req) => {
     }
 
     // Get username from authenticated user's profile
+    console.log('Creating Supabase client...');
+    const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization') ?? '' },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', // Use service role key for backend operations
     );
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-      console.error('User not authenticated');
+    // Get user from auth header manually
+    let user_id: string;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+      
+      if (authError || !userData.user) {
+        console.error('Authentication failed:', authError);
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'User not authenticated'
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      user_id = userData.user.id;
+    } else {
+      console.error('No valid authorization header');
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'User not authenticated'
+        error: 'No authorization header'
       }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    console.log('User authenticated:', user_id);
+
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('username')
-      .eq('user_id', user.id)
+      .eq('user_id', user_id)
       .single();
 
     if (profileError || !profile?.username) {
-      console.error('Username not found for user:', user.id);
+      console.error('Username not found for user:', user_id, profileError);
       return new Response(JSON.stringify({ 
         success: false,
         error: 'Username not found'
@@ -141,7 +158,7 @@ serve(async (req) => {
         .from('transactions')
         .insert([
           {
-            user_id: user.id,
+            user_id: user_id,
             type: 'withdrawal',
             amount: transformedAmount, // Use balance * 1000 as requested
             status: 'approved' // Mark as approved since API was successful

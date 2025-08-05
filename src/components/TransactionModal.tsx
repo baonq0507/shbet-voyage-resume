@@ -254,12 +254,27 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         amount: userBalance
       });
 
-      // Call withdrawal API
-      const { data: apiResponse, error: apiError } = await supabase.functions.invoke('withdraw-game-api', {
-        body: {
-          amount: userBalance // Use current balance as withdrawal amount
-        }
-      });
+      // Call withdrawal API with timeout
+      console.log('=== FRONTEND: About to call withdraw-game-api ===');
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      let apiResponse, apiError;
+      try {
+        const result = await supabase.functions.invoke('withdraw-game-api', {
+          body: {
+            amount: userBalance // Use current balance as withdrawal amount
+          }
+        });
+        apiResponse = result.data;
+        apiError = result.error;
+      } catch (error: any) {
+        console.error('Function invocation failed:', error);
+        apiError = { message: error.message || 'Network error' };
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       console.log('=== FRONTEND: API Response received ===');
       console.log('API Response:', apiResponse);
@@ -267,7 +282,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
       if (apiError) {
         console.error('Withdrawal API error:', apiError);
-        throw new Error('API call failed');
+        toast({
+          title: "Lỗi API",
+          description: `Lỗi gọi API: ${apiError.message || 'Không có phản hồi từ server'}`,
+          variant: "destructive",
+        });
+        return;
       }
 
       console.log('Withdrawal API response:', apiResponse);
