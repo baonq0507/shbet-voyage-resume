@@ -50,31 +50,6 @@ const BanCa = () => {
       {/* Banner */}
       <PromotionBanner />
 
-      {/* Features */}
-      <section className="py-16 bg-gradient-hero">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-8 text-white">
-            🐠 ĐẶC ĐIỂM NỔI BẬT 🐠
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-card/10 backdrop-blur-sm rounded-lg p-6 casino-glow">
-              <Fish className="w-12 h-12 text-secondary mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-gradient">Đa Dạng Cá</h3>
-              <div className="text-white/80">Hơn 100 loài cá với giá trị khác nhau</div>
-            </div>
-            <div className="bg-card/10 backdrop-blur-sm rounded-lg p-6 casino-glow">
-              <Target className="w-12 h-12 text-secondary mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-gradient">Vũ Khí Đa Dạng</h3>
-              <div className="text-white/80">Nhiều loại súng với sức mạnh khác nhau</div>
-            </div>
-            <div className="bg-card/10 backdrop-blur-sm rounded-lg p-6 casino-glow">
-              <Waves className="w-12 h-12 text-secondary mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-gradient">Boss Khủng</h3>
-              <div className="text-white/80">Thử thách với boss cá dev siêu to</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Games */}
       <SimpleGamesList 
