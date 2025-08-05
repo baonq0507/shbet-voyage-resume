@@ -22,10 +22,10 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
     providers.length > 0 ? Number(providers[0].id) : null
   );
   
-  // Temporarily simplified to fix TypeScript error
-  const games: Game[] = [];
-  const loading = false;
-  const error = null;
+  // Create gpids array properly
+  const gpidsForQuery = selectedProvider ? [selectedProvider] : undefined;
+  const gameListResult = useGamesList(1, 50, 'all', gpidsForQuery);
+  const { games, loading, error } = gameListResult;
   const { loginToGame } = useGameLogin();
   const { openGame } = useGameFrame();
 
