@@ -128,10 +128,10 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.id)}
-                    className={`w-full rounded-lg transition-all duration-200 ${
+                    className={`w-full rounded-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden ${
                       isActive(item.id)
-                        ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-sidebar-primary/20 font-medium'
-                        : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground/80'
+                        ? 'bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90 text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/25 border border-sidebar-primary/20 font-semibold'
+                        : 'hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-accent/80 hover:text-sidebar-accent-foreground text-sidebar-foreground/80 border border-transparent hover:border-sidebar-accent/30 hover:shadow-md'
                     } ${collapsed ? 'p-3 justify-center' : 'p-4'}`}
                     tooltip={collapsed ? item.title : undefined}
                   >
@@ -160,7 +160,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
           <SidebarGroup className="mt-8">
             <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
               <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-sidebar-accent/50 rounded-lg p-3 transition-colors group">
+                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-gradient-to-r hover:from-sidebar-accent/30 hover:to-sidebar-accent/20 rounded-xl p-3 transition-all duration-300 group hover:scale-[1.01] border border-transparent hover:border-sidebar-accent/30">
                   <span className="text-sidebar-foreground/80 font-semibold text-sm uppercase tracking-wider">
                     Thống kê nhanh
                   </span>
@@ -175,7 +175,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     {quickStats.map((stat, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent/30 hover:bg-sidebar-accent/50 transition-all duration-200 border border-sidebar-border/30 cursor-pointer group"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-sidebar-accent/20 to-sidebar-accent/10 hover:from-sidebar-accent/40 hover:to-sidebar-accent/20 transition-all duration-300 border border-sidebar-border/30 hover:border-sidebar-accent/50 cursor-pointer group hover:scale-[1.02] hover:shadow-md"
                       >
                         <div className={`p-2 rounded-md ${
                           index === 0 ? 'bg-green-500/20 text-green-400' :
