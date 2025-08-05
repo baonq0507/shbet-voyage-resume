@@ -148,40 +148,30 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
         }
       });
 
-      console.log('❌ Registration API error:', registerError);
+      console.log('📥 Registration response:', registerResponse);
+      console.log('🔌 Connection error:', registerError);
+
+      // Kiểm tra lỗi kết nối trước
       if (registerError) {
-        console.error('❌ Registration API error:', registerError);
+        console.error('❌ Connection error:', registerError);
         toast({
-          title: "Lỗi",
-          description: "Có lỗi xảy ra khi đăng ký",
+          title: "Lỗi kết nối",
+          description: "Không thể kết nối đến máy chủ. Vui lòng thử lại.",
           variant: "destructive"
         });
         setIsLoading(false);
         return;
       }
 
-      console.log('❌ Registration failed:', registerResponse);
+      // Kiểm tra phản hồi từ backend
       if (!registerResponse?.success) {
         console.log('❌ Registration failed:', registerResponse?.error);
-        let errorMessage = "Có lỗi xảy ra khi đăng ký";
         
-        // Xử lý các loại lỗi cụ thể
-        if (registerResponse?.error === 'Tên người dùng đã tồn tại') {
-          errorMessage = "Tên người dùng đã tồn tại";
-        } else if (registerResponse?.error === 'Định dạng email không hợp lệ') {
-          errorMessage = "Định dạng email không hợp lệ";
-        } else if (registerResponse?.error === 'Mật khẩu phải có ít nhất 6 ký tự') {
-          errorMessage = "Mật khẩu phải có ít nhất 6 ký tự";
-        } else if (registerResponse?.error === 'Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới') {
-          errorMessage = "Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới";
-        } else if (registerResponse?.error === 'Vui lòng điền đầy đủ thông tin') {
-          errorMessage = "Vui lòng điền đầy đủ thông tin";
-        } else if (registerResponse?.error) {
-          errorMessage = registerResponse.error;
-        }
+        // Hiển thị lỗi cụ thể từ backend
+        const errorMessage = registerResponse?.error || "Có lỗi xảy ra khi đăng ký";
         
         toast({
-          title: "Lỗi",
+          title: "Lỗi đăng ký",
           description: errorMessage,
           variant: "destructive"
         });
