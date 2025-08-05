@@ -71,8 +71,20 @@ const Header = () => {
     ]
   };
 
-  // Helper function to render icons (FontAwesome or Lucide)
-  const renderIcon = (iconName: string, size: number = 20) => {
+  // Helper function to render icons (FontAwesome, Lucide, or Image)
+  const renderIcon = (iconName: string, size: number = 20, type?: string) => {
+    // Handle image icons
+    if (type === 'image' || iconName.startsWith('/') || iconName.startsWith('http')) {
+      return (
+        <img 
+          src={iconName} 
+          alt="Menu Icon" 
+          className="w-5 h-5 object-contain"
+          style={{ width: `${size}px`, height: `${size}px` }}
+        />
+      );
+    }
+    
     // Handle FontAwesome icons
     if (iconName.startsWith('fas fa-')) {
       return <i className={`${iconName} text-${size === 16 ? 'sm' : 'lg'}`} style={{ fontSize: `${size}px` }} />;
@@ -189,7 +201,7 @@ const Header = () => {
                       : "text-foreground hover:bg-primary/10 hover:text-primary"
                   }`}
                 >
-                  {renderIcon(item.icon, 20)}
+                  {renderIcon(item.icon, 20, item.type)}
                   <span className="text-center leading-tight whitespace-nowrap">{item.text}</span>
                 </Link>
                 
@@ -394,7 +406,7 @@ const Header = () => {
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        {renderIcon(item.icon, 20)}
+                        {renderIcon(item.icon, 20, item.type)}
                         <span>{item.text}</span>
                       </Link>
                     ))}

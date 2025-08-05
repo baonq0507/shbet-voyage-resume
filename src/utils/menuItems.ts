@@ -19,7 +19,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'casino',
     text: 'CASINO',
-    icon: 'Diamond',
+    icon: '/lovable-uploads/de3e3037-01f8-42a0-9ec3-cd3a105f3f71.png',
+    type: 'image',
     path: '/casino',
     dropdown: [
       { id: 5, text: 'BG Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/bg.png', type: "image" },
@@ -37,7 +38,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'nohu',
     text: 'NỔ HŨ',
-    icon: 'Coins',
+    icon: '/lovable-uploads/7190c282-59db-4f45-95b5-19ad77174422.png',
+    type: 'image',
     path: '/nohu',
     dropdown: [
       { id: 2, text: 'CQ9 Điện tử', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/cq9.png', type: "image" },
@@ -56,7 +58,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'banca',
     text: 'BẮN CÁ',
-    icon: 'Fish',
+    icon: '/lovable-uploads/ca245fec-f6bb-49eb-92b4-867d65591308.png',
+    type: 'image',
     path: '/banca',
     dropdown: [
       { id: 1020, text: 'JIL Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/jili.png', type: "image" },
@@ -66,7 +69,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'thethao',
     text: 'THỂ THAO',
-    icon: 'Trophy',
+    icon: '/lovable-uploads/f4f2c744-94ef-4340-a202-577d71ae9fe4.png',
+    type: 'image',
     path: '/thethao',
     dropdown: [
       { id: 44, text: 'SABA Thể Thao', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/saba.png', type: "image" },
@@ -81,7 +85,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'gamebai',
     text: 'GAME BÀI',
-    icon: 'Spade',
+    icon: '/lovable-uploads/78123f22-e96e-4ad4-842e-3d3b9e9db79e.png',
+    type: 'image',
     path: '/gamebai',
     dropdown: [
       { id: 10, text: 'JOKER Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/jg.png', type: "image" },
@@ -92,7 +97,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'daga',
     text: 'ĐÁ GÀ',
-    icon: 'Bird',
+    icon: '/lovable-uploads/5d52ec90-de21-4da7-bea3-b529b5a8bf20.png',
+    type: 'image',
     path: '/daga',
     dropdown: [
       { id: 1001, text: 'WS168 Đá Gà', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/ws168.png', type: "image" },
