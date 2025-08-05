@@ -111,7 +111,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
         {/* Logo/Title Section */}
         {!collapsed && (
           <div className="mb-6 px-2">
-            <h2 className="text-xl font-bold text-sidebar-foreground mb-1 tracking-tight">
+            <h2 className="text-xl font-bold text-foreground mb-1 tracking-tight">
               Admin Panel
             </h2>
           </div>
@@ -119,7 +119,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
 
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold text-sm uppercase tracking-wider mb-3">
+          <SidebarGroupLabel className="text-foreground font-semibold text-sm uppercase tracking-wider mb-3 px-2">
             {collapsed ? "Menu" : "Quản lý chính"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -130,8 +130,8 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     onClick={() => onSectionChange(item.id)}
                     className={`w-full rounded-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden ${
                       isActive(item.id)
-                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 border border-yellow-400/20 font-semibold'
-                        : 'hover:bg-gradient-to-r hover:from-yellow-500/20 hover:to-yellow-400/10 hover:text-sidebar-accent-foreground text-sidebar-foreground/80 border border-transparent hover:border-yellow-400/30 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25 border border-primary/20 font-semibold'
+                        : 'hover:bg-card/50 hover:text-foreground text-muted-foreground border border-border/50 hover:border-primary/30 hover:shadow-md bg-card/20'
                     } ${collapsed ? 'p-4 justify-center' : 'py-5 px-4'}`}
                     tooltip={collapsed ? item.title : undefined}
                   >
@@ -160,11 +160,11 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
           <SidebarGroup className="mt-8">
             <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
               <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-gradient-to-r hover:from-sidebar-accent/30 hover:to-sidebar-accent/20 rounded-xl p-3 transition-all duration-300 group hover:scale-[1.01] border border-transparent hover:border-sidebar-accent/30">
-                  <span className="text-sidebar-foreground/80 font-semibold text-sm uppercase tracking-wider">
+                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-card/50 rounded-xl p-3 transition-all duration-300 group hover:scale-[1.01] border border-border/50 hover:border-primary/30">
+                  <span className="text-foreground font-semibold text-sm uppercase tracking-wider">
                     Thống kê nhanh
                   </span>
-                  <ChevronDown className={`h-4 w-4 transition-all duration-200 text-sidebar-foreground/60 group-hover:text-sidebar-foreground/80 ${
+                  <ChevronDown className={`h-4 w-4 transition-all duration-200 text-muted-foreground group-hover:text-foreground ${
                     isStatsOpen ? 'rotate-180' : ''
                   }`} />
                 </CollapsibleTrigger>
@@ -175,8 +175,8 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     {quickStats.map((stat, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-sidebar-accent/20 to-sidebar-accent/10 hover:from-sidebar-accent/40 hover:to-sidebar-accent/20 transition-all duration-300 border border-sidebar-border/30 hover:border-sidebar-accent/50 cursor-pointer group hover:scale-[1.02] hover:shadow-md"
-                      >
+                         className="flex items-center gap-3 p-3 rounded-xl bg-card/30 hover:bg-card/50 transition-all duration-300 border border-border hover:border-primary/30 cursor-pointer group hover:scale-[1.02] hover:shadow-md"
+                       >
                         <div className={`p-2 rounded-md ${
                           index === 0 ? 'bg-green-500/20 text-green-400' :
                           index === 1 ? 'bg-blue-500/20 text-blue-400' :
@@ -185,10 +185,10 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                           <stat.icon className="h-4 w-4" />
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-sm font-medium text-sidebar-foreground leading-tight">
+                          <span className="text-sm font-medium text-foreground leading-tight">
                             {stat.title}
                           </span>
-                          <span className="text-xs text-sidebar-foreground/60 mt-0.5">
+                          <span className="text-xs text-muted-foreground mt-0.5">
                             Xem chi tiết
                           </span>
                         </div>
