@@ -65,22 +65,24 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <LoadingProvider>
-        <GameFrameProvider>
-          <TooltipProvider>
-            <Toaster />
-            <BrowserRouter>
-              <AppContent />
-              <GlobalLoadingOverlay />
-            </BrowserRouter>
-          </TooltipProvider>
-        </GameFrameProvider>
-      </LoadingProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <LoadingProvider>
+            <GameFrameProvider>
+              <TooltipProvider>
+                <Toaster />
+                <AppContent />
+                <GlobalLoadingOverlay />
+              </TooltipProvider>
+            </GameFrameProvider>
+          </LoadingProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+};
 
 export default App;
