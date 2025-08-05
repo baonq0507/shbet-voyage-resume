@@ -82,12 +82,13 @@ export const BankAccountModal = ({ isOpen, onClose, onSuccess }: BankAccountModa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] animate-fade-in animate-scale-in">
+        <div className="animate-fade-in-up">{/* Content wrapper for additional animation */}
         <DialogHeader>
-          <DialogTitle>Liên kết tài khoản ngân hàng</DialogTitle>
+          <DialogTitle className="animate-fade-in delay-100">Liên kết tài khoản ngân hàng</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in delay-200">
           <div className="space-y-2">
             <Label htmlFor="bankName">Tên ngân hàng</Label>
             <Input
@@ -130,6 +131,7 @@ export const BankAccountModal = ({ isOpen, onClose, onSuccess }: BankAccountModa
             </Button>
           </div>
         </form>
+        </div>{/* End content wrapper */}
       </DialogContent>
     </Dialog>
   );

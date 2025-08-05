@@ -266,14 +266,15 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] bg-card border-border max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border max-h-[90vh] overflow-y-auto custom-scrollbar animate-fade-in animate-scale-in">
+        <div className="animate-fade-in-up">{/* Content wrapper for additional animation */}
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold text-gradient">
+          <DialogTitle className="text-center text-2xl font-bold text-gradient animate-fade-in delay-100">
             DINAMONDBET68
           </DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs defaultValue="login" className="w-full animate-fade-in delay-200">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login" className="text-sm font-medium">
               Đăng Nhập
@@ -473,6 +474,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
             </Button>
           </TabsContent>
         </Tabs>
+        </div>{/* End content wrapper */}
       </DialogContent>
     </Dialog>
   );

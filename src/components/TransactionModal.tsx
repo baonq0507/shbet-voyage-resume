@@ -362,17 +362,18 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar animate-fade-in animate-scale-in">
+        <div className="animate-fade-in-up">{/* Content wrapper for additional animation */}
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">
+          <DialogTitle className="text-xl font-bold text-center animate-fade-in delay-100">
             Giao dịch tài khoản
           </DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground">
+          <DialogDescription className="text-center text-muted-foreground animate-fade-in delay-150">
             Thực hiện giao dịch nạp tiền hoặc rút tiền cho tài khoản của bạn
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'deposit' | 'withdrawal')} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'deposit' | 'withdrawal')} className="w-full animate-fade-in delay-200">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="deposit" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
@@ -613,6 +614,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
           onClose={() => setShowBankAccountModal(false)}
           onSuccess={handleBankAccountSuccess}
         />
+        </div>{/* End content wrapper */}
       </DialogContent>
     </Dialog>
   );
