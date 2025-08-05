@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail } from 'lucide-react';
+import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
+import { EditUserModal } from '@/components/EditUserModal';
 
 interface UserProfile {
   id: string;
@@ -18,8 +19,11 @@ interface UserProfile {
   username: string;
   balance: number;
   phone_number?: string;
+  avatar_url?: string;
   created_at: string;
   last_login_at?: string;
+  last_login_ip?: string;
+  updated_at: string;
 }
 
 const Users: React.FC = () => {
@@ -28,6 +32,7 @@ const Users: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
 
   const { toast } = useToast();
 
@@ -44,7 +49,8 @@ const Users: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+      // Type assertion to handle the unknown last_login_ip type from Supabase
+      setUsers((data || []) as UserProfile[]);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -209,17 +215,30 @@ const Users: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setIsUserDetailsDialogOpen(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Chi tiết
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsUserDetailsDialogOpen(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Chi tiết
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsEditUserModalOpen(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Sửa
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -312,6 +331,14 @@ const Users: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit User Modal */}
+      <EditUserModal
+        isOpen={isEditUserModalOpen}
+        onClose={() => setIsEditUserModalOpen(false)}
+        user={selectedUser}
+        onUserUpdated={fetchUsers}
+      />
     </AdminLayout>
   );
 };
