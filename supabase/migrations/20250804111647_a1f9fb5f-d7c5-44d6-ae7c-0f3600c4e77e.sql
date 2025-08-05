@@ -1,2 +1,0 @@
--- Note: Functions is_first_deposit and validate_promotion_dates were already created in previous migration 20250804111326_322b72e1-e61f-4685-af1b-5ec673e2203b.sql
--- This migration is now redundant and can be skipped

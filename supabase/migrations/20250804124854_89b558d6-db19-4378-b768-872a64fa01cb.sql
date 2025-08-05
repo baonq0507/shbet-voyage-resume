@@ -1,2 +1,0 @@
--- Note: Storage policies for avatars were already created in previous migration 20250804121833_008f532e-3d8e-4ee8-9445-dec944489c1d.sql
--- This migration is now redundant and can be skipped
