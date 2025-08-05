@@ -305,10 +305,10 @@ const Header = () => {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Avatar className="h-5 w-5">
-                          <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
-                          <AvatarFallback>
+                      <Button variant="outline" size="sm" className="p-1 rounded-full">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={profile.avatar_url} alt={profile.full_name} className="object-cover" />
+                          <AvatarFallback className="text-xs">
                             {profile.full_name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
