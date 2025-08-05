@@ -21,9 +21,9 @@ sleep 5
 export VITE_USE_LOCAL_SUPABASE=true
 
 echo "🌐 Starting React development server..."
-echo "📊 Supabase Studio: http://206.206.126.141:54323"
-echo "🔗 API URL: http://206.206.126.141:54321"
-echo "🗄️  Database: postgresql://postgres:postgres@206.206.126.141:54322/postgres"
+echo "📊 Supabase Studio: https://api.dinamondbet68.com/"
+echo "🔗 API URL: https://api.dinamondbet68.com/"
+echo "🗄️  Database: postgresql://postgres:postgres@api.dinamondbet68.com:54322/postgres"
 
 # Start the React development server
 npm run dev 

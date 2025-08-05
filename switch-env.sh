@@ -18,8 +18,8 @@ switch_to_local() {
     sed -i 's/VITE_USE_LOCAL_SUPABASE=false/VITE_USE_LOCAL_SUPABASE=true/' $ENV_FILE
     sed -i 's/# VITE_USE_LOCAL_SUPABASE=true/VITE_USE_LOCAL_SUPABASE=true/' $ENV_FILE
     echo "✅ Đã chuyển sang LOCAL"
-    echo "📊 Supabase Studio: http://206.206.126.141:54323"
-    echo "🔗 API URL: http://206.206.126.141:54321"
+    echo "📊 Supabase Studio: https://api.dinamondbet68.com/"
+echo "🔗 API URL: https://api.dinamondbet68.com/"
     echo "💡 Chạy: ./start-local.sh để khởi động local"
 }
 
@@ -37,7 +37,7 @@ switch_to_cloud() {
 show_status() {
     if grep -q "VITE_USE_LOCAL_SUPABASE=true" $ENV_FILE; then
         echo "📍 Hiện tại: LOCAL"
-        echo "📊 Supabase Studio: http://206.206.126.141:54323"
+        echo "📊 Supabase Studio: https://api.dinamondbet68.com/"
     else
         echo "📍 Hiện tại: CLOUD"
         echo "🌐 Supabase URL: https://hlydtwqhiuwbikkjemck.supabase.co"

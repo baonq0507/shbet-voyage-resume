@@ -35,7 +35,7 @@ ip_version = "IPv6"
 [studio]
 enabled = true
 port = 54323
-api_url = "http://206.206.126.141:54321"
+api_url = "https://api.dinamondbet68.com/"
 
 [inbucket]
 enabled = true
@@ -48,8 +48,8 @@ buckets = []
 
 [auth]
 enabled = true
-site_url = "http://206.206.126.141:3000"
-additional_redirect_urls = ["http://206.206.126.141:3000"]
+site_url = "https://api.dinamondbet68.com/"
+additional_redirect_urls = ["https://api.dinamondbet68.com/"]
 jwt_expiry = 3600
 enable_signup = true
 

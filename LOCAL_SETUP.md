@@ -33,7 +33,7 @@ Tạo file `.env.local` trong thư mục gốc:
 VITE_USE_LOCAL_SUPABASE=true
 
 # Local Supabase URLs
-VITE_LOCAL_SUPABASE_URL=http://206.206.126.141:54321
+VITE_LOCAL_SUPABASE_URL=https://api.dinamondbet68.com/
 VITE_LOCAL_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 
 # Cloud Supabase URLs (fallback)
@@ -49,10 +49,10 @@ npm run dev
 
 ## URLs khi chạy Local
 
-- **React App**: http://206.206.126.141:8080
-- **Supabase Studio**: http://206.206.126.141:54323
-- **API URL**: http://206.206.126.141:54321
-- **Database**: postgresql://postgres:postgres@206.206.126.141:54322/postgres
+- **React App**: https://api.dinamondbet68.com/
+- **Supabase Studio**: https://api.dinamondbet68.com/
+- **API URL**: https://api.dinamondbet68.com/
+- **Database**: postgresql://postgres:postgres@api.dinamondbet68.com:54322/postgres
 
 ## Lợi ích của Local Development
 
@@ -118,5 +118,5 @@ supabase db pull
 # Pull data (nếu cần)
 supabase db dump --data-only > data.sql
 supabase db reset
-psql postgresql://postgres:postgres@206.206.126.141:54322/postgres < data.sql
+psql postgresql://postgres:postgres@api.dinamondbet68.com:54322/postgres < data.sql
 ```

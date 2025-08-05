@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export const useDepositApproval = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const approveDeposit = async (transactionId: string, username: string, amount: number) => {
     setIsProcessing(true);
@@ -18,7 +19,11 @@ export const useDepositApproval = () => {
 
       if (apiError) {
         console.error('deposit-game-api error:', apiError);
-        toast.error(`Lỗi kết nối API: ${apiError.message}`);
+        toast({
+          title: "Lỗi",
+          description: `Lỗi kết nối API: ${apiError.message}`,
+          variant: "destructive"
+        });
         return false;
       }
 
@@ -26,7 +31,11 @@ export const useDepositApproval = () => {
       if (!apiResult?.success) {
         const errorMessage = apiResult?.message || 'Lỗi không xác định từ hệ thống game';
         console.error('deposit-game-api failed:', apiResult);
-        toast.error(`Nạp tiền thất bại: ${errorMessage}`);
+        toast({
+          title: "Lỗi",
+          description: `Nạp tiền thất bại: ${errorMessage}`,
+          variant: "destructive"
+        });
         return false;
       }
 
@@ -44,7 +53,11 @@ export const useDepositApproval = () => {
 
       if (updateError) {
         console.error('Transaction update error:', updateError);
-        toast.error(`Lỗi cập nhật giao dịch: ${updateError.message}`);
+        toast({
+          title: "Lỗi",
+          description: `Lỗi cập nhật giao dịch: ${updateError.message}`,
+          variant: "destructive"
+        });
         return false;
       }
 
@@ -57,7 +70,11 @@ export const useDepositApproval = () => {
 
       if (profileError) {
         console.error('Profile fetch error:', profileError);
-        toast.error(`Lỗi lấy thông tin người dùng: ${profileError.message}`);
+        toast({
+          title: "Lỗi",
+          description: `Lỗi lấy thông tin người dùng: ${profileError.message}`,
+          variant: "destructive"
+        });
         return false;
       }
 
@@ -75,7 +92,11 @@ export const useDepositApproval = () => {
 
       if (balanceError) {
         console.error('Balance update error:', balanceError);
-        toast.error(`Lỗi cập nhật số dư: ${balanceError.message}`);
+        toast({
+          title: "Lỗi",
+          description: `Lỗi cập nhật số dư: ${balanceError.message}`,
+          variant: "destructive"
+        });
         return false;
       }
 
@@ -86,12 +107,19 @@ export const useDepositApproval = () => {
         newBalance 
       });
 
-      toast.success(`Đã duyệt nạp tiền thành công! Số dư mới: ${newBalance.toLocaleString('vi-VN')} VND`);
+      toast({
+        title: "Thành công",
+        description: `Đã duyệt nạp tiền thành công! Số dư mới: ${newBalance.toLocaleString('vi-VN')} VND`
+      });
       return true;
 
     } catch (error) {
       console.error('Error in deposit approval process:', error);
-      toast.error(`Lỗi hệ thống: ${error.message}`);
+      toast({
+        title: "Lỗi",
+        description: `Lỗi hệ thống: ${error.message}`,
+        variant: "destructive"
+      });
       return false;
     } finally {
       setIsProcessing(false);

@@ -148,6 +148,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
         }
       });
 
+      console.log('❌ Registration API error:', registerError);
       if (registerError) {
         console.error('❌ Registration API error:', registerError);
         toast({
@@ -159,11 +160,25 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
         return;
       }
 
+      console.log('❌ Registration failed:', registerResponse);
       if (!registerResponse?.success) {
         console.log('❌ Registration failed:', registerResponse?.error);
-        const errorMessage = registerResponse?.error === 'Username already exists' 
-          ? "Tên đăng nhập đã tồn tại"
-          : "Có lỗi xảy ra khi đăng ký";
+        let errorMessage = "Có lỗi xảy ra khi đăng ký";
+        
+        // Xử lý các loại lỗi cụ thể
+        if (registerResponse?.error === 'Tên người dùng đã tồn tại') {
+          errorMessage = "Tên người dùng đã tồn tại";
+        } else if (registerResponse?.error === 'Định dạng email không hợp lệ') {
+          errorMessage = "Định dạng email không hợp lệ";
+        } else if (registerResponse?.error === 'Mật khẩu phải có ít nhất 6 ký tự') {
+          errorMessage = "Mật khẩu phải có ít nhất 6 ký tự";
+        } else if (registerResponse?.error === 'Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới') {
+          errorMessage = "Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới";
+        } else if (registerResponse?.error === 'Vui lòng điền đầy đủ thông tin') {
+          errorMessage = "Vui lòng điền đầy đủ thông tin";
+        } else if (registerResponse?.error) {
+          errorMessage = registerResponse.error;
+        }
         
         toast({
           title: "Lỗi",
@@ -175,6 +190,15 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       }
 
       console.log('✅ Registration successful, attempting auto-login');
+
+      toast({
+        title: "Đăng ký thành công",
+        description: "Đang tự động đăng nhập...",
+        variant: "default"
+      });
+
+      // Wait a moment for the user to be fully created
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Try to sign in the newly created user
       const { error: signInError } = await supabase.auth.signInWithPassword({

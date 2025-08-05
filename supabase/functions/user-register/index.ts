@@ -12,6 +12,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Remove authorization requirement for registration
+  // This allows public registration without authentication
+
   try {
     console.log('🚀 User registration process started');
     
@@ -22,7 +25,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'All fields are required' 
+          error: 'Vui lòng điền đầy đủ thông tin' 
         }),
         { 
           status: 400, 
@@ -31,8 +34,88 @@ serve(async (req) => {
       );
     }
 
-    // Step 1: Call external player registration API
-    console.log(`📝 Step 1: Registering player externally - ${username}, ${fullName}`);
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log('❌ Invalid email format');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Định dạng email không hợp lệ' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      console.log('❌ Password too short');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Mật khẩu phải có ít nhất 6 ký tự' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate username format (alphanumeric and underscore only)
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+      console.log('❌ Invalid username format');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Step 1: Create Supabase client with service role
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+
+    // Step 2: Check if username already exists in local database
+    console.log('📝 Step 2: Checking local username availability');
+    const { data: existingUser } = await supabaseAdmin
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .single();
+
+    if (existingUser) {
+      console.log('❌ Username already exists in local database');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Tên người dùng đã tồn tại'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Step 3: Call external player registration API
+    console.log(`📝 Step 3: Registering player externally - ${username}, ${fullName}`);
 
     const externalRequestData = {
       Username: username,
@@ -65,7 +148,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Username already exists',
+          error: 'Tên người dùng đã tồn tại',
           details: externalResponseData?.error?.msg || 'Registration failed'
         }),
         { 
@@ -76,39 +159,6 @@ serve(async (req) => {
     }
 
     console.log('✅ External player registration successful');
-
-    // Step 2: Create Supabase client with service role
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
-
-    // Step 3: Check if username already exists in local database
-    console.log('📝 Step 3: Checking local username availability');
-    const { data: existingUser } = await supabaseAdmin
-      .from('profiles')
-      .select('username')
-      .eq('username', username)
-      .single();
-
-    if (existingUser) {
-      console.log('❌ Username already exists in local database');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Username already exists'
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
 
     // Step 4: Create user in Supabase Auth
     console.log('📝 Step 4: Creating user in Supabase Auth');
@@ -137,7 +187,36 @@ serve(async (req) => {
       );
     }
 
+    // Step 5: Create profile record in database
+    console.log('📝 Step 5: Creating profile record');
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .insert({
+        user_id: authData.user.id,
+        username: username,
+        full_name: fullName,
+        phone_number: phoneNumber,
+        avatar_url: '/src/assets/avatars/avatar-1.jpg'
+      });
+
+    if (profileError) {
+      console.error('❌ Failed to create profile record:', profileError);
+      // Try to delete the auth user if profile creation fails
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to create user profile'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     console.log('✅ User created successfully in Supabase Auth');
+    console.log('✅ Profile record created successfully');
     console.log('✅ Registration process completed successfully');
 
     return new Response(

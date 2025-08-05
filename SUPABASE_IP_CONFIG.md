@@ -1,7 +1,7 @@
 # Cấu hình Supabase với IP Server
 
 ## 📍 Thông tin Server
-- **Server IP**: `206.206.126.141`
+- **Server IP**: `api.dinamondbet68.com`
 - **Supabase Local**: Đang chạy và hoạt động
 - **Status**: ✅ Hoàn thành cấu hình
 
@@ -12,12 +12,12 @@
 [studio]
 enabled = true
 port = 54323
-api_url = "http://206.206.126.141:54321"
+api_url = "https://api.dinamondbet68.com/"
 
 [auth]
 enabled = true
-site_url = "http://206.206.126.141:3000"
-additional_redirect_urls = ["http://206.206.126.141:3000"]
+site_url = "https://api.dinamondbet68.com/"
+additional_redirect_urls = ["https://api.dinamondbet68.com/"]
 ```
 
 ### 2. Environment Variables (`.env.local`)
@@ -26,7 +26,7 @@ additional_redirect_urls = ["http://206.206.126.141:3000"]
 VITE_USE_LOCAL_SUPABASE=true
 
 # Local Supabase với IP server
-VITE_LOCAL_SUPABASE_URL=http://206.206.126.141:54321
+VITE_LOCAL_SUPABASE_URL=https://api.dinamondbet68.com/
 VITE_LOCAL_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 ```
 
@@ -37,20 +37,20 @@ VITE_LOCAL_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdX
 ## 🌐 URLs có thể truy cập
 
 ### Supabase Services
-- **API URL**: http://206.206.126.141:54321
-- **Studio URL**: http://206.206.126.141:54323
-- **GraphQL URL**: http://206.206.126.141:54321/graphql/v1
-- **Storage URL**: http://206.206.126.141:54321/storage/v1/s3
+- **API URL**: https://api.dinamondbet68.com/
+- **Studio URL**: https://api.dinamondbet68.com/
+- **GraphQL URL**: https://api.dinamondbet68.com/graphql/v1
+- **Storage URL**: https://api.dinamondbet68.com/storage/v1/s3
 
 ### Application
-- **Dev Server**: http://206.206.126.141:8080
-- **Alt Dev Server**: http://206.206.126.141:8081
+- **Dev Server**: https://api.dinamondbet68.com/
+- **Alt Dev Server**: https://api.dinamondbet68.com/
 
 ## ✅ Kiểm tra kết nối
 
 ### Supabase API
 ```bash
-curl -I http://206.206.126.141:54321/rest/v1/
+curl -I https://api.dinamondbet68.com/rest/v1/
 # Response: HTTP/1.1 200 OK
 ```
 
@@ -83,7 +83,7 @@ supabase status
 
 ## 📝 Lưu ý quan trọng
 
-1. **IP Server**: `206.206.126.141` đã được cấu hình đúng trong tất cả các file
+1. **IP Server**: `api.dinamondbet68.com` đã được cấu hình đúng trong tất cả các file
 2. **Ports**: 
    - Supabase API: 54321
    - Supabase Studio: 54323
@@ -100,4 +100,4 @@ supabase status
 
 ---
 
-**Trạng thái**: 🟢 Hoàn thành - Supabase đang chạy với IP server `206.206.126.141` 
+**Trạng thái**: 🟢 Hoàn thành - Supabase đang chạy với IP server `api.dinamondbet68.com` 
