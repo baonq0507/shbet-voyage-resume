@@ -11,7 +11,7 @@ const CLOUD_SUPABASE_URL = import.meta.env.VITE_CLOUD_SUPABASE_URL || "https://h
 const CLOUD_SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_CLOUD_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTA1MjQsImV4cCI6MjA2OTgyNjUyNH0.deIb21DJNmyM5ZjocFAl4j_47AF6CnY26LN0Bn9eB9k";
 
 // Determine which configuration to use based on environment variable
-const USE_LOCAL = true; // Force use local for development
+const USE_LOCAL = false; // Use cloud for production
 const SUPABASE_URL = USE_LOCAL ? LOCAL_SUPABASE_URL : CLOUD_SUPABASE_URL;
 const SUPABASE_ANON_KEY = USE_LOCAL ? LOCAL_SUPABASE_ANON_KEY : CLOUD_SUPABASE_PUBLISHABLE_KEY;
 
