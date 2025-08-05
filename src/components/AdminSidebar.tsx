@@ -114,9 +114,6 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
             <h2 className="text-xl font-bold text-sidebar-foreground mb-1 tracking-tight">
               Admin Panel
             </h2>
-            <p className="text-sm text-sidebar-foreground/70">
-              Quản lý hệ thống
-            </p>
           </div>
         )}
 
