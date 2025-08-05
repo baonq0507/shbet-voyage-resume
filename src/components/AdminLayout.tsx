@@ -27,7 +27,7 @@ export function AdminLayout({ children, activeSection = 'dashboard', onSectionCh
           {/* Content Container */}
           <main className="flex-1 relative overflow-hidden">
             {/* Content Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/30 pointer-events-none" />
             
             {/* Scrollable Content */}
             <div className="h-full overflow-auto custom-scrollbar">
