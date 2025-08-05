@@ -139,7 +139,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                       isActive(item.id) ? 'text-sidebar-primary-foreground' : ''
                     }`} />
                     {!collapsed && (
-                      <div className="flex flex-col items-start min-w-0 flex-1 hidden sm:flex">
+                      <div className="flex flex-col items-start min-w-0 flex-1">
                         <span className="font-medium text-sm leading-tight truncate w-full">
                           {item.title}
                         </span>
