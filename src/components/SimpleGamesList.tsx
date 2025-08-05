@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play, Star, Trophy, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGamesList } from "@/hooks/useGamesList";
+import { useGameLogin } from "@/hooks/useGameLogin";
+import { useGameFrame } from "@/hooks/useGameFrame";
 import { LazyImage } from "@/components/ui/lazy-image";
 
 interface GameCardProps {
@@ -9,12 +11,16 @@ interface GameCardProps {
   description: string;
   image: string;
   featured?: boolean;
+  onClick?: () => void;
 }
 
-const GameCard = ({ title, description, image, featured }: GameCardProps) => (
-  <Card className={`group cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 border-2 overflow-hidden ${
-    featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
-  } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}>
+const GameCard = ({ title, description, image, featured, onClick }: GameCardProps) => (
+  <Card 
+    onClick={onClick}
+    className={`group cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 border-2 overflow-hidden ${
+      featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
+    } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}
+  >
     <CardHeader className="p-2 sm:p-3">
       <div className="relative overflow-hidden rounded-xl shadow-lg">
         <LazyImage 
@@ -61,6 +67,30 @@ interface SimpleGamesListProps {
 
 const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: SimpleGamesListProps) => {
   const { games, loading } = useGamesList(1, maxGames, category, gpids);
+  const { loginToGame, loginToSportsGame } = useGameLogin();
+  const { openGame } = useGameFrame();
+
+  const handleGameClick = async (game: any) => {
+    console.log('🎯 Game clicked:', game);
+    
+    // Xác định có phải sports game không
+    const isSportsGame = category === 'sports' || game.category === 'sports';
+    
+    // Sử dụng gpid từ game hoặc random từ gpids nếu có
+    const gameGpid = game.gpid || (gpids && gpids.length > 0 ? gpids[Math.floor(Math.random() * gpids.length)] : 1);
+    
+    console.log('🎮 Login params:', { gpid: gameGpid, isSports: isSportsGame });
+    
+    // Login vào game
+    const gameUrl = isSportsGame 
+      ? await loginToSportsGame(gameGpid)
+      : await loginToGame(gameGpid);
+    
+    if (gameUrl) {
+      console.log('✅ Opening game with URL:', gameUrl);
+      openGame(gameUrl);
+    }
+  };
 
   return (
     <section className="py-12 md:py-16">
@@ -92,6 +122,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
                 description={`${game.provider} - ${game.type}`}
                 image={game.image}
                 featured={game.rank <= 3}
+                onClick={() => handleGameClick(game)}
               />
             ))}
           </div>
