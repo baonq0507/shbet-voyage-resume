@@ -16,6 +16,12 @@ verify_jwt = false
 [functions.get-paginated-transactions]
 verify_jwt = false
 
+[functions.deposit-game-api]
+verify_jwt = false
+
+[functions.withdraw-game-api]
+verify_jwt = false
+
 [db]
 port = 54322
 shadow_port = 54320

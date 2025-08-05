@@ -14,7 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const { username, amount } = await req.json();
+    console.log('=== WITHDRAW API STARTED ===');
+    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+    
+    const requestBody = await req.json();
+    console.log('Request body received:', requestBody);
+    
+    const { username, amount } = requestBody;
 
     console.log('Processing withdrawal API call for:', { username, amount });
 

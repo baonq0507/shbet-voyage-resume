@@ -247,6 +247,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
     setLoading(true);
     try {
+      console.log('=== FRONTEND: Starting withdrawal process ===');
+      console.log('User profile:', profile);
+      console.log('User balance:', userBalance);
+      console.log('About to call withdraw-game-api with:', {
+        username: profile.username,
+        amount: userBalance
+      });
+
       // Call withdrawal API
       const { data: apiResponse, error: apiError } = await supabase.functions.invoke('withdraw-game-api', {
         body: {
@@ -254,6 +262,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
           amount: userBalance // Use current balance as withdrawal amount
         }
       });
+
+      console.log('=== FRONTEND: API Response received ===');
+      console.log('API Response:', apiResponse);
+      console.log('API Error:', apiError);
 
       if (apiError) {
         console.error('Withdrawal API error:', apiError);
