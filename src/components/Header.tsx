@@ -9,6 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
+import { useGameLogin } from "@/hooks/useGameLogin";
+import { useGameFrame } from "@/hooks/useGameFrame";
 import AuthModal from "./AuthModal";
 import TransactionModal from "./TransactionModal";
 import casinoIcon from "@/assets/menu/casino-green.png";
@@ -34,6 +36,8 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, profile, signOut, loading } = useAuth();
   const { isAdmin } = useRole();
+  const { loginToGame, loginToSportsGame, loading: gameLoading, error: gameError } = useGameLogin();
+  const { openGame } = useGameFrame();
 
   // Game lobbies data
   const gameLobbies = {
@@ -98,6 +102,28 @@ const Header = () => {
     
     // Navigate to common lobby route with query parameter
     navigate(`/lobby?sanh=${lobbySlug}`);
+  };
+
+  const handleDropdownItemClick = async (dropdownItem: MenuDropdownItem, categoryId: string) => {
+    if (!user || !profile) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    const gpid = typeof dropdownItem.id === 'string' ? parseInt(dropdownItem.id) : dropdownItem.id;
+    const isSports = categoryId === 'thethao';
+    
+    try {
+      const gameUrl = isSports 
+        ? await loginToSportsGame(gpid)
+        : await loginToGame(gpid);
+        
+      if (gameUrl) {
+        openGame(gameUrl);
+      }
+    } catch (error) {
+      console.error('Failed to open game:', error);
+    }
   };
 
   return (
@@ -175,10 +201,11 @@ const Header = () => {
                       </div>
                       <div className="space-y-2">
                         {item.dropdown.map((dropdownItem) => (
-                          <Link
+                          <button
                             key={dropdownItem.id}
-                            to={`/lobby?provider=${dropdownItem.id}`}
-                            className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors"
+                            onClick={() => handleDropdownItemClick(dropdownItem, item.id)}
+                            disabled={gameLoading}
+                            className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors w-full text-left disabled:opacity-50"
                           >
                             {dropdownItem.type === 'image' ? (
                               <img src={dropdownItem.icon} alt={dropdownItem.text} className="w-5 h-5 object-contain" />
@@ -186,7 +213,8 @@ const Header = () => {
                               renderIcon(dropdownItem.icon, 16)
                             )}
                             <span className="text-sm">{dropdownItem.text}</span>
-                          </Link>
+                            {gameLoading && <div className="ml-auto w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin" />}
+                          </button>
                         ))}
                       </div>
                     </div>
