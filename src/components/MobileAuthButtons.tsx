@@ -15,9 +15,9 @@ const MobileAuthButtons = () => {
         </Button>
         
         <Button 
-          variant="casino" 
+          variant="outline" 
           size="sm" 
-          className="flex-1 h-10 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          className="flex-1 h-10 text-sm font-semibold border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
         >
           <UserPlus className="w-4 h-4 mr-2" />
           Đăng Ký
