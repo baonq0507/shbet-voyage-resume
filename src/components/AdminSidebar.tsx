@@ -107,7 +107,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
 
   return (
     <Sidebar className={`transition-all duration-300 border-r border-sidebar-border ${collapsed ? "w-16" : "w-72"}`}>
-      <SidebarContent className="bg-gradient-to-br from-background via-background/95 to-card/30 backdrop-blur-sm p-4 pt-6">
+      <SidebarContent className="bg-background backdrop-blur-sm p-4 pt-6">
         {/* Logo/Title Section */}
         {!collapsed && (
           <div className="mb-6 px-2">
