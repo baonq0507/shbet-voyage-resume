@@ -30,16 +30,32 @@ const GameFrame = () => {
   };
 
   const handleFullscreen = () => {
-    const gameContainer = document.querySelector('#game-container');
-    if (gameContainer) {
-      if (gameContainer.requestFullscreen) {
-        gameContainer.requestFullscreen();
-      } else if ((gameContainer as any).webkitRequestFullscreen) {
-        (gameContainer as any).webkitRequestFullscreen();
-      } else if ((gameContainer as any).mozRequestFullScreen) {
-        (gameContainer as any).mozRequestFullScreen();
-      } else if ((gameContainer as any).msRequestFullscreen) {
-        (gameContainer as any).msRequestFullscreen();
+    const iframe = document.querySelector('#game-iframe') as HTMLIFrameElement;
+    if (iframe) {
+      // Try iframe fullscreen first (better for games)
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen().catch(() => {
+          // Fallback to container fullscreen
+          const gameContainer = document.querySelector('#game-container');
+          if (gameContainer?.requestFullscreen) {
+            gameContainer.requestFullscreen();
+          }
+        });
+      } else if ((iframe as any).webkitRequestFullscreen) {
+        (iframe as any).webkitRequestFullscreen();
+      } else if ((iframe as any).webkitEnterFullscreen) {
+        // iOS Safari video fullscreen
+        (iframe as any).webkitEnterFullscreen();
+      } else {
+        // Fallback to container
+        const gameContainer = document.querySelector('#game-container');
+        if (gameContainer) {
+          if ((gameContainer as any).webkitRequestFullscreen) {
+            (gameContainer as any).webkitRequestFullscreen();
+          } else if ((gameContainer as any).mozRequestFullScreen) {
+            (gameContainer as any).mozRequestFullScreen();
+          }
+        }
       }
     }
   };
@@ -104,6 +120,7 @@ const GameFrame = () => {
 
         {/* Game iframe */}
         <iframe
+          id="game-iframe"
           src={gameUrl}
           className="w-full min-h-[80vh] md:min-h-[85vh] border-0"
           onLoad={handleIframeLoad}
@@ -111,6 +128,7 @@ const GameFrame = () => {
           title="Game"
           allow="fullscreen; autoplay; camera; microphone; geolocation"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
+          allowFullScreen
         />
       </div>
     </div>
