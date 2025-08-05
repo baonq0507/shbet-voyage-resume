@@ -136,7 +136,40 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
     setIsLoading(true);
     try {
-      // Check if username already exists
+      // First, try to register player with external API
+      console.log('📤 Calling register-player API');
+      const { data: registerResponse, error: registerError } = await supabase.functions.invoke('register-player', {
+        body: {
+          username: formData.username,
+          displayName: formData.fullName
+        }
+      });
+
+      if (registerError) {
+        console.error('❌ Register player API error:', registerError);
+        toast({
+          title: "Lỗi",
+          description: "Có lỗi xảy ra khi đăng ký",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!registerResponse?.success) {
+        console.log('❌ Register player failed:', registerResponse?.error);
+        toast({
+          title: "Lỗi",
+          description: "Tên đăng nhập đã tồn tại",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('✅ Register player successful, proceeding with Supabase registration');
+
+      // Check if username already exists in local database
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('username')
