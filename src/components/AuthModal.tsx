@@ -65,13 +65,26 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       });
 
       if (error) {
-        toast({
-          title: "Đăng nhập thất bại",
-          description: error.message === "Invalid login credentials" 
-            ? "Email hoặc mật khẩu không đúng"
-            : error.message,
-          variant: "destructive"
-        });
+        // Handle email confirmation error specifically
+        if (error.message.includes('email_not_confirmed') || error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email chưa được xác nhận",
+            description: "Hệ thống đang xử lý xác nhận email tự động. Vui lòng thử lại sau vài giây.",
+            variant: "destructive"
+          });
+        } else if (error.message === "Invalid login credentials") {
+          toast({
+            title: "Đăng nhập thất bại",
+            description: "Email hoặc mật khẩu không đúng",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Đăng nhập thất bại",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
         return;
       }
 
@@ -168,6 +181,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
       // Automatically sign in the user after successful registration
       if (data.user && !data.session) {
+        // Try to sign in, but handle email confirmation error gracefully
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password
@@ -175,11 +189,21 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
         if (signInError) {
           console.error('Auto sign-in error:', signInError);
-          toast({
-            title: "Đăng ký thành công",
-            description: "Tài khoản đã được tạo. Vui lòng đăng nhập.",
-            variant: "default"
-          });
+          
+          // If it's an email confirmation error, show a different message
+          if (signInError.message.includes('email_not_confirmed') || signInError.message.includes('Email not confirmed')) {
+            toast({
+              title: "Đăng ký thành công",
+              description: "Tài khoản đã được tạo và email đã được xác nhận tự động. Vui lòng thử đăng nhập lại.",
+              variant: "default"
+            });
+          } else {
+            toast({
+              title: "Đăng ký thành công",
+              description: "Tài khoản đã được tạo. Vui lòng đăng nhập.",
+              variant: "default"
+            });
+          }
           return;
         }
       }
