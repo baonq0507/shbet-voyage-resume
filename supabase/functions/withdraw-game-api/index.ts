@@ -15,89 +15,74 @@ serve(async (req) => {
 
   try {
     console.log('=== WITHDRAW API STARTED ===');
-    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
     
-    // Parse request body with error handling
-    let requestBody;
-    try {
-      requestBody = await req.json();
-      console.log('Request body received:', requestBody);
-    } catch (parseError) {
-      console.error('Error parsing request body:', parseError);
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: 'Invalid JSON in request body'
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Parse request body
+    const requestBody = await req.json();
+    console.log('Request body:', requestBody);
     
     const { amount } = requestBody;
 
-    // Validate required fields
-    if (!amount) {
-      console.error('Missing required field: amount');
+    // Validate amount
+    if (!amount || typeof amount !== 'number') {
+      console.error('Invalid amount:', amount);
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Missing required field: amount'
+        error: 'Valid amount is required'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Get username from authenticated user's profile
-    console.log('Creating Supabase client...');
+    // Get auth token from header
     const authHeader = req.headers.get('Authorization');
-    console.log('Auth header present:', !!authHeader);
-    
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', // Use service role key for backend operations
-    );
-
-    // Get user from auth header manually
-    let user_id: string;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
-      
-      if (authError || !userData.user) {
-        console.error('Authentication failed:', authError);
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: 'User not authenticated'
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      user_id = userData.user.id;
-    } else {
-      console.error('No valid authorization header');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('No authorization header');
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'No authorization header'
+        error: 'Authorization required'
       }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('User authenticated:', user_id);
+    // Create Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
+    // Get user from token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !userData.user) {
+      console.error('Authentication failed:', authError);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Invalid authentication'
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = userData.user.id;
+    console.log('User authenticated:', userId);
+
+    // Get username from profile
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('username')
-      .eq('user_id', user_id)
+      .eq('user_id', userId)
       .single();
 
     if (profileError || !profile?.username) {
-      console.error('Username not found for user:', user_id, profileError);
+      console.error('Username not found:', profileError);
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Username not found'
+        error: 'User profile not found'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -105,16 +90,14 @@ serve(async (req) => {
     }
 
     const username = profile.username;
-    console.log('Processing withdrawal API call for:', { username, amount });
+    console.log('Username found:', username);
 
-    // Transform amount based on business rules (same as deposit):
-    // If amount < 10000: divide by 1000
-    // If amount >= 10000: keep the same
+    // Transform amount for third-party API
     const apiAmount = amount < 10000 ? amount / 1000 : amount;
-    
     console.log('Amount transformation:', { originalAmount: amount, apiAmount });
 
     // Call third-party API
+    console.log('Calling third-party withdraw API...');
     const response = await fetch('https://api.tw954.com/withdraw-game', {
       method: 'POST',
       headers: {
@@ -129,44 +112,27 @@ serve(async (req) => {
     console.log('Third-party API response status:', response.status);
 
     if (response.status === 200) {
-      let responseData;
-      try {
-        responseData = await response.json();
-        console.log('Withdrawal API response data:', responseData);
-      } catch (parseError) {
-        console.error('Error parsing third-party response:', parseError);
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: 'Invalid response from third-party service'
-        }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      const responseData = await response.json();
+      console.log('Third-party API response data:', responseData);
       
-      // Transform the balance from API response (multiply by 1000)
-      const transformedAmount = responseData.balance ? responseData.balance * 1000 : amount;
+      // Transform balance for transaction (multiply by 1000)
+      const transactionAmount = responseData.balance ? responseData.balance * 1000 : amount;
       
-      console.log('Amount transformation:', { 
-        originalBalance: responseData.balance, 
-        transformedAmount,
-        requestAmount: amount 
-      });
-
-      // Create transaction record in database
+      console.log('Creating transaction record...');
+      // Create transaction record
       const { error: dbError } = await supabaseClient
         .from('transactions')
         .insert([
           {
-            user_id: user_id,
+            user_id: userId,
             type: 'withdrawal',
-            amount: transformedAmount, // Use balance * 1000 as requested
-            status: 'approved' // Mark as approved since API was successful
+            amount: transactionAmount, // Use balance * 1000
+            status: 'approved'
           }
         ]);
 
       if (dbError) {
-        console.error('Database error creating transaction:', dbError);
+        console.error('Database error:', dbError);
         return new Response(JSON.stringify({ 
           success: false,
           error: 'Failed to create transaction record'
@@ -176,30 +142,30 @@ serve(async (req) => {
         });
       }
       
+      console.log('Transaction created successfully');
       return new Response(JSON.stringify({ 
         success: true,
-        status: response.status,
-        amount: transformedAmount,
+        amount: transactionAmount,
         message: 'Withdrawal processed successfully'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      console.error('Third-party API returned error status:', response.status);
+      console.error('Third-party API error, status:', response.status);
       return new Response(JSON.stringify({ 
         success: false,
-        status: response.status,
-        message: 'Withdrawal failed at third-party service'
+        error: 'Withdrawal failed at third-party service'
       }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
   } catch (error) {
-    console.error('Error in withdraw-game-api function:', error);
+    console.error('Error in withdraw-game-api:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: error.message 
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
