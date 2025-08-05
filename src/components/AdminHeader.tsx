@@ -27,55 +27,48 @@ export function AdminHeader() {
     <header className="h-16 lg:h-18 border-b border-sidebar-border/20 bg-sidebar/80 backdrop-blur-xl supports-[backdrop-filter]:bg-sidebar/60 sticky top-0 z-50 transition-all duration-300">
       <div className="flex h-full items-center justify-between px-4 lg:px-6 max-w-full w-full mx-auto">
         {/* Left Section */}
-        <div className="flex items-center gap-3 lg:gap-4 min-w-0">
-          <SidebarTrigger className="hover:bg-sidebar-accent transition-colors duration-200" />
+        <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
+          <SidebarTrigger className="hover:bg-sidebar-accent transition-colors duration-200 flex-shrink-0" />
           
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {/* Logo/Icon */}
-            <div className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-primary shadow-md">
-              <Crown className="h-4 w-4 text-white" />
+            <div className="hidden sm:flex items-center justify-center w-7 h-7 rounded-md bg-gradient-primary shadow-sm flex-shrink-0">
+              <Crown className="h-3.5 w-3.5 text-white" />
             </div>
             
-            {/* Title */}
-            <div className="flex items-center gap-2 lg:gap-3 min-w-0">
-              <div className="min-w-0">
-                <h1 className="text-lg lg:text-xl font-bold text-sidebar-foreground truncate">
-                  Admin CMS
-                </h1>
-                <p className="hidden lg:block text-xs text-sidebar-foreground/60 truncate">
-                  Casino Management System
-                </p>
-              </div>
-              
-              {/* Status Badge */}
-              <Badge variant="outline" className="hidden md:flex items-center gap-1 bg-green-500/10 text-green-400 border-green-500/20">
-                <Activity className="h-3 w-3" />
-                <span className="text-xs">Online</span>
-              </Badge>
+            {/* Title - Compact */}
+            <div className="min-w-0 flex-1">
+              <h1 className="text-base lg:text-lg font-bold text-sidebar-foreground truncate">
+                Admin CMS
+              </h1>
+              <p className="hidden xl:block text-xs text-sidebar-foreground/60 truncate">
+                Casino Management
+              </p>
             </div>
+            
+            {/* Status Badge - More compact */}
+            <Badge variant="outline" className="hidden lg:flex items-center gap-1 bg-green-500/10 text-green-400 border-green-500/20 px-2 py-1 flex-shrink-0">
+              <Activity className="h-2.5 w-2.5" />
+              <span className="text-xs">Online</span>
+            </Badge>
           </div>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-3 lg:gap-4">
-          {/* Quick Actions - Hidden on mobile */}
-          <div className="hidden lg:flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* User Menu */}
+        {/* Right Section - Compact */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Quick Actions - Removed to save space */}
+          
+          {/* User Menu - Compact */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full ring-2 ring-transparent hover:ring-sidebar-primary/20 transition-all duration-200">
-                <Avatar className="h-9 w-9 ring-2 ring-sidebar-border/30">
-                  <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full ring-2 ring-transparent hover:ring-sidebar-primary/20 transition-all duration-200">
+                <Avatar className="h-7 w-7 ring-1 ring-sidebar-border/30">
+                  <AvatarFallback className="bg-gradient-primary text-white font-semibold text-xs">
                     {user?.email?.charAt(0).toUpperCase() || 'A'}
                   </AvatarFallback>
                 </Avatar>
-                {/* Online indicator */}
-                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full ring-2 ring-sidebar border-sidebar animate-pulse" />
+                {/* Online indicator - Smaller */}
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full ring-1 ring-sidebar animate-pulse" />
               </Button>
             </DropdownMenuTrigger>
             
