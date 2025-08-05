@@ -1,2 +1,0 @@
--- Enable real-time for transactions table
--- This will be applied after the transactions table is created

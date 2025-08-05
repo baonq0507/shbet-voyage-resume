@@ -1,2 +1,0 @@
--- Enable real-time for profiles table
--- This will be applied after the profiles table is created
