@@ -142,7 +142,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -164,6 +164,23 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
           variant: "destructive"
         });
         return;
+      }
+
+      // Automatically sign in the user after successful registration
+      if (data.user && !data.session) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password
+        });
+
+        if (signInError) {
+          toast({
+            title: "Đăng ký thành công",
+            description: "Tài khoản đã được tạo. Vui lòng đăng nhập.",
+            variant: "default"
+          });
+          return;
+        }
       }
 
       toast({
