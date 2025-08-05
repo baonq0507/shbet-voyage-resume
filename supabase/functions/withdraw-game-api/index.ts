@@ -18,6 +18,13 @@ serve(async (req) => {
 
     console.log('Processing withdrawal API call for:', { username, amount });
 
+    // Transform amount based on business rules (same as deposit):
+    // If amount < 10000: divide by 1000
+    // If amount >= 10000: keep the same
+    const apiAmount = amount < 10000 ? amount / 1000 : amount;
+    
+    console.log('Amount transformation:', { originalAmount: amount, apiAmount });
+
     // Call third-party API
     const response = await fetch('https://api.tw954.com/withdraw-game', {
       method: 'POST',
@@ -26,7 +33,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         username: username,
-        amount: amount,
+        amount: apiAmount,
       }),
     });
 
