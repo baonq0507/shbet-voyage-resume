@@ -160,7 +160,14 @@ const Admin = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTransactions((data || []) as Transaction[]);
+      
+      // Map the data to match the Transaction interface
+      const mappedTransactions = (data || []).map((item: any) => ({
+        ...item,
+        profiles: item.profiles && !item.profiles.error ? item.profiles : undefined
+      }));
+      
+      setTransactions(mappedTransactions as Transaction[]);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast({
@@ -215,24 +222,26 @@ const Admin = () => {
       if (!transaction) return;
 
       if (action === 'approve' && transaction.type === 'deposit') {
-        await approveDeposit(transactionId, adminNote || '', {
-          onSuccess: () => {
-            toast({
-              title: "Thành công",
-              description: `Đã duyệt ${transaction.type === 'deposit' ? 'nạp' : transaction.type === 'bonus' ? 'Bonus' : 'rút tiền'} ${transaction.amount?.toLocaleString()} VND`,
-            });
-            setSelectedTransaction(null);
-            fetchTransactions();
-            fetchStats();
-          },
-          onError: (error) => {
-            toast({
-              title: "Lỗi",
-              description: error,
-              variant: "destructive"
-            });
-          }
-        });
+        const username = transaction.profiles?.username;
+        if (!username) {
+          toast({
+            title: "Lỗi",
+            description: "Không tìm thấy thông tin người dùng",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        const success = await approveDeposit(transactionId, username, transaction.amount);
+        if (success) {
+          toast({
+            title: "Thành công",
+            description: `Đã duyệt nạp tiền ${transaction.amount?.toLocaleString()} VND`,
+          });
+          setSelectedTransaction(null);
+          fetchTransactions();
+          fetchStats();
+        }
       } else {
         const { error } = await supabase
           .from('transactions')
@@ -315,8 +324,8 @@ const Admin = () => {
         title: data.title,
         description: data.description,
         promotion_type: data.promotionType,
-        bonus_percentage: data.bonusType === 'percentage' ? data.bonusValue : null,
-        bonus_amount: data.bonusType === 'amount' ? data.bonusValue : null,
+        bonus_percentage: data.bonusType === 'percentage' ? data.bonusPercentage : null,
+        bonus_amount: data.bonusType === 'amount' ? data.bonusAmount : null,
         min_deposit: data.minDeposit,
         max_uses: data.maxUses,
         current_uses: 0,
