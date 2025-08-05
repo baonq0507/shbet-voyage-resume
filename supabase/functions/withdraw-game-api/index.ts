@@ -17,10 +17,35 @@ serve(async (req) => {
     console.log('=== WITHDRAW API STARTED ===');
     console.log('Request headers:', Object.fromEntries(req.headers.entries()));
     
-    const requestBody = await req.json();
-    console.log('Request body received:', requestBody);
+    // Parse request body with error handling
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('Request body received:', requestBody);
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Invalid JSON in request body'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     const { username, amount } = requestBody;
+
+    // Validate required fields
+    if (!username || !amount) {
+      console.error('Missing required fields:', { username, amount });
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Missing required fields: username and amount'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     console.log('Processing withdrawal API call for:', { username, amount });
 
@@ -46,8 +71,20 @@ serve(async (req) => {
     console.log('Third-party API response status:', response.status);
 
     if (response.status === 200) {
-      const responseData = await response.json();
-      console.log('Withdrawal API response data:', responseData);
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('Withdrawal API response data:', responseData);
+      } catch (parseError) {
+        console.error('Error parsing third-party response:', parseError);
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Invalid response from third-party service'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       
       // Transform the balance from API response (multiply by 1000)
       const transformedAmount = responseData.balance ? responseData.balance * 1000 : amount;
@@ -67,6 +104,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
+      console.error('Third-party API returned error status:', response.status);
       return new Response(JSON.stringify({ 
         success: false,
         status: response.status,
