@@ -36,7 +36,7 @@ serve(async (req) => {
 
     // Get auth token from header
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader) {
       console.error('No authorization header');
       return new Response(JSON.stringify({ 
         success: false,
@@ -47,17 +47,21 @@ serve(async (req) => {
       });
     }
 
-    // Create Supabase client
+    // Create Supabase client with the user's JWT token
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
     );
 
-    // Get user from token
-    const token = authHeader.replace('Bearer ', '');
-    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+    // Get current user (JWT will be verified automatically)
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
-    if (authError || !userData.user) {
+    if (authError || !user) {
       console.error('Authentication failed:', authError);
       return new Response(JSON.stringify({ 
         success: false,
@@ -68,7 +72,7 @@ serve(async (req) => {
       });
     }
 
-    const userId = userData.user.id;
+    const userId = user.id;
     console.log('User authenticated:', userId);
 
     // Get username from profile
