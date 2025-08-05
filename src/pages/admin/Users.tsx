@@ -240,12 +240,12 @@ const Users: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Thông tin</TableHead>
-                      <TableHead>Số dư</TableHead>
-                      <TableHead>Liên hệ</TableHead>
-                      <TableHead>Ngày tạo</TableHead>
-                      <TableHead>Đăng nhập cuối</TableHead>
-                      <TableHead>Thao tác</TableHead>
+                      <TableHead className="w-[200px]">Thông tin</TableHead>
+                      <TableHead className="w-[120px]">Số dư</TableHead>
+                      <TableHead className="w-[200px]">Liên hệ</TableHead>
+                      <TableHead className="w-[120px]">Ngày tạo</TableHead>
+                      <TableHead className="w-[140px]">Đăng nhập cuối</TableHead>
+                      <TableHead className="w-[280px]">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -292,8 +292,8 @@ const Users: React.FC = () => {
                             <Badge variant="secondary">Chưa đăng nhập</Badge>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
+                        <TableCell className="w-[280px]">
+                          <div className="flex gap-2 flex-wrap">
                             <Button
                               variant="outline"
                               size="sm"
@@ -301,6 +301,7 @@ const Users: React.FC = () => {
                                 setSelectedUser(user);
                                 setIsUserDetailsDialogOpen(true);
                               }}
+                              className="min-w-[80px]"
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               Chi tiết
@@ -312,6 +313,7 @@ const Users: React.FC = () => {
                                 setSelectedUser(user);
                                 setIsEditUserModalOpen(true);
                               }}
+                              className="min-w-[60px]"
                             >
                               <Edit className="w-4 h-4 mr-1" />
                               Sửa
@@ -323,7 +325,7 @@ const Users: React.FC = () => {
                                 setUserToDelete(user);
                                 setIsDeleteDialogOpen(true);
                               }}
-                              className="text-destructive hover:text-destructive"
+                              className="text-destructive hover:text-destructive min-w-[60px]"
                             >
                               <Trash2 className="w-4 h-4 mr-1" />
                               Xóa
