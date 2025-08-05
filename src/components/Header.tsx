@@ -13,6 +13,7 @@ import { useGameLogin } from "@/hooks/useGameLogin";
 import { useGameFrame } from "@/hooks/useGameFrame";
 import AuthModal from "./AuthModal";
 import TransactionModal from "./TransactionModal";
+import LoadingOverlay from "./LoadingOverlay";
 import casinoIcon from "@/assets/menu/casino-green.png";
 import nohuIcon from "@/assets/menu/nohu-green.png";
 import bancaIcon from "@/assets/menu/banca-green.png";
@@ -462,6 +463,12 @@ const Header = () => {
         isOpen={isTransactionModalOpen} 
         onClose={() => setIsTransactionModalOpen(false)}
         initialTab={transactionType}
+      />
+
+      <LoadingOverlay
+        isVisible={gameLoading}
+        title="Đang đăng nhập game..."
+        description="Đang kết nối với server game và xác thực tài khoản của bạn"
       />
     </header>
   );
