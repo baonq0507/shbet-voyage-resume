@@ -96,9 +96,11 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gradient">{title}</span>
-          </h2>
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-yellow-500"></div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mx-4 text-yellow-500">{title}</h2>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-yellow-500"></div>
+          </div>
           <div className="w-16 sm:w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
