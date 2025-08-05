@@ -101,7 +101,6 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
             <h2 className="text-xl sm:text-2xl font-bold mx-4 text-yellow-500">{title}</h2>
             <div className="flex-1 h-px bg-gradient-to-l from-transparent to-yellow-500"></div>
           </div>
-          <div className="w-16 sm:w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
         {loading ? (
