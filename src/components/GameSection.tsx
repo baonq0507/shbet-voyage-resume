@@ -147,19 +147,19 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
             <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-xl"></div>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full relative z-10">
-              {/* Scroll hint for mobile/tablet */}
-              <div className="md:hidden text-center text-xs text-muted-foreground mb-2 opacity-75">
+              {/* Scroll hint for all devices */}
+              <div className="text-center text-xs text-muted-foreground mb-2 opacity-75">
                 ← Vuốt để xem thêm →
               </div>
               
               <div className="relative">
                 {/* Left gradient overlay */}
-                <div className="md:hidden absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card/90 to-transparent pointer-events-none z-10"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card/90 to-transparent pointer-events-none z-10"></div>
                 {/* Right gradient overlay */}
-                <div className="md:hidden absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-card/90 to-transparent pointer-events-none z-10"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-card/90 to-transparent pointer-events-none z-10"></div>
                 
                 <TabsList className="
-                  flex md:flex-wrap md:justify-center 
+                  flex 
                   overflow-x-auto overflow-y-hidden 
                   scrollbar-hide
                   gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 
