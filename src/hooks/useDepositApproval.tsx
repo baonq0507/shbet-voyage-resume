@@ -9,31 +9,46 @@ export const useDepositApproval = () => {
     setIsProcessing(true);
     
     try {
-      // Call third-party API first
+      console.log('Starting deposit approval process:', { transactionId, username, amount });
+      
+      // Step 1: Call deposit-game-api to process payment with third-party
       const { data: apiResult, error: apiError } = await supabase.functions.invoke('deposit-game-api', {
         body: { username, amount }
       });
 
       if (apiError) {
-        throw new Error(`API call failed: ${apiError.message}`);
-      }
-
-      if (!apiResult.success) {
-        toast.error(`Deposit failed: ${apiResult.message}`);
+        console.error('deposit-game-api error:', apiError);
+        toast.error(`Lỗi kết nối API: ${apiError.message}`);
         return false;
       }
 
-      // If API call successful, approve transaction and update balance
+      // Step 2: Check if third-party API call was successful
+      if (!apiResult?.success) {
+        const errorMessage = apiResult?.message || 'Lỗi không xác định từ hệ thống game';
+        console.error('deposit-game-api failed:', apiResult);
+        toast.error(`Nạp tiền thất bại: ${errorMessage}`);
+        return false;
+      }
+
+      console.log('deposit-game-api success, proceeding with database updates');
+
+      // Step 3: Update transaction status to approved
       const { error: updateError } = await supabase
         .from('transactions')
-        .update({ status: 'approved' })
+        .update({ 
+          status: 'approved',
+          approved_at: new Date().toISOString(),
+          approved_by: (await supabase.auth.getUser()).data.user?.id
+        })
         .eq('id', transactionId);
 
       if (updateError) {
-        throw new Error(`Failed to update transaction: ${updateError.message}`);
+        console.error('Transaction update error:', updateError);
+        toast.error(`Lỗi cập nhật giao dịch: ${updateError.message}`);
+        return false;
       }
 
-      // Get current balance and update
+      // Step 4: Get current user balance
       const { data: currentProfile, error: profileError } = await supabase
         .from('profiles')
         .select('balance')
@@ -41,12 +56,15 @@ export const useDepositApproval = () => {
         .single();
 
       if (profileError) {
-        throw new Error(`Failed to get current balance: ${profileError.message}`);
+        console.error('Profile fetch error:', profileError);
+        toast.error(`Lỗi lấy thông tin người dùng: ${profileError.message}`);
+        return false;
       }
 
-      const newBalance = (currentProfile.balance || 0) + amount;
+      // Step 5: Calculate new balance and update
+      const currentBalance = currentProfile.balance || 0;
+      const newBalance = currentBalance + amount;
 
-      // Update user balance
       const { error: balanceError } = await supabase
         .from('profiles')
         .update({ 
@@ -56,15 +74,24 @@ export const useDepositApproval = () => {
         .eq('username', username);
 
       if (balanceError) {
-        throw new Error(`Failed to update balance: ${balanceError.message}`);
+        console.error('Balance update error:', balanceError);
+        toast.error(`Lỗi cập nhật số dư: ${balanceError.message}`);
+        return false;
       }
 
-      toast.success('Deposit approved and balance updated successfully');
+      console.log('Deposit approval completed successfully:', { 
+        username, 
+        amount, 
+        oldBalance: currentBalance, 
+        newBalance 
+      });
+
+      toast.success(`Đã duyệt nạp tiền thành công! Số dư mới: ${newBalance.toLocaleString('vi-VN')} VND`);
       return true;
 
     } catch (error) {
-      console.error('Error approving deposit:', error);
-      toast.error(`Failed to approve deposit: ${error.message}`);
+      console.error('Error in deposit approval process:', error);
+      toast.error(`Lỗi hệ thống: ${error.message}`);
       return false;
     } finally {
       setIsProcessing(false);
