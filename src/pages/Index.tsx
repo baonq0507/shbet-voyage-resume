@@ -193,50 +193,6 @@ const Index = () => {
       {/* Promotion Banner */}
       <PromotionBanner />
 
-      {/* Hero Section with Auth Buttons */}
-      <section className="py-8 md:py-12 bg-gradient-to-br from-background via-background to-background/80">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary">
-                <img 
-                  src="/lovable-uploads/5f8b7fab-93aa-4385-bb91-920f8493ebb9.png" 
-                  alt="DIAMONDBET68" 
-                  className="h-16 sm:h-20 md:h-24 lg:h-32 w-auto object-contain mx-auto drop-shadow-2xl"
-                />
-              </h1>
-              <div className="w-32 h-1 bg-gradient-primary rounded-full casino-glow mx-auto"></div>
-            </div>
-            
-            <p className="text-sm md:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto font-medium">
-              Nhà cái uy tín hàng đầu Việt Nam
-              <br />
-              <span className="text-primary font-bold">Trải nghiệm cá cược đỉnh cao</span>
-              <br />
-              với hàng nghìn game hấp dẫn
-            </p>
-            
-            {!user ? (
-              <AuthButtons 
-                onAuthClick={() => setIsAuthModalOpen(true)} 
-                variant="hero"
-                className="justify-center"
-              />
-            ) : (
-              <div className="flex flex-col md:flex-row gap-4 justify-center pt-4">
-                <Button variant="casino" size="lg" className="font-bold casino-glow hover:scale-105 transition-all duration-300">
-                  <Play className="w-5 h-5 mr-2" />
-                  Chơi Ngay
-                </Button>
-                <Button variant="gold" size="lg" className="font-bold gold-glow hover:scale-105 transition-all duration-300">
-                  <Gift className="w-5 h-5 mr-2" />
-                  Nhận Thưởng
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* Mobile Navigation */}
       <MobileNavigation />
