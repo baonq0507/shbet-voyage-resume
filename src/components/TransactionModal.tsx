@@ -228,7 +228,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     if (!user || !profile?.username) {
       toast({
         title: "Lỗi",
-        description: "Không thể xác định thông tin người dùng",
+        description: "Không thể xác định username. Vui lòng đăng nhập lại.",
         variant: "destructive",
       });
       return;

@@ -48,6 +48,17 @@ serve(async (req) => {
     }
 
     console.log('Processing withdrawal API call for:', { username, amount });
+    
+    if (!username) {
+      console.error('No username provided!');
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Username is required'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Transform amount based on business rules (same as deposit):
     // If amount < 10000: divide by 1000
