@@ -136,13 +136,8 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                     {/* Animated background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                     
-                    <div className="relative z-10 flex flex-col items-center gap-0.5">
-                      <div className="relative">
-                        <Globe className="w-8 h-8 sm:w-10 sm:h-10 group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg" />
-                        {/* Glow effect for active state */}
-                        <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      <span className="text-[10px] leading-none">HOT NHẤT</span>
+                    <div className="relative z-10 flex items-center justify-center">
+                      <span className="text-xs font-semibold">HOT NHẤT</span>
                     </div>
                     
                     {/* Active indicator */}
