@@ -130,9 +130,9 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     onClick={() => onSectionChange(item.id)}
                     className={`w-full rounded-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden ${
                       isActive(item.id)
-                        ? 'bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90 text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/25 border border-sidebar-primary/20 font-semibold'
-                        : 'hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-accent/80 hover:text-sidebar-accent-foreground text-sidebar-foreground/80 border border-transparent hover:border-sidebar-accent/30 hover:shadow-md'
-                    } ${collapsed ? 'p-3 justify-center' : 'p-4'}`}
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 border border-yellow-400/20 font-semibold'
+                        : 'hover:bg-gradient-to-r hover:from-yellow-500/20 hover:to-yellow-400/10 hover:text-sidebar-accent-foreground text-sidebar-foreground/80 border border-transparent hover:border-yellow-400/30 hover:shadow-md'
+                    } ${collapsed ? 'p-4 justify-center' : 'py-5 px-4'}`}
                     tooltip={collapsed ? item.title : undefined}
                   >
                     <item.icon className={`${collapsed ? 'h-5 w-5' : 'h-5 w-5 mr-3'} ${
