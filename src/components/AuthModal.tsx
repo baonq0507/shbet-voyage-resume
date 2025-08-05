@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Phone, Lock, UserCheck, Eye, EyeOff } from "lucide-react";
+import { User, Phone, Lock, UserCheck, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useUsernameCheck } from "@/hooks/useUsernameCheck";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -26,6 +27,9 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
     confirmPassword: ""
   });
   const { toast } = useToast();
+  
+  // Username check hook
+  const usernameCheck = useUsernameCheck(formData.username);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -111,6 +115,16 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       toast({
         title: "Lỗi",
         description: "Vui lòng nhập đầy đủ thông tin",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check username availability before proceeding
+    if (usernameCheck.isAvailable === false) {
+      toast({
+        title: "Lỗi",
+        description: usernameCheck.error || "Tên người dùng đã tồn tại",
         variant: "destructive"
       });
       return;
@@ -361,9 +375,41 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
                     placeholder="Nhập tên đăng nhập"
                     value={formData.username}
                     onChange={(e) => handleInputChange("username", e.target.value)}
-                    className="pl-10"
+                    className={`pl-10 pr-10 ${
+                      formData.username && formData.username.length >= 3
+                        ? usernameCheck.isAvailable === true
+                          ? 'border-green-500 focus:border-green-500'
+                          : usernameCheck.isAvailable === false
+                          ? 'border-red-500 focus:border-red-500'
+                          : ''
+                        : ''
+                    }`}
                   />
+                  {/* Status indicator */}
+                  {formData.username && formData.username.length >= 3 && (
+                    <div className="absolute right-3 top-3 h-4 w-4">
+                      {usernameCheck.isChecking ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                      ) : usernameCheck.isAvailable === true ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : usernameCheck.isAvailable === false ? (
+                        <X className="h-4 w-4 text-red-500" />
+                      ) : null}
+                    </div>
+                  )}
                 </div>
+                {/* Error message */}
+                {usernameCheck.error && formData.username && (
+                  <p className="text-sm text-red-500 mt-1">{usernameCheck.error}</p>
+                )}
+                {/* Success message */}
+                {usernameCheck.isAvailable === true && formData.username && (
+                  <p className="text-sm text-green-500 mt-1">✓ Tên người dùng có thể sử dụng</p>
+                )}
+                {/* Username taken message */}
+                {usernameCheck.isAvailable === false && formData.username && !usernameCheck.error && (
+                  <p className="text-sm text-red-500 mt-1">✗ Tên người dùng đã tồn tại</p>
+                )}
               </div>
               
               <div className="space-y-2">
