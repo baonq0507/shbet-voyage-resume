@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SimpleGamesList from "@/components/SimpleGamesList";
+import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
 import MobileAuthButtons from "@/components/MobileAuthButtons";
@@ -50,11 +50,9 @@ const DaGa = () => {
       <MobileNavigation />
 
       {/* Games */}
-      <SimpleGamesList 
-        title="TRƯỜNG GÀ UY TÍN" 
-        category="cockfight"
-        gpids={menuItems.find(item => item.id === 'daga')?.dropdown?.map(item => Number(item.id)) || []} 
-        maxGames={12} 
+      <CategoryGamesList 
+        categoryId="daga"
+        title="TRƯỜNG GÀ UY TÍN"
       />
 
       <Footer />

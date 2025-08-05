@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SimpleGamesList from "@/components/SimpleGamesList";
+import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
 import MobileAuthButtons from "@/components/MobileAuthButtons";
@@ -30,7 +30,10 @@ export default function XoSo() {
 
 
       {/* Games */}
-      <SimpleGamesList title="GAME XỔ SỐ HOT NHẤT" gpids={xosoGpids} maxGames={12} />
+      <CategoryGamesList 
+        categoryId="xoso"
+        title="GAME XỔ SỐ HOT NHẤT"
+      />
 
       {/* Features */}
       <section className="py-16 bg-gradient-hero">

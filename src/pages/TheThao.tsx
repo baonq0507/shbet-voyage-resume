@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SimpleGamesList from "@/components/SimpleGamesList";
+import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
 import MobileAuthButtons from "@/components/MobileAuthButtons";
@@ -64,11 +64,9 @@ const TheThao = () => {
 
 
       {/* Games */}
-      <SimpleGamesList 
-        title="THỂ THAO HOT NHẤT" 
-        category="sports"
-        gpids={menuItems.find(item => item.id === 'thethao')?.dropdown?.map(item => Number(item.id)) || []} 
-        maxGames={12} 
+      <CategoryGamesList 
+        categoryId="thethao"
+        title="THỂ THAO HOT NHẤT"
       />
 
       {/* Live Sports Features */}

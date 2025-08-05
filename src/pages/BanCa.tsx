@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SimpleGamesList from "@/components/SimpleGamesList";
+import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
 import MobileAuthButtons from "@/components/MobileAuthButtons";
@@ -63,11 +63,9 @@ const BanCa = () => {
 
 
       {/* Games */}
-      <SimpleGamesList 
-        title="GAME BẮN CÁ HOT NHẤT" 
-        category="fishing"
-        gpids={menuItems.find(item => item.id === 'banca')?.dropdown?.map(item => Number(item.id)) || []} 
-        maxGames={12} 
+      <CategoryGamesList 
+        categoryId="banca"
+        title="GAME BẮN CÁ HOT NHẤT"
       />
 
       <Footer />
