@@ -28,7 +28,7 @@ serve(async (req) => {
           error: 'Vui lòng điền đầy đủ thông tin' 
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -44,7 +44,7 @@ serve(async (req) => {
           error: 'Định dạng email không hợp lệ' 
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -59,7 +59,7 @@ serve(async (req) => {
           error: 'Mật khẩu phải có ít nhất 6 ký tự' 
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -75,7 +75,7 @@ serve(async (req) => {
           error: 'Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới' 
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -108,7 +108,7 @@ serve(async (req) => {
           error: 'Tên người dùng đã tồn tại'
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -152,7 +152,7 @@ serve(async (req) => {
           details: externalResponseData?.error?.msg || 'Registration failed'
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );

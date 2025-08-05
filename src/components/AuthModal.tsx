@@ -149,25 +149,32 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
       });
 
       console.log('📥 Registration response:', registerResponse);
-      console.log('🔌 Connection error:', registerError);
+      console.log('🔌 Edge function error:', registerError);
 
-      // Nếu có lỗi từ edge function (HTTP 400-500), extract error message
+      // Nếu có lỗi từ edge function, extract error message từ response
       if (registerError) {
-        console.error('❌ Edge function error:', registerError);
+        console.error('❌ Edge function error details:', registerError);
         
-        // Thử parse error message từ edge function response
         let errorMessage = "Có lỗi xảy ra khi đăng ký";
         
-        if (registerError.message) {
+        // Supabase edge function error có thể chứa response body trong context
+        if (registerError.context?.body) {
           try {
-            // Edge function error thường chứa JSON response trong message
-            const errorData = JSON.parse(registerError.message);
+            const errorData = JSON.parse(registerError.context.body);
             if (errorData.error) {
               errorMessage = errorData.error;
             }
-          } catch {
-            // Nếu không parse được, dùng message gốc
-            errorMessage = registerError.message;
+          } catch (e) {
+            console.log('Failed to parse error context:', e);
+          }
+        }
+        
+        // Fallback: thử parse từ message nếu có JSON
+        if (errorMessage === "Có lỗi xảy ra khi đăng ký" && registerError.message) {
+          if (registerError.message.includes('Tên người dùng đã tồn tại')) {
+            errorMessage = "Tên người dùng đã tồn tại";
+          } else if (registerError.message.includes('Định dạng email không hợp lệ')) {
+            errorMessage = "Định dạng email không hợp lệ";
           }
         }
         
