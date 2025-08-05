@@ -294,20 +294,7 @@ const AdminPage = () => {
       const transaction = transactions.find(t => t.id === transactionId);
       if (!transaction) return;
 
-      // Update transaction status
-      const { error: updateError } = await supabase
-        .from('transactions')
-        .update({
-          status,
-          admin_note: note || null,
-          approved_by: user?.id,
-          approved_at: new Date().toISOString()
-        })
-        .eq('id', transactionId);
-
-      if (updateError) throw updateError;
-
-      // If approving a deposit, use the deposit approval hook
+      // Special handling for deposit approval - call third-party API first
       if (status === 'approved' && transaction.type === 'deposit') {
         const success = await approveDeposit(
           transactionId,
@@ -316,11 +303,11 @@ const AdminPage = () => {
         );
 
         if (!success) {
-          return; // Error already shown by the hook
+          return; // Error already shown by the hook, don't proceed with status update
         }
 
         // Extract promotion code from admin note if present
-        const promotionCode = transaction.admin_note?.match(/Mã khuyến mãi: ([A-Z0-9]+)/)?.[1];
+        const promotionCode = note?.match(/Mã khuyến mãi: ([A-Z0-9]+)/)?.[1];
 
         // Apply promotion if available
         await applyPromotionToDeposit(
@@ -329,6 +316,19 @@ const AdminPage = () => {
           user?.id,
           promotionCode
         );
+      } else {
+        // For non-deposit transactions or rejection, update status normally
+        const { error: updateError } = await supabase
+          .from('transactions')
+          .update({
+            status,
+            admin_note: note || null,
+            approved_by: user?.id,
+            approved_at: new Date().toISOString()
+          })
+          .eq('id', transactionId);
+
+        if (updateError) throw updateError;
       }
 
       // If approving a withdrawal, deduct from user balance
