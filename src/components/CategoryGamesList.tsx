@@ -89,8 +89,8 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
         {/* Games Grid */}
         <div className="flex-1">
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
-              {Array.from({ length: 10 }).map((_, index) => (
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {Array.from({ length: 9 }).map((_, index) => (
                 <Card key={index} className="overflow-hidden">
                   <CardContent className="p-0">
                     <Skeleton className="w-full aspect-square" />
@@ -114,7 +114,7 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
               <p className="text-muted-foreground text-sm sm:text-base">Không có game nào</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {games.map((game) => (
                 <Card 
                   key={game.id} 
@@ -129,23 +129,23 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Button size="sm" className="bg-primary hover:bg-primary/90 text-xs sm:text-sm">
+                        <Button size="sm" className="bg-primary hover:bg-primary/90 text-[10px] sm:text-xs">
                           Chơi Ngay
                         </Button>
                       </div>
                       {game.rank && game.rank <= 3 && (
-                        <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs">
+                        <Badge className="absolute top-1 left-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[8px] sm:text-xs">
                           #{game.rank}
                         </Badge>
                       )}
                     </div>
-                    <div className="p-2 sm:p-3">
-                      <h3 className="font-medium text-xs sm:text-sm mb-1 line-clamp-1">{game.name}</h3>
+                    <div className="p-1 sm:p-2">
+                      <h3 className="font-medium text-[10px] sm:text-xs mb-1 line-clamp-1">{game.name}</h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] sm:text-xs text-muted-foreground truncate flex-1 mr-2">{game.provider}</span>
+                        <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate flex-1 mr-1">{game.provider}</span>
                         <Badge 
                           variant={game.isActive ? "default" : "secondary"}
-                          className="text-[10px] sm:text-xs px-1 sm:px-2 py-0.5"
+                          className="text-[8px] px-1 py-0.5"
                         >
                           {game.isActive ? "Hoạt động" : "Bảo trì"}
                         </Badge>
