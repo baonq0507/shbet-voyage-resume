@@ -29,15 +29,20 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
   const handleGameClick = async (game: Game) => {
     try {
       const isThethaoGame = game.type?.toLowerCase().includes('sport') || game.category?.toLowerCase().includes('sport');
-      const gameId = Number(game.id);
+      const gpid = game.gpid;
+      
+      if (!gpid) {
+        console.error('Game GPID is missing:', game);
+        return;
+      }
       
       if (isThethaoGame) {
-        const loginResult = await loginToGame(gameId, true);
+        const loginResult = await loginToGame(gpid, true);
         if (loginResult) {
           window.open(loginResult, '_blank');
         }
       } else {
-        const loginResult = await loginToGame(gameId, false);
+        const loginResult = await loginToGame(gpid, false);
         if (loginResult) {
           openGame(loginResult);
         }

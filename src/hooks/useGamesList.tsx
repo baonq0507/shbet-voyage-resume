@@ -10,6 +10,7 @@ export interface Game {
   isActive: boolean;
   provider: string;
   rank: number;
+  gpid?: number;
 }
 
 interface GamesResponse {
