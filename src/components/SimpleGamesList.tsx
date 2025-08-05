@@ -109,7 +109,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: maxGames }).map((_, index) => (
               <Card key={index} className="overflow-hidden animate-pulse">
                 <div className="h-24 sm:h-28 md:h-32 bg-muted"></div>
@@ -120,7 +120,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
             ))}
           </div>
         ) : sortedAndLimitedGames.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-3 gap-4 md:gap-6">
             {sortedAndLimitedGames.map((game) => (
               <GameCard 
                 key={game.id} 
