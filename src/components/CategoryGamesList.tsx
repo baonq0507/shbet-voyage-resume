@@ -53,7 +53,11 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-8 text-center">{title}</h2>
+      <div className="flex items-center justify-center mb-4 sm:mb-8">
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent to-yellow-500"></div>
+        <h2 className="text-xl sm:text-2xl font-bold mx-4 text-yellow-500">{title}</h2>
+        <div className="flex-1 h-px bg-gradient-to-l from-transparent to-yellow-500"></div>
+      </div>
       
       <div className="flex gap-2 sm:gap-4 lg:gap-6">
         {/* Provider Categories - Compact sidebar on mobile, full on desktop */}
