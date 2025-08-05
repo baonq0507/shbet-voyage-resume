@@ -17,25 +17,23 @@ export function AdminLayout({ children, activeSection = 'dashboard', onSectionCh
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(var(--primary))_0%,_transparent_50%)] opacity-[0.03] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(var(--secondary))_0%,_transparent_50%)] opacity-[0.02] pointer-events-none" />
         
+        {/* Header spans full width */}
+        <AdminHeader />
+        
         {/* Main Layout Container */}
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-[calc(100vh-4rem)] w-full">
           {/* Sidebar */}
           <AdminSidebar activeSection={activeSection} onSectionChange={onSectionChange} />
           
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col">
-            <AdminHeader />
-            
-            {/* Content Container */}
-            <main className="flex-1 overflow-hidden">
-              {/* Scrollable Content */}
-              <div className="h-full overflow-auto custom-scrollbar">
-                <div className="p-4 md:p-6 lg:p-8 space-y-6 animate-fade-in">
-                  {children}
-                </div>
+          <main className="flex-1 overflow-hidden">
+            {/* Scrollable Content */}
+            <div className="h-full overflow-auto custom-scrollbar">
+              <div className="p-4 md:p-6 lg:p-8 space-y-6 animate-fade-in">
+                {children}
               </div>
-            </main>
-          </div>
+            </div>
+          </main>
         </div>
       </div>
     </SidebarProvider>
