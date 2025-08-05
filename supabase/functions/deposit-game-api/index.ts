@@ -38,13 +38,18 @@ serve(async (req) => {
     });
 
     console.log('Third-party API response status:', response.status);
+    
+    const responseData = await response.json();
+    console.log('Third-party API response data:', responseData);
 
-    const success = response.status === 200;
+    // Check if API call was successful based on error.msg
+    const success = responseData?.error?.msg === "No Error";
     
     return new Response(JSON.stringify({ 
       success,
       status: response.status,
-      message: success ? 'Deposit processed successfully' : 'Deposit failed at third-party service'
+      message: success ? 'Deposit processed successfully' : responseData?.error?.msg || 'Deposit failed at third-party service',
+      data: responseData
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

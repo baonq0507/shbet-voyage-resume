@@ -120,7 +120,7 @@ serve(async (req) => {
       let responseData;
       try {
         responseData = await response.json();
-        console.log('Withdrawal API response data:', responseData);
+        console.log('Third-party API response data:', responseData);
       } catch (parseError) {
         console.error('Error parsing third-party response:', parseError);
         return new Response(JSON.stringify({ 
@@ -132,45 +132,112 @@ serve(async (req) => {
         });
       }
       
-      // Check if there's an error in the response body
-      if (responseData.error && responseData.error.id !== 0) {
+      // Check if withdrawal was successful based on error.msg
+      if (responseData?.error?.msg === "No Error") {
+        // Transform balance for transaction (multiply by 1000)
+        const transactionAmount = responseData.balance ? responseData.balance * 1000 : amount;
+        
+        console.log('Creating transaction record...');
+        
+        // Initialize Supabase client
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        
+        if (!supabaseUrl || !supabaseServiceKey) {
+          console.error('Missing Supabase environment variables');
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: 'Server configuration error'
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+        
+        // Get user ID from username
+        const { data: userData, error: userError } = await supabaseClient
+          .from('users')
+          .select('id')
+          .eq('username', username)
+          .single();
+          
+        if (userError || !userData) {
+          console.error('User not found:', userError);
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: 'User not found'
+          }), {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const userId = userData.id;
+        
+        // Create transaction record with pending status
+        const { error: dbError } = await supabaseClient
+          .from('transactions')
+          .insert([
+            {
+              user_id: userId,
+              type: 'withdrawal',
+              amount: transactionAmount, // Use balance * 1000
+              status: 'pending'
+            }
+          ]);
+
+        if (dbError) {
+          console.error('Database error:', dbError);
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: 'Failed to create transaction record'
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        console.log('Transaction created successfully with pending status');
+        
+        // Transform the balance from API response (multiply by 1000)
+        const transformedBalance = responseData.amount ? responseData.amount * 1000 : 0;
+        const transformedOutstanding = responseData.outstanding ? responseData.outstanding * 1000 : 0;
+        
+        console.log('Response transformation:', { 
+          originalBalance: responseData.balance, 
+          transformedBalance,
+          originalOutstanding: responseData.outstanding,
+          transformedOutstanding,
+          requestAmount: amount,
+          txnId: responseData.txnId,
+          refno: responseData.refno
+        });
+        
+        return new Response(JSON.stringify({ 
+          success: true,
+          status: response.status,
+          amount: amount, // Return original requested amount
+          balance: transformedBalance,
+          outstanding: transformedOutstanding,
+          txnId: responseData.txnId,
+          refno: responseData.refno,
+          message: 'Withdrawal processed successfully'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else {
         console.error('Third-party API returned error:', responseData.error);
         return new Response(JSON.stringify({ 
           success: false,
           status: response.status,
-          message: responseData.error.msg || 'Withdrawal failed',
+          message: responseData.error?.msg || 'Withdrawal failed',
           error: responseData.error
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      
-      // Transform the balance from API response (multiply by 1000)
-      const transformedBalance = responseData.amount ? responseData.amount * 1000 : 0;
-      const transformedOutstanding = responseData.outstanding ? responseData.outstanding * 1000 : 0;
-      
-      console.log('Response transformation:', { 
-        originalBalance: responseData.balance, 
-        transformedBalance,
-        originalOutstanding: responseData.outstanding,
-        transformedOutstanding,
-        requestAmount: amount,
-        txnId: responseData.txnId,
-        refno: responseData.refno
-      });
-      
-      return new Response(JSON.stringify({ 
-        success: true,
-        status: response.status,
-        amount: amount, // Return original requested amount
-        balance: transformedBalance,
-        outstanding: transformedOutstanding,
-        txnId: responseData.txnId,
-        refno: responseData.refno,
-        message: 'Withdrawal processed successfully'
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     } else {
       console.error('Third-party API returned error status:', response.status);
       
