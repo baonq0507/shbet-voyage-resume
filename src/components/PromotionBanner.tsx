@@ -7,7 +7,7 @@ export const PromotionBanner: React.FC = () => {
         <img 
           src="/lovable-uploads/973568b4-22dc-4593-b4a5-cf21aba80a76.png" 
           alt="DIAMONDBET68 Promotion Banner" 
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-top"
         />
       </div>
     </section>
