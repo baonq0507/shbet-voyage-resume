@@ -20,7 +20,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.withdraw-game-api]
-verify_jwt = true
+verify_jwt = false
 
 [db]
 port = 54322

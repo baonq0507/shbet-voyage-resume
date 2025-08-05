@@ -5,119 +5,103 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Max-Age': '86400',
+  'Access-Control-Allow-Credentials': 'true',
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
     console.log('=== WITHDRAW API STARTED ===');
-    console.log('Method:', req.method);
-    console.log('URL:', req.url);
-    console.log('Headers:', Object.fromEntries(req.headers.entries()));
+    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
     
-    // Simple health check
-    if (req.method === 'GET') {
-      return new Response(JSON.stringify({
-        success: true,
-        message: 'Withdraw API is working',
-        timestamp: new Date().toISOString()
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    // Parse request body
-    const requestBody = await req.json();
-    console.log('Request body:', requestBody);
-    
-    const { amount } = requestBody;
-
-    // Validate amount
-    if (!amount || typeof amount !== 'number') {
-      console.error('Invalid amount:', amount);
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: 'Valid amount is required'
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get auth token from header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      console.error('No authorization header');
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: 'Authorization required'
-      }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Create Supabase client with the user's JWT token
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
+    // Parse request body with error handling
+    let requestBody;
+    try {
+      // Log raw request info for debugging
+      console.log('Request method:', req.method);
+      console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+      
+      // Get raw body first
+      const rawBody = await req.text();
+      console.log('Raw request body:', rawBody);
+      
+      // Try to parse as JSON
+      if (rawBody && rawBody.trim()) {
+        try {
+          requestBody = JSON.parse(rawBody);
+          console.log('Request body parsed:', requestBody);
+        } catch (jsonError) {
+          console.error('JSON parse error:', jsonError);
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: 'Invalid JSON format',
+            details: jsonError.message
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } else {
+        console.error('Empty request body');
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Empty request body',
+          details: 'Request body is empty or contains only whitespace'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
-    );
-
-    // Get current user (JWT will be verified automatically)
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    
-    if (authError || !user) {
-      console.error('Authentication failed:', authError);
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      console.error('Parse error details:', {
+        name: parseError.name,
+        message: parseError.message,
+        stack: parseError.stack
+      });
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Invalid authentication'
+        error: 'Invalid JSON in request body',
+        details: parseError.message
       }), {
-        status: 401,
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    const { username, amount } = requestBody;
 
-    const userId = user.id;
-    console.log('User authenticated:', userId);
-
-    // Get username from profile
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('username')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileError || !profile?.username) {
-      console.error('Username not found:', profileError);
+    // Validate required fields
+    if (!username || !amount) {
+      console.error('Missing required fields:', { username, amount });
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'User profile not found'
+        error: 'Missing required fields: username and amount'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const username = profile.username;
-    console.log('Username found:', username);
+    console.log('Processing withdrawal API call for:', { username, amount });
 
-    // Transform amount for third-party API
+    // Transform amount based on business rules (same as deposit):
+    // If amount < 10000: divide by 1000
+    // If amount >= 10000: keep the same
     const apiAmount = amount < 10000 ? amount / 1000 : amount;
+    
     console.log('Amount transformation:', { originalAmount: amount, apiAmount });
 
     // Call third-party API
-    console.log('Calling third-party withdraw API...');
     const response = await fetch('https://api.tw954.com/withdraw-game', {
       method: 'POST',
       headers: {
@@ -130,62 +114,90 @@ serve(async (req) => {
     });
 
     console.log('Third-party API response status:', response.status);
+    console.log('Third-party API response headers:', Object.fromEntries(response.headers.entries()));
 
     if (response.status === 200) {
-      const responseData = await response.json();
-      console.log('Third-party API response data:', responseData);
-      
-      // Transform balance for transaction (multiply by 1000)
-      const transactionAmount = responseData.balance ? responseData.balance * 1000 : amount;
-      
-      console.log('Creating transaction record...');
-      // Create transaction record
-      const { error: dbError } = await supabaseClient
-        .from('transactions')
-        .insert([
-          {
-            user_id: userId,
-            type: 'withdrawal',
-            amount: transactionAmount, // Use balance * 1000
-            status: 'approved'
-          }
-        ]);
-
-      if (dbError) {
-        console.error('Database error:', dbError);
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('Withdrawal API response data:', responseData);
+      } catch (parseError) {
+        console.error('Error parsing third-party response:', parseError);
         return new Response(JSON.stringify({ 
           success: false,
-          error: 'Failed to create transaction record'
+          error: 'Invalid response from third-party service'
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       
-      console.log('Transaction created successfully');
+      // Check if there's an error in the response body
+      if (responseData.error && responseData.error.id !== 0) {
+        console.error('Third-party API returned error:', responseData.error);
+        return new Response(JSON.stringify({ 
+          success: false,
+          status: response.status,
+          message: responseData.error.msg || 'Withdrawal failed',
+          error: responseData.error
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      // Transform the balance from API response (multiply by 1000)
+      const transformedBalance = responseData.amount ? responseData.amount * 1000 : 0;
+      const transformedOutstanding = responseData.outstanding ? responseData.outstanding * 1000 : 0;
+      
+      console.log('Response transformation:', { 
+        originalBalance: responseData.balance, 
+        transformedBalance,
+        originalOutstanding: responseData.outstanding,
+        transformedOutstanding,
+        requestAmount: amount,
+        txnId: responseData.txnId,
+        refno: responseData.refno
+      });
+      
       return new Response(JSON.stringify({ 
         success: true,
-        amount: transactionAmount,
+        status: response.status,
+        amount: amount, // Return original requested amount
+        balance: transformedBalance,
+        outstanding: transformedOutstanding,
+        txnId: responseData.txnId,
+        refno: responseData.refno,
         message: 'Withdrawal processed successfully'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      console.error('Third-party API error, status:', response.status);
+      console.error('Third-party API returned error status:', response.status);
+      
+      // Try to get error response body
+      let errorBody = '';
+      try {
+        errorBody = await response.text();
+        console.error('Third-party API error response body:', errorBody);
+      } catch (textError) {
+        console.error('Could not read error response body:', textError);
+      }
+      
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Withdrawal failed at third-party service'
+        status: response.status,
+        message: 'Withdrawal failed at third-party service',
+        error: errorBody || 'Unknown error'
       }), {
-        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
   } catch (error) {
-    console.error('Error in withdraw-game-api:', error);
+    console.error('Error in withdraw-game-api function:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: 'Internal server error'
+      error: error.message 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
