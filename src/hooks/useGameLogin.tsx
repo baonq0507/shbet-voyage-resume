@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from './useAuth';
+import { useLoading } from './useLoading';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface GameLoginResponse {
   success: boolean;
@@ -11,9 +12,9 @@ interface GameLoginResponse {
 }
 
 export const useGameLogin = () => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user, profile } = useAuth();
+  const { showLoading, hideLoading, isLoading } = useLoading();
 
   const loginToGame = async (gpid: number, isSports: boolean = false): Promise<string | null> => {
     if (!user || !profile?.username) {
@@ -26,7 +27,10 @@ export const useGameLogin = () => {
       return null;
     }
 
-    setLoading(true);
+    showLoading(
+      "Đang đăng nhập game...",
+      "Đang kết nối với server game và xác thực tài khoản của bạn"
+    );
     setError(null);
 
     try {
@@ -85,7 +89,7 @@ export const useGameLogin = () => {
       });
       return null;
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 
@@ -96,7 +100,7 @@ export const useGameLogin = () => {
   return {
     loginToGame,
     loginToSportsGame,
-    loading,
+    loading: isLoading,
     error
   };
 };

@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { GameFrameProvider } from "@/hooks/useGameFrame";
+import { LoadingProvider } from "@/hooks/useLoading";
 import GameFrame from "./components/GameFrame";
+import GlobalLoadingOverlay from "./components/GlobalLoadingOverlay";
 import Index from "./pages/Index";
 import Casino from "./pages/Casino";
 import NoHu from "./pages/NoHu";
@@ -29,11 +31,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <GameFrameProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <LoadingProvider>
+        <GameFrameProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <div className="pb-16 lg:pb-0">
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -56,11 +59,13 @@ const App = () => (
             </div>
             <MobileFooter />
             <GameFrame />
+            <GlobalLoadingOverlay />
           </BrowserRouter>
         </TooltipProvider>
       </GameFrameProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+    </LoadingProvider>
+  </AuthProvider>
+</QueryClientProvider>
 );
 
 export default App;
