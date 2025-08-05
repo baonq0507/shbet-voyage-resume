@@ -123,7 +123,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
             {collapsed ? "Menu" : "Quản lý chính"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
+            <SidebarMenu className="space-y-3">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
