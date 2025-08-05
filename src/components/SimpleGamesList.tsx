@@ -93,7 +93,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
   };
 
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-4 sm:py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
           <div className="flex items-center justify-center mb-4">
