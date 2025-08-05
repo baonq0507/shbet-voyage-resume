@@ -37,10 +37,12 @@ CREATE INDEX IF NOT EXISTS idx_games_provider_type ON games(provider, type);
 ALTER TABLE games ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access to games
+DROP POLICY IF EXISTS "Allow public read access to games" ON games;
 CREATE POLICY "Allow public read access to games" ON games
     FOR SELECT USING (true);
 
 -- Allow authenticated users to insert/update games (for admin functions)
+DROP POLICY IF EXISTS "Allow authenticated users to manage games" ON games;
 CREATE POLICY "Allow authenticated users to manage games" ON games
     FOR ALL USING (auth.role() = 'authenticated');
 
@@ -54,6 +56,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger to automatically update updated_at
+DROP TRIGGER IF EXISTS update_games_updated_at_trigger ON games;
 CREATE TRIGGER update_games_updated_at_trigger
     BEFORE UPDATE ON games
     FOR EACH ROW
