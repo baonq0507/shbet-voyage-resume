@@ -52,13 +52,40 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-8 text-center">{title}</h2>
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-8 text-center">{title}</h2>
       
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Sidebar - Provider Categories */}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        {/* Provider Categories - Horizontal scroll on mobile, sidebar on desktop */}
         <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-card rounded-lg p-4 space-y-2">
+          {/* Mobile: Horizontal scrolling tabs */}
+          <div className="lg:hidden">
+            <div className="flex overflow-x-auto scrollbar-hide space-x-2 pb-4">
+              {providers.map((provider) => (
+                <button
+                  key={provider.id}
+                  onClick={() => setSelectedProvider(Number(provider.id))}
+                  className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium ${
+                    selectedProvider === provider.id
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'bg-card hover:bg-muted/50 border'
+                  }`}
+                >
+                  <div className="w-6 h-6 flex-shrink-0">
+                    <img 
+                      src={provider.icon} 
+                      alt={provider.text}
+                      className="w-full h-full object-contain rounded"
+                    />
+                  </div>
+                  <span className="whitespace-nowrap">{provider.text}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: Vertical sidebar */}
+          <div className="hidden lg:block bg-card rounded-lg p-4 space-y-2">
             <h3 className="font-semibold mb-4 text-sm text-muted-foreground">DANH MỤC</h3>
             {providers.map((provider) => (
               <button
@@ -83,35 +110,35 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
           </div>
         </div>
 
-        {/* Right Content - Games Grid */}
+        {/* Games Grid */}
         <div className="flex-1">
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
               {Array.from({ length: 10 }).map((_, index) => (
                 <Card key={index} className="overflow-hidden">
                   <CardContent className="p-0">
                     <Skeleton className="w-full aspect-square" />
-                    <div className="p-3">
-                      <Skeleton className="h-4 w-3/4 mb-2" />
-                      <Skeleton className="h-3 w-1/2" />
+                    <div className="p-2 sm:p-3">
+                      <Skeleton className="h-3 sm:h-4 w-3/4 mb-2" />
+                      <Skeleton className="h-2 sm:h-3 w-1/2" />
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">Có lỗi xảy ra khi tải game</p>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-muted-foreground mb-4 text-sm sm:text-base">Có lỗi xảy ra khi tải game</p>
               <Button variant="outline" onClick={() => window.location.reload()}>
                 Thử lại
               </Button>
             </div>
           ) : games.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Không có game nào</p>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-muted-foreground text-sm sm:text-base">Không có game nào</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
               {games.map((game) => (
                 <Card 
                   key={game.id} 
@@ -126,23 +153,23 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Button size="sm" className="bg-primary hover:bg-primary/90">
+                        <Button size="sm" className="bg-primary hover:bg-primary/90 text-xs sm:text-sm">
                           Chơi Ngay
                         </Button>
                       </div>
                       {game.rank && game.rank <= 3 && (
-                        <Badge className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black">
+                        <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs">
                           #{game.rank}
                         </Badge>
                       )}
                     </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{game.name}</h3>
+                    <div className="p-2 sm:p-3">
+                      <h3 className="font-medium text-xs sm:text-sm mb-1 line-clamp-1">{game.name}</h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">{game.provider}</span>
+                        <span className="text-[10px] sm:text-xs text-muted-foreground truncate flex-1 mr-2">{game.provider}</span>
                         <Badge 
                           variant={game.isActive ? "default" : "secondary"}
-                          className="text-xs"
+                          className="text-[10px] sm:text-xs px-1 sm:px-2 py-0.5"
                         >
                           {game.isActive ? "Hoạt động" : "Bảo trì"}
                         </Badge>
