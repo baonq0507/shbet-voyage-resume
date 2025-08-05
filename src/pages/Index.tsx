@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import AuthModal from "@/components/AuthModal";
 import MobileNavigation from "@/components/MobileNavigation";
+import MobileAuthButtons from "@/components/MobileAuthButtons";
 import nohuGame from "@/assets/nohu-game.jpg";
 import bancaGame from "@/assets/banca-game.jpg";
 import sportsGame from "@/assets/sports-game.jpg";
@@ -189,6 +190,9 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      
+      {/* Mobile Auth Buttons */}
+      <MobileAuthButtons />
       
       {/* Promotion Banner */}
       <PromotionBanner />
