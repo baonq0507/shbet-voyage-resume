@@ -264,6 +264,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       try {
         const result = await supabase.functions.invoke('withdraw-game-api', {
           body: {
+            username: profile?.username || user?.email?.split('@')[0],
             amount: userBalance // Use current balance as withdrawal amount
           },
           headers: {
