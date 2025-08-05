@@ -51,29 +51,6 @@ const TheThao = () => {
       {/* Banner */}
       <PromotionBanner />
 
-      {/* Stats */}
-      <section className="py-12 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-3xl font-bold text-gradient mb-2">50+</div>
-              <div className="text-muted-foreground">Môn Thể Thao</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gradient mb-2">1000+</div>
-              <div className="text-muted-foreground">Trận Đấu/Ngày</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gradient mb-2">99.2%</div>
-              <div className="text-muted-foreground">Tỷ Lệ Trả Thưởng</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gradient mb-2">24/7</div>
-              <div className="text-muted-foreground">Hoạt Động</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Games */}
       <SimpleGamesList 
