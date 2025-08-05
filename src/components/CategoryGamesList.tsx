@@ -26,10 +26,10 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
   const { loginToGame } = useGameLogin();
   const { openGame } = useGameFrame();
 
-  const handleGameClick = async (game: Game) => {
+  const handleGameClick = async (game: Game) => { // Updated
     try {
       const isThethaoGame = game.type?.toLowerCase().includes('sport') || game.category?.toLowerCase().includes('sport');
-      const gpid = game.gpid;
+      const gpid = (game as any).gpid;
       
       if (!gpid) {
         console.error('Game GPID is missing:', game);
