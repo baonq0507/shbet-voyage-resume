@@ -11,8 +11,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('=== WITHDRAW API FUNCTION CALLED ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { 
       status: 200,
       headers: corsHeaders 
@@ -21,57 +26,31 @@ serve(async (req) => {
 
   try {
     console.log('=== WITHDRAW API STARTED ===');
-    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
     
-    // Parse request body with error handling
+    // Parse request body
     let requestBody;
     try {
-      // Log raw request info for debugging
-      console.log('Request method:', req.method);
-      console.log('Request headers:', Object.fromEntries(req.headers.entries()));
-      
-      // Get raw body first
       const rawBody = await req.text();
       console.log('Raw request body:', rawBody);
       
-      // Try to parse as JSON
-      if (rawBody && rawBody.trim()) {
-        try {
-          requestBody = JSON.parse(rawBody);
-          console.log('Request body parsed:', requestBody);
-        } catch (jsonError) {
-          console.error('JSON parse error:', jsonError);
-          return new Response(JSON.stringify({ 
-            success: false,
-            error: 'Invalid JSON format',
-            details: jsonError.message
-          }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-      } else {
+      if (!rawBody || !rawBody.trim()) {
         console.error('Empty request body');
         return new Response(JSON.stringify({ 
           success: false,
-          error: 'Empty request body',
-          details: 'Request body is empty or contains only whitespace'
+          error: 'Empty request body'
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
+      
+      requestBody = JSON.parse(rawBody);
+      console.log('Parsed request body:', requestBody);
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
-      console.error('Parse error details:', {
-        name: parseError.name,
-        message: parseError.message,
-        stack: parseError.stack
-      });
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Invalid JSON in request body',
-        details: parseError.message
+        error: 'Invalid JSON in request body'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -92,16 +71,14 @@ serve(async (req) => {
       });
     }
 
-    console.log('Processing withdrawal API call for:', { username, amount });
+    console.log('Processing withdrawal for:', { username, amount });
 
-    // Transform amount based on business rules (same as deposit):
-    // If amount < 10000: divide by 1000
-    // If amount >= 10000: keep the same
+    // Transform amount based on business rules
     const apiAmount = amount < 10000 ? amount / 1000 : amount;
-    
     console.log('Amount transformation:', { originalAmount: amount, apiAmount });
 
     // Call third-party API
+    console.log('Calling third-party API...');
     const response = await fetch('https://api.tw954.com/withdraw-game', {
       method: 'POST',
       headers: {
@@ -114,148 +91,125 @@ serve(async (req) => {
     });
 
     console.log('Third-party API response status:', response.status);
-    console.log('Third-party API response headers:', Object.fromEntries(response.headers.entries()));
 
-    if (response.status === 200) {
-      let responseData;
-      try {
-        responseData = await response.json();
+    // Always try to get response body first
+    let responseData;
+    try {
+      const responseText = await response.text();
+      console.log('Third-party API response text:', responseText);
+      
+      if (responseText) {
+        responseData = JSON.parse(responseText);
         console.log('Third-party API response data:', responseData);
-      } catch (parseError) {
-        console.error('Error parsing third-party response:', parseError);
+      }
+    } catch (parseError) {
+      console.error('Error parsing third-party response:', parseError);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Invalid response from third-party service',
+        status: response.status
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check success condition like deposit API
+    const success = responseData?.error?.msg === "No Error";
+    console.log('API Success check:', { success, errorMsg: responseData?.error?.msg });
+
+    if (success) {
+      console.log('Withdrawal successful, creating transaction record...');
+      
+      // Initialize Supabase client
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      
+      if (!supabaseUrl || !supabaseServiceKey) {
+        console.error('Missing Supabase environment variables');
         return new Response(JSON.stringify({ 
           success: false,
-          error: 'Invalid response from third-party service'
+          error: 'Server configuration error'
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       
-      // Check if withdrawal was successful based on error.msg
-      if (responseData?.error?.msg === "No Error") {
-        // Transform balance for transaction (multiply by 1000)
-        const transactionAmount = responseData.balance ? responseData.balance * 1000 : amount;
+      const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+      
+      // Get user ID from username
+      console.log('Looking up user by username:', username);
+      const { data: userData, error: userError } = await supabaseClient
+        .from('profiles')
+        .select('user_id')
+        .eq('username', username)
+        .single();
         
-        console.log('Creating transaction record...');
-        
-        // Initialize Supabase client
-        const supabaseUrl = Deno.env.get('SUPABASE_URL');
-        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-        
-        if (!supabaseUrl || !supabaseServiceKey) {
-          console.error('Missing Supabase environment variables');
-          return new Response(JSON.stringify({ 
-            success: false,
-            error: 'Server configuration error'
-          }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        
-        const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
-        
-        // Get user ID from username
-        const { data: userData, error: userError } = await supabaseClient
-          .from('profiles')
-          .select('user_id')
-          .eq('username', username)
-          .single();
-          
-        if (userError || !userData) {
-          console.error('User not found:', userError);
-          return new Response(JSON.stringify({ 
-            success: false,
-            error: 'User not found'
-          }), {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        
-        const userId = userData.user_id;
-        
-        // Create transaction record with pending status
-        const { error: dbError } = await supabaseClient
-          .from('transactions')
-          .insert([
-            {
-              user_id: userId,
-              type: 'withdrawal',
-              amount: transactionAmount, // Use balance * 1000
-              status: 'pending'
-            }
-          ]);
-
-        if (dbError) {
-          console.error('Database error:', dbError);
-          return new Response(JSON.stringify({ 
-            success: false,
-            error: 'Failed to create transaction record'
-          }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        console.log('Transaction created successfully with pending status');
-        
-        // Transform the balance from API response (multiply by 1000)
-        const transformedBalance = responseData.amount ? responseData.amount * 1000 : 0;
-        const transformedOutstanding = responseData.outstanding ? responseData.outstanding * 1000 : 0;
-        
-        console.log('Response transformation:', { 
-          originalBalance: responseData.balance, 
-          transformedBalance,
-          originalOutstanding: responseData.outstanding,
-          transformedOutstanding,
-          requestAmount: amount,
-          txnId: responseData.txnId,
-          refno: responseData.refno
-        });
-        
-        return new Response(JSON.stringify({ 
-          success: true,
-          status: response.status,
-          amount: amount, // Return original requested amount
-          balance: transformedBalance,
-          outstanding: transformedOutstanding,
-          txnId: responseData.txnId,
-          refno: responseData.refno,
-          message: 'Withdrawal processed successfully'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } else {
-        console.error('Third-party API returned error:', responseData.error);
+      if (userError || !userData) {
+        console.error('User not found:', userError);
         return new Response(JSON.stringify({ 
           success: false,
-          status: response.status,
-          message: responseData.error?.msg || 'Withdrawal failed',
-          error: responseData.error
+          error: 'User not found'
         }), {
+          status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-    } else {
-      console.error('Third-party API returned error status:', response.status);
       
-      // Try to get error response body
-      let errorBody = '';
-      try {
-        errorBody = await response.text();
-        console.error('Third-party API error response body:', errorBody);
-      } catch (textError) {
-        console.error('Could not read error response body:', textError);
+      const userId = userData.user_id;
+      console.log('Found user ID:', userId);
+      
+      // Create transaction record with pending status
+      const { error: dbError } = await supabaseClient
+        .from('transactions')
+        .insert([
+          {
+            user_id: userId,
+            type: 'withdrawal',
+            amount: amount, // Use original amount
+            status: 'pending'
+          }
+        ]);
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Failed to create transaction record'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
+
+      console.log('Transaction created successfully');
       
+      // Transform response data
+      const transformedBalance = responseData.balance ? responseData.balance * 1000 : 0;
+      const transformedOutstanding = responseData.outstanding ? responseData.outstanding * 1000 : 0;
+      
+      return new Response(JSON.stringify({ 
+        success: true,
+        status: response.status,
+        amount: amount,
+        balance: transformedBalance,
+        outstanding: transformedOutstanding,
+        txnId: responseData.txnId,
+        refno: responseData.refno,
+        message: 'Withdrawal processed successfully'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } else {
+      console.error('Third-party API returned error:', responseData?.error);
       return new Response(JSON.stringify({ 
         success: false,
         status: response.status,
-        message: 'Withdrawal failed at third-party service',
-        error: errorBody || 'Unknown error'
+        message: responseData?.error?.msg || 'Withdrawal failed',
+        error: responseData?.error || 'Unknown error'
       }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
