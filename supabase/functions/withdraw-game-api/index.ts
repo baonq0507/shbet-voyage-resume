@@ -158,8 +158,8 @@ serve(async (req) => {
         
         // Get user ID from username
         const { data: userData, error: userError } = await supabaseClient
-          .from('users')
-          .select('id')
+          .from('profiles')
+          .select('user_id')
           .eq('username', username)
           .single();
           
@@ -174,7 +174,7 @@ serve(async (req) => {
           });
         }
         
-        const userId = userData.id;
+        const userId = userData.user_id;
         
         // Create transaction record with pending status
         const { error: dbError } = await supabaseClient
