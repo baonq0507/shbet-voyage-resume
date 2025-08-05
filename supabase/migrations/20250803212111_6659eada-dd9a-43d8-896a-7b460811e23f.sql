@@ -1,3 +1,0 @@
--- Add bonus type to transactions
--- This migration will be applied after the transactions table is created
--- The constraint modification will be handled in a later migration
