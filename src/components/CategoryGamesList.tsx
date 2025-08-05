@@ -55,56 +55,36 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-8 text-center">{title}</h2>
       
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {/* Provider Categories - Horizontal scroll on mobile, sidebar on desktop */}
-        <div className="lg:w-64 flex-shrink-0">
-          {/* Mobile: Horizontal scrolling tabs */}
-          <div className="lg:hidden">
-            <div className="flex overflow-x-auto scrollbar-hide space-x-2 pb-4">
-              {providers.map((provider) => (
-                <button
-                  key={provider.id}
-                  onClick={() => setSelectedProvider(Number(provider.id))}
-                  className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium ${
-                    selectedProvider === provider.id
-                      ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'bg-card hover:bg-muted/50 border'
-                  }`}
-                >
-                  <div className="w-6 h-6 flex-shrink-0">
-                    <img 
-                      src={provider.icon} 
-                      alt={provider.text}
-                      className="w-full h-full object-contain rounded"
-                    />
-                  </div>
-                  <span className="whitespace-nowrap">{provider.text}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop: Vertical sidebar */}
-          <div className="hidden lg:block bg-card rounded-lg p-4 space-y-2">
-            <h3 className="font-semibold mb-4 text-sm text-muted-foreground">DANH MỤC</h3>
+      <div className="flex gap-2 sm:gap-4 lg:gap-6">
+        {/* Provider Categories - Compact sidebar on mobile, full on desktop */}
+        <div className="w-20 sm:w-32 lg:w-64 flex-shrink-0">
+          <div className="bg-card rounded-lg p-1 sm:p-2 lg:p-4 space-y-1 sm:space-y-2">
+            <h3 className="font-semibold mb-2 lg:mb-4 text-[10px] sm:text-xs lg:text-sm text-muted-foreground text-center lg:text-left">
+              <span className="hidden sm:inline">DANH MỤC</span>
+              <span className="sm:hidden">DM</span>
+            </h3>
             {providers.map((provider) => (
               <button
                 key={provider.id}
                 onClick={() => setSelectedProvider(Number(provider.id))}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-left ${
+                className={`w-full flex flex-col sm:flex-row items-center gap-1 sm:gap-2 lg:gap-3 p-1 sm:p-2 lg:p-3 rounded-lg transition-all duration-200 text-left ${
                   selectedProvider === provider.id
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'hover:bg-muted/50'
                 }`}
+                title={provider.text} // Tooltip for mobile
               >
-                <div className="w-8 h-8 flex-shrink-0">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 flex-shrink-0">
                   <img 
                     src={provider.icon} 
                     alt={provider.text}
                     className="w-full h-full object-contain rounded"
                   />
                 </div>
-                <span className="text-sm font-medium">{provider.text}</span>
+                <span className="text-[8px] sm:text-xs lg:text-sm font-medium text-center sm:text-left leading-tight">
+                  <span className="hidden lg:inline">{provider.text}</span>
+                  <span className="lg:hidden">{provider.text.split(' ')[0]}</span>
+                </span>
               </button>
             ))}
           </div>
