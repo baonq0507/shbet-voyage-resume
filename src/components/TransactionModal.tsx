@@ -249,10 +249,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     try {
       console.log('=== FRONTEND: Starting withdrawal process ===');
       console.log('User profile:', profile);
+      console.log('User object:', user);
       console.log('User balance:', userBalance);
-      console.log('About to call withdraw-game-api with:', {
+      
+      const username = profile?.username || user?.email?.split('@')[0];
+      console.log('Username to be sent:', username);
+      
+      const requestBody = {
+        username: username,
         amount: userBalance
-      });
+      };
+      console.log('Complete request body:', requestBody);
 
       // Call withdrawal API with timeout
       console.log('=== FRONTEND: About to call withdraw-game-api ===');
@@ -263,10 +270,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       let apiResponse, apiError;
       try {
         const result = await supabase.functions.invoke('withdraw-game-api', {
-          body: {
-            username: profile?.username || user?.email?.split('@')[0],
-            amount: userBalance // Use current balance as withdrawal amount
-          },
+          body: requestBody,
           headers: {
             'Content-Type': 'application/json',
           }
