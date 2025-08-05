@@ -33,32 +33,62 @@ serve(async (req) => {
       });
     }
     
-    const { username, amount } = requestBody;
+    const { amount } = requestBody;
 
     // Validate required fields
-    if (!username || !amount) {
-      console.error('Missing required fields:', { username, amount });
+    if (!amount) {
+      console.error('Missing required field: amount');
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Missing required fields: username and amount'
+        error: 'Missing required field: amount'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Processing withdrawal API call for:', { username, amount });
-    
-    if (!username) {
-      console.error('No username provided!');
+    // Get username from authenticated user's profile
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization') ?? '' },
+        },
+      }
+    );
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      console.error('User not authenticated');
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Username is required'
+        error: 'User not authenticated'
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('username')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError || !profile?.username) {
+      console.error('Username not found for user:', user.id);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Username not found'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const username = profile.username;
+    console.log('Processing withdrawal API call for:', { username, amount });
 
     // Transform amount based on business rules (same as deposit):
     // If amount < 10000: divide by 1000
@@ -105,6 +135,29 @@ serve(async (req) => {
         transformedAmount,
         requestAmount: amount 
       });
+
+      // Create transaction record in database
+      const { error: dbError } = await supabaseClient
+        .from('transactions')
+        .insert([
+          {
+            user_id: user.id,
+            type: 'withdrawal',
+            amount: transformedAmount, // Use balance * 1000 as requested
+            status: 'approved' // Mark as approved since API was successful
+          }
+        ]);
+
+      if (dbError) {
+        console.error('Database error creating transaction:', dbError);
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Failed to create transaction record'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       
       return new Response(JSON.stringify({ 
         success: true,

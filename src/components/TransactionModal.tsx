@@ -251,14 +251,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       console.log('User profile:', profile);
       console.log('User balance:', userBalance);
       console.log('About to call withdraw-game-api with:', {
-        username: profile.username,
         amount: userBalance
       });
 
       // Call withdrawal API
       const { data: apiResponse, error: apiError } = await supabase.functions.invoke('withdraw-game-api', {
         body: {
-          username: profile.username,
           amount: userBalance // Use current balance as withdrawal amount
         }
       });
@@ -275,20 +273,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       console.log('Withdrawal API response:', apiResponse);
 
       if (apiResponse.success) {
-        // Create transaction record with the transformed amount from API
-        const { error: dbError } = await supabase
-          .from('transactions')
-          .insert([
-            {
-              user_id: user.id,
-              type: 'withdrawal',
-              amount: apiResponse.amount, // Use the transformed amount from API
-              status: 'approved' // Mark as approved since API was successful
-            }
-          ]);
-
-        if (dbError) throw dbError;
-
         toast({
           title: "Rút tiền thành công ✅",
           description: `Đã rút ${apiResponse.amount?.toLocaleString()} VND thành công`,
