@@ -20,8 +20,8 @@ export function AdminLayout({ children, activeSection = 'dashboard', onSectionCh
         {/* Header spans full width */}
         <AdminHeader />
         
-        {/* Main Layout Container */}
-        <div className="flex min-h-[calc(100vh-4rem)] w-full">
+        {/* Main Layout Container - Account for header height */}
+        <div className="flex w-full" style={{ height: 'calc(100vh - 4rem)' }}>
           {/* Sidebar */}
           <AdminSidebar activeSection={activeSection} onSectionChange={onSectionChange} />
           
