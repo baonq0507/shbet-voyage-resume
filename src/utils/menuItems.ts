@@ -108,7 +108,8 @@ export const menuItems: MenuItem[] = [
   {
     id: 'xoso',
     text: 'XỔ SỐ',
-    icon: 'Circle',
+    icon: '/lovable-uploads/d0bb457d-1803-4367-87c4-62402a5bc566.png',
+    type: 'image',
     path: '/xoso',
     dropdown: [
       { id: 1003, text: 'TC XỔ SỐ', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/tcg.png', type: "image" },
