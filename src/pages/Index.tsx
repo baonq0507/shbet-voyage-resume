@@ -65,7 +65,7 @@ const Index = () => {
         title="GAME CASINO HOT NHẤT" 
         category="casino"
         gpids={casinoGpids}
-        maxGames={12} 
+        maxGames={6} 
       />
 
       {/* Dynamic Promotions Section */}
