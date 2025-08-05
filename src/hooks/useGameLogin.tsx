@@ -45,6 +45,7 @@ export const useGameLogin = () => {
       const { data, error: functionError } = await supabase.functions.invoke('game-login', {
         body: {
           gpid: gpid,
+          username: profile.username,
           isSports: isSports
         }
       });

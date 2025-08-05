@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface GameLoginRequest {
   gpid: number;
+  username: string;
   isSports?: boolean;
 }
 
@@ -32,65 +33,22 @@ Deno.serve(async (req) => {
     console.log('🎮 Game login request received');
     
     // Get request data
-    const { gpid, isSports = false }: GameLoginRequest = await req.json();
-    console.log('📥 Request data:', { gpid, isSports });
+    const { gpid, username, isSports = false }: GameLoginRequest = await req.json();
+    console.log('📥 Request data:', { gpid, username, isSports });
 
-    // Get user from authorization header
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      console.log('❌ No authorization header');
+    if (!username) {
+      console.log('❌ Username is required');
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.log('❌ Missing Supabase configuration');
-      return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get user profile using the auth token
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
-    if (userError || !user) {
-      console.log('❌ Invalid user token:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get user profile from database
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('user_id', user.id)
-      .single();
-
-    if (profileError || !profile?.username) {
-      console.log('❌ User profile not found:', profileError);
-      return new Response(
-        JSON.stringify({ error: 'User profile not found' }),
+        JSON.stringify({ error: 'Username is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('👤 User found:', profile.username);
+    console.log('👤 Using username:', username);
 
     // Prepare game login data
     const gameLoginData: GameLoginData = {
-      Username: profile.username,
+      Username: username,
       IsWapSports: isSports,
       CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
       Portfolio: isSports ? 'ThirdPartySportsBook' : 'SeamlessGame',
