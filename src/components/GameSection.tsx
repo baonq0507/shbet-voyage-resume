@@ -142,7 +142,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                         {/* Glow effect for active state */}
                         <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                      <span className="text-[10px] leading-none">API</span>
+                      <span className="text-[10px] leading-none">HOT NHẤT</span>
                     </div>
                     
                     {/* Active indicator */}
