@@ -189,6 +189,14 @@ serve(async (req) => {
 
     // Step 5: Create profile record in database
     console.log('📝 Step 5: Creating profile record');
+    console.log('📊 Profile data to insert:', {
+      user_id: authData.user.id,
+      username: username,
+      full_name: fullName,
+      phone_number: phoneNumber,
+      avatar_url: '/src/assets/avatars/avatar-1.jpg'
+    });
+    
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
@@ -201,15 +209,18 @@ serve(async (req) => {
 
     if (profileError) {
       console.error('❌ Failed to create profile record:', profileError);
+      console.error('❌ Profile error details:', JSON.stringify(profileError, null, 2));
+      
       // Try to delete the auth user if profile creation fails
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Failed to create user profile'
+          error: `Failed to create user profile: ${profileError.message}`,
+          details: profileError
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
