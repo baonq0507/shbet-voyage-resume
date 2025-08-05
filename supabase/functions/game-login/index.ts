@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
     console.log('🚀 Calling game API with data:', gameLoginData);
 
     // Call game login API
-    const gameResponse = await fetch('http://206.206.126.141/web-root/restricted/player/login.aspx', {
+    const gameResponse = await fetch('https://ex-api-yy5.tw946.com/web-root/restricted/player/login.aspx', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
