@@ -181,53 +181,15 @@ serve(async (req) => {
           error: authError?.message || 'Failed to create user account'
         }),
         { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // Step 5: Create profile record in database
-    console.log('📝 Step 5: Creating profile record');
-    console.log('📊 Profile data to insert:', {
-      user_id: authData.user.id,
-      username: username,
-      full_name: fullName,
-      phone_number: phoneNumber,
-      avatar_url: '/src/assets/avatars/avatar-1.jpg'
-    });
-    
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        user_id: authData.user.id,
-        username: username,
-        full_name: fullName,
-        phone_number: phoneNumber,
-        avatar_url: '/src/assets/avatars/avatar-1.jpg'
-      });
-
-    if (profileError) {
-      console.error('❌ Failed to create profile record:', profileError);
-      console.error('❌ Profile error details:', JSON.stringify(profileError, null, 2));
-      
-      // Try to delete the auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Failed to create user profile: ${profileError.message}`,
-          details: profileError
-        }),
-        { 
           status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
     }
 
+    // Step 5: User created successfully - profile is created automatically by trigger
     console.log('✅ User created successfully in Supabase Auth');
-    console.log('✅ Profile record created successfully');
+    console.log('✅ Profile will be created automatically by trigger');
     console.log('✅ Registration process completed successfully');
 
     return new Response(
