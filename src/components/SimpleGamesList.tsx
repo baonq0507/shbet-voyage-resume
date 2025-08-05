@@ -21,12 +21,12 @@ const GameCard = ({ title, description, image, featured, onClick }: GameCardProp
       featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
     } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}
   >
-    <CardHeader className="p-1 sm:p-2">
-      <div className="relative overflow-hidden rounded-xl shadow-lg w-full" style={{ aspectRatio: '1 / 1' }}>
+    <CardHeader className="p-2 sm:p-3">
+      <div className="relative overflow-hidden rounded-xl shadow-lg">
         <LazyImage 
           src={image} 
           alt={title}
-          className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
+          className="w-full h-24 sm:h-28 md:h-32 group-hover:scale-125 transition-transform duration-500"
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -51,7 +51,7 @@ const GameCard = ({ title, description, image, featured, onClick }: GameCardProp
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/20 via-transparent to-transparent rotate-45 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000"></div>
       </div>
       
-      <CardTitle className="text-xs sm:text-sm font-semibold group-hover:text-primary transition-colors mt-2 text-center line-clamp-2 min-h-[2rem] flex items-center justify-center px-1">
+      <CardTitle className="text-xs sm:text-sm md:text-base font-semibold group-hover:text-primary transition-colors mt-3 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
         {title}
       </CardTitle>
     </CardHeader>
@@ -112,7 +112,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: maxGames }).map((_, index) => (
               <Card key={index} className="overflow-hidden animate-pulse">
-                <div className="w-full bg-muted" style={{ aspectRatio: '1 / 1' }}></div>
+                <div className="h-24 sm:h-28 md:h-32 bg-muted"></div>
                 <CardHeader className="pb-2">
                   <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
                 </CardHeader>

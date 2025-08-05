@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Local Supabase configuration
-const LOCAL_SUPABASE_URL = import.meta.env.VITE_LOCAL_SUPABASE_URL || "https://api.dinamondbet68.com/";
+const LOCAL_SUPABASE_URL = import.meta.env.VITE_LOCAL_SUPABASE_URL || "http://206.206.126.141:54321";
 const LOCAL_SUPABASE_ANON_KEY = import.meta.env.VITE_LOCAL_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
 
 // Cloud Supabase configuration (fallback)
