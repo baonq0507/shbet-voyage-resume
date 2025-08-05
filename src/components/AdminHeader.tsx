@@ -25,7 +25,7 @@ export function AdminHeader() {
 
   return (
     <header className="h-16 lg:h-18 border-b border-sidebar-border/20 bg-sidebar/80 backdrop-blur-xl supports-[backdrop-filter]:bg-sidebar/60 sticky top-0 z-50 transition-all duration-300">
-      <div className="flex h-full items-center justify-between px-4 lg:px-6">
+      <div className="flex h-full items-center justify-between px-4 lg:px-6 max-w-full w-full mx-auto">
         {/* Left Section */}
         <div className="flex items-center gap-3 lg:gap-4 min-w-0">
           <SidebarTrigger className="hover:bg-sidebar-accent transition-colors duration-200" />
