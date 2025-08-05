@@ -129,17 +129,17 @@ serve(async (req) => {
       }),
     });
 
+    const responseData = await response.json();
     console.log('Third-party API response status:', response.status);
+    console.log('Third-party API response data:', responseData);
 
-    if (response.status === 200) {
-      const responseData = await response.json();
-      console.log('Third-party API response data:', responseData);
-      
+    // Check if withdrawal was successful based on error.msg
+    if (responseData?.error?.msg === "No Error") {
       // Transform balance for transaction (multiply by 1000)
       const transactionAmount = responseData.balance ? responseData.balance * 1000 : amount;
       
       console.log('Creating transaction record...');
-      // Create transaction record
+      // Create transaction record with pending status
       const { error: dbError } = await supabaseClient
         .from('transactions')
         .insert([
@@ -147,7 +147,7 @@ serve(async (req) => {
             user_id: userId,
             type: 'withdrawal',
             amount: transactionAmount, // Use balance * 1000
-            status: 'approved'
+            status: 'pending'
           }
         ]);
 
@@ -162,19 +162,21 @@ serve(async (req) => {
         });
       }
       
-      console.log('Transaction created successfully');
+      console.log('Transaction created successfully with pending status');
       return new Response(JSON.stringify({ 
         success: true,
         amount: transactionAmount,
-        message: 'Withdrawal processed successfully'
+        message: 'Withdrawal processed successfully',
+        data: responseData
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      console.error('Third-party API error, status:', response.status);
+      console.error('Third-party API error:', responseData?.error?.msg);
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Withdrawal failed at third-party service'
+        error: responseData?.error?.msg || 'Withdrawal failed at third-party service',
+        data: responseData
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
