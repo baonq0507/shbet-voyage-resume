@@ -150,12 +150,12 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                   </TabsTrigger>
                 )}
                 
-                {/* Lobby Tabs */}
+                {/* Category Tabs */}
                 {lobbies && lobbies.map((lobby, index) => (
                   <TabsTrigger 
                     key={lobby.id} 
                     value={lobby.id} 
-                    className="group flex flex-col items-center justify-center gap-0.5 p-1.5 sm:p-2 h-auto min-h-[50px] sm:min-h-[55px] text-xs font-semibold rounded-lg min-w-[70px] max-w-[90px] flex-shrink-0
+                    className="group flex items-center justify-center p-2 sm:p-3 h-auto min-h-[40px] sm:min-h-[45px] text-xs sm:text-sm font-semibold rounded-lg min-w-[80px] flex-shrink-0
                       data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/90 
                       data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:scale-105 data-[state=active]:casino-glow
                       hover:bg-gradient-to-br hover:from-primary/30 hover:to-primary/20 hover:scale-102 hover:shadow-md
@@ -166,17 +166,9 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                     {/* Animated background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
                     
-                     <div className="relative z-10 flex flex-col items-center gap-0.5">
-                       <div className="relative">
-                          <LazyImage 
-                            src={lobby.logo} 
-                            alt={lobby.name}
-                            className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 group-data-[state=active]:scale-110 transition-transform duration-300 drop-shadow-lg"
-                          />
-                         {/* Glow effect for active state */}
-                         <div className="absolute inset-0 rounded-full bg-white/20 blur-sm opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-300"></div>
-                       </div>
-                     </div>
+                    <div className="relative z-10 flex items-center">
+                      <span className="text-center leading-tight">{lobby.name}</span>
+                    </div>
                     
                     {/* Active indicator */}
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
