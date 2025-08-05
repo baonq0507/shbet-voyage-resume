@@ -17,6 +17,7 @@ import { Navigate } from 'react-router-dom';
 import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash } from 'lucide-react';
 import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 import { usePromotionApplication } from '@/hooks/usePromotionApplication';
+import { useDepositApproval } from '@/hooks/useDepositApproval';
 
 interface Transaction {
   id: string;
@@ -105,6 +106,7 @@ const AdminPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { applyPromotionToDeposit } = usePromotionApplication();
+  const { approveDeposit, isProcessing: isDepositProcessing } = useDepositApproval();
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -305,16 +307,17 @@ const AdminPage = () => {
 
       if (updateError) throw updateError;
 
-      // If approving a deposit, update user balance and apply promotions
+      // If approving a deposit, use the deposit approval hook
       if (status === 'approved' && transaction.type === 'deposit') {
-        const { error: balanceError } = await supabase
-          .from('profiles')
-          .update({
-            balance: (transaction.profiles?.balance || 0) + transaction.amount
-          })
-          .eq('user_id', transaction.user_id);
+        const success = await approveDeposit(
+          transactionId,
+          transaction.profiles?.username || '',
+          transaction.amount
+        );
 
-        if (balanceError) throw balanceError;
+        if (!success) {
+          return; // Error already shown by the hook
+        }
 
         // Extract promotion code from admin note if present
         const promotionCode = transaction.admin_note?.match(/Mã khuyến mãi: ([A-Z0-9]+)/)?.[1];
