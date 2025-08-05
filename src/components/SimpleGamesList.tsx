@@ -22,7 +22,7 @@ const GameCard = ({ title, description, image, featured, onClick }: GameCardProp
     } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}
   >
     <CardHeader className="p-2 sm:p-3">
-      <div className="relative overflow-hidden rounded-xl shadow-lg aspect-square">
+      <div className="relative overflow-hidden rounded-xl shadow-lg w-full" style={{ aspectRatio: '1 / 1' }}>
         <LazyImage 
           src={image} 
           alt={title}
@@ -112,7 +112,7 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
           <div className="grid grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: maxGames }).map((_, index) => (
               <Card key={index} className="overflow-hidden animate-pulse">
-                <div className="aspect-square bg-muted"></div>
+                <div className="w-full bg-muted" style={{ aspectRatio: '1 / 1' }}></div>
                 <CardHeader className="pb-2">
                   <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
                 </CardHeader>
