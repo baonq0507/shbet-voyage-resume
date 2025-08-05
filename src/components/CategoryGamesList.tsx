@@ -59,10 +59,6 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
         {/* Provider Categories - Compact sidebar on mobile, full on desktop */}
         <div className="w-20 sm:w-32 lg:w-64 flex-shrink-0">
           <div className="bg-card rounded-lg p-1 sm:p-2 lg:p-4 space-y-1 sm:space-y-2">
-            <h3 className="font-semibold mb-2 lg:mb-4 text-[10px] sm:text-xs lg:text-sm text-muted-foreground text-center lg:text-left">
-              <span className="hidden sm:inline">DANH MỤC</span>
-              <span className="sm:hidden">DM</span>
-            </h3>
             {providers.map((provider) => (
               <button
                 key={provider.id}
