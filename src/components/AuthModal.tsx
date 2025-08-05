@@ -166,22 +166,6 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
         return;
       }
 
-      // Automatically sign in the user after successful registration
-      if (data.user && !data.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password
-        });
-
-        if (signInError) {
-          toast({
-            title: "Đăng ký thành công",
-            description: "Tài khoản đã được tạo. Vui lòng đăng nhập.",
-            variant: "default"
-          });
-          return;
-        }
-      }
 
       toast({
         title: "Đăng ký thành công",
