@@ -46,7 +46,7 @@ export const BankAccountModal = ({ isOpen, onClose, onSuccess }: BankAccountModa
 
     try {
       const { error } = await supabase
-        .from('user_bank_accounts')
+        .from('bank')
         .insert({
           user_id: user.id,
           bank_name: bankName,

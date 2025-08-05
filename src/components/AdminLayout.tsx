@@ -33,7 +33,7 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { isAdmin, roleLoading } = useRole();
+  const { isAdmin, isLoading } = useRole();
   const location = useLocation();
 
   const menuItems = [
@@ -87,7 +87,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     }
   ];
 
-  if (roleLoading) {
+  if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Đang tải...</div>;
   }
 

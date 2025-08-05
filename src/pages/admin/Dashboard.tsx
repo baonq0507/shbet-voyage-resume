@@ -72,11 +72,11 @@ const Dashboard: React.FC = () => {
         .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
 
-      // Fetch unread notifications
+      // Fetch unread notifications  
       const { count: notificationsCount } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })
-        .eq('is_published', false);
+        .eq('is_read', false);
 
       const totalDeposits = deposits?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
       const totalWithdrawals = withdrawals?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <AdminLayout activeTab="dashboard">
+      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Đang tải thống kê...</div>
         </div>

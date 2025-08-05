@@ -52,7 +52,7 @@ const Notifications: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotifications(data || []);
+      setNotifications(data as any || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       toast({
@@ -81,10 +81,11 @@ const Notifications: React.FC = () => {
         .from('notifications')
         .insert({
           title,
-          content,
+          message: content,
           type,
-          target_audience: targetAudience,
-          is_published: isPublished,
+          target_users: targetAudience === 'all' ? [] : [targetAudience],
+          is_read: false,
+          user_id: '', // Admin notification
           created_at: new Date().toISOString()
         });
 

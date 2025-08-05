@@ -51,7 +51,7 @@ const Promotions: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPromotions(data || []);
+      setPromotions(data as any || []);
     } catch (error) {
       console.error('Error fetching promotions:', error);
       toast({

@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Search, Eye, DollarSign, Calendar, Phone, Mail } from 'lucide-react';
+import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 
 interface UserProfile {
@@ -80,7 +80,7 @@ const Users: React.FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Tổng người dùng</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <UsersIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalUsers.toLocaleString()}</div>

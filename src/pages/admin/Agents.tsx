@@ -44,7 +44,7 @@ const Agents: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAgents(data || []);
+      setAgents(data as any || []);
     } catch (error) {
       console.error('Error fetching agents:', error);
       toast({
