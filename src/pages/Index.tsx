@@ -192,7 +192,7 @@ const Index = () => {
       <Header />
       
       {/* Mobile Auth Buttons */}
-      <MobileAuthButtons />
+      <MobileAuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
       
       {/* Promotion Banner */}
       <PromotionBanner />

@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button";
 import { LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-const MobileAuthButtons = () => {
+interface MobileAuthButtonsProps {
+  onAuthClick: () => void;
+}
+
+const MobileAuthButtons = ({ onAuthClick }: MobileAuthButtonsProps) => {
   const { user } = useAuth();
 
   // Ẩn nút nếu đã đăng nhập
@@ -16,6 +20,7 @@ const MobileAuthButtons = () => {
           variant="outline" 
           size="sm" 
           className="flex-1 h-10 text-sm font-semibold border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
+          onClick={onAuthClick}
         >
           <LogIn className="w-4 h-4 mr-2" />
           Đăng Nhập
@@ -25,6 +30,7 @@ const MobileAuthButtons = () => {
           variant="outline" 
           size="sm" 
           className="flex-1 h-10 text-sm font-semibold border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
+          onClick={onAuthClick}
         >
           <UserPlus className="w-4 h-4 mr-2" />
           Đăng Ký
