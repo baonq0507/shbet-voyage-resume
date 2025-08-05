@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePromotionCodes } from "@/hooks/usePromotionCodes";
-import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle, Tag } from "lucide-react";
+import { BankAccountModal } from "./BankAccountModal";
+import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle, Tag, Plus } from "lucide-react";
 
 interface Bank {
   id: string;
@@ -19,6 +20,15 @@ interface Bank {
   account_number: string;
   account_holder: string;
   qr_code_url: string | null;
+}
+
+interface UserBankAccount {
+  id: string;
+  user_id: string;
+  bank_name: string;
+  account_number: string;
+  account_holder: string;
+  is_active: boolean;
 }
 
 interface TransactionModalProps {
@@ -38,6 +48,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const [proofImage, setProofImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
+  const [userBankAccounts, setUserBankAccounts] = useState<UserBankAccount[]>([]);
+  const [showBankAccountModal, setShowBankAccountModal] = useState(false);
   const { toast } = useToast();
   const { user, profile } = useAuth();
   const { validatePromotionCode } = usePromotionCodes();
@@ -61,6 +73,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   useEffect(() => {
     if (isOpen) {
       fetchBanks();
+      fetchUserBankAccounts();
     }
   }, [isOpen]);
 
@@ -130,6 +143,23 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     }
   };
 
+  const fetchUserBankAccounts = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_bank_accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setUserBankAccounts(data || []);
+    } catch (error) {
+      console.error('Error fetching user bank accounts:', error);
+    }
+  };
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -195,47 +225,86 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   };
 
   const handleWithdrawSubmit = async () => {
-    if (!withdrawAmount || !user) {
+    if (!user || !profile?.username) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng nhập số tiền rút",
+        description: "Không thể xác định thông tin người dùng",
         variant: "destructive",
       });
       return;
     }
 
+    // Check if user has linked bank account
+    if (userBankAccounts.length === 0) {
+      toast({
+        title: "Cần liên kết ngân hàng",
+        description: "Bạn cần liên kết tài khoản ngân hàng trước khi rút tiền",
+        variant: "destructive",
+      });
+      setShowBankAccountModal(true);
+      return;
+    }
+
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .insert([
-          {
-            user_id: user.id,
-            type: 'withdrawal',
-            amount: parseFloat(withdrawAmount),
-            status: 'pending'
-          }
-        ]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Thành công",
-        description: "Yêu cầu rút tiền đã được gửi. Vui lòng chờ admin duyệt.",
+      // Call withdrawal API
+      const { data: apiResponse, error: apiError } = await supabase.functions.invoke('withdraw-game-api', {
+        body: {
+          username: profile.username,
+          amount: userBalance // Use current balance as withdrawal amount
+        }
       });
 
-      setWithdrawAmount("");
-      onClose();
+      if (apiError) {
+        console.error('Withdrawal API error:', apiError);
+        throw new Error('API call failed');
+      }
+
+      console.log('Withdrawal API response:', apiResponse);
+
+      if (apiResponse.success) {
+        // Create transaction record with the transformed amount from API
+        const { error: dbError } = await supabase
+          .from('transactions')
+          .insert([
+            {
+              user_id: user.id,
+              type: 'withdrawal',
+              amount: apiResponse.amount, // Use the transformed amount from API
+              status: 'approved' // Mark as approved since API was successful
+            }
+          ]);
+
+        if (dbError) throw dbError;
+
+        toast({
+          title: "Rút tiền thành công ✅",
+          description: `Đã rút ${apiResponse.amount?.toLocaleString()} VND thành công`,
+        });
+
+        onClose();
+      } else {
+        throw new Error(apiResponse.message || 'Withdrawal failed');
+      }
+
     } catch (error) {
-      console.error('Error creating withdrawal request:', error);
+      console.error('Error processing withdrawal:', error);
       toast({
-        title: "Lỗi",
-        description: "Không thể tạo yêu cầu rút tiền",
+        title: "Lỗi rút tiền",
+        description: "Không thể thực hiện rút tiền. Vui lòng thử lại.",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBankAccountSuccess = () => {
+    fetchUserBankAccounts();
+    toast({
+      title: "Thành công",
+      description: "Tài khoản ngân hàng đã được liên kết. Bạn có thể rút tiền ngay bây giờ.",
+    });
   };
 
   // Real-time validation for withdrawal amount
@@ -448,59 +517,78 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="withdraw-amount">Số tiền rút (VND)</Label>
-                  <Input
-                    id="withdraw-amount"
-                    type="number"
-                    placeholder="Nhập số tiền"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    className={withdrawalValidation?.type === 'error' ? 'border-red-500' : ''}
-                  />
-                  
-                  {/* Real-time validation messages */}
-                  {withdrawalValidation && (
-                    <Alert className={`mt-2 ${
-                      withdrawalValidation.type === 'error' ? 'border-red-200 bg-red-50' :
-                      withdrawalValidation.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
-                      'border-green-200 bg-green-50'
-                    }`}>
-                      <div className="flex items-center gap-2">
-                        {withdrawalValidation.type === 'error' && <AlertTriangle className="w-4 h-4 text-red-600" />}
-                        {withdrawalValidation.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600" />}
-                        {withdrawalValidation.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600" />}
-                        <AlertDescription className={`text-sm ${
-                          withdrawalValidation.type === 'error' ? 'text-red-800' :
-                          withdrawalValidation.type === 'warning' ? 'text-yellow-800' :
-                          'text-green-800'
-                        }`}>
-                          {withdrawalValidation.message}
-                        </AlertDescription>
-                      </div>
-                    </Alert>
+                {/* Bank Account Section */}
+                <div className="space-y-3">
+                  <Label>Tài khoản ngân hàng</Label>
+                  {userBankAccounts.length === 0 ? (
+                    <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Bạn cần liên kết tài khoản ngân hàng để rút tiền
+                      </p>
+                      <Button 
+                        onClick={() => setShowBankAccountModal(true)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Liên kết tài khoản ngân hàng
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {userBankAccounts.map((account) => (
+                        <div key={account.id} className="p-3 border rounded-lg bg-green-50 border-green-200">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-green-800">{account.bank_name}</p>
+                              <p className="text-sm text-green-600">
+                                {account.account_number} - {account.account_holder}
+                              </p>
+                            </div>
+                            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                          </div>
+                        </div>
+                      ))}
+                      <Button 
+                        onClick={() => setShowBankAccountModal(true)}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Thêm tài khoản ngân hàng khác
+                      </Button>
+                    </div>
                   )}
                 </div>
 
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
-                    <strong>Lưu ý:</strong> Yêu cầu rút tiền sẽ được xử lý trong vòng 24 giờ. 
-                    Vui lòng đảm bảo thông tin tài khoản ngân hàng của bạn đã được cập nhật.
-                  </p>
-                </div>
+                {userBankAccounts.length > 0 && (
+                  <>
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        <strong>Rút toàn bộ số dư:</strong> Hệ thống sẽ tự động rút toàn bộ {userBalance.toLocaleString()} VND về tài khoản ngân hàng đã liên kết.
+                      </p>
+                    </div>
 
-                <Button 
-                  onClick={handleWithdrawSubmit}
-                  disabled={loading || !withdrawAmount || withdrawalValidation?.type === 'error'}
-                  className="w-full"
-                  variant="outline"
-                >
-                  {loading ? "Đang xử lý..." : "Yêu cầu rút tiền"}
-                </Button>
+                    <Button 
+                      onClick={handleWithdrawSubmit}
+                      disabled={loading || userBalance <= 0}
+                      className="w-full"
+                    >
+                      {loading ? "Đang xử lý..." : `Rút ${userBalance.toLocaleString()} VND`}
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+        
+        <BankAccountModal 
+          isOpen={showBankAccountModal}
+          onClose={() => setShowBankAccountModal(false)}
+          onSuccess={handleBankAccountSuccess}
+        />
       </DialogContent>
     </Dialog>
   );
