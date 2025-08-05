@@ -15,6 +15,7 @@ interface GameResponse {
   isActive: boolean;
   provider: string;
   rank: number;
+  gpid?: number;
 }
 
 // Initialize Supabase client
@@ -86,10 +87,11 @@ async function fetchGamesFromDatabase(category: string = "all", gpids?: number[]
         category: game.category || category,
         isActive: game.is_active || false,
         provider: game.provider || 'Unknown',
-        rank: game.rank || 0
+        rank: game.rank || 0,
+        gpid: game.gpid || null
       };
       
-      console.log(`[${requestId}] 🎮 Transformed game: ${transformedGame.name} (ID: ${transformedGame.id}, Type: ${transformedGame.type})`);
+      console.log(`[${requestId}] 🎮 Transformed game: ${transformedGame.name} (ID: ${transformedGame.id}, Type: ${transformedGame.type}, GPID: ${transformedGame.gpid})`);
       return transformedGame;
     });
 
@@ -125,74 +127,74 @@ function getFallbackGames(category: string): GameResponse[] {
   const fallbackData: Record<string, GameResponse[]> = {
     "all": [
       // Casino games matching menu GPIDs
-      { id: "5", name: "BG Live Casino", image: "https://via.placeholder.com/300x200?text=BG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "BG", rank: 1 },
-      { id: "7", name: "SE Live Casino", image: "https://via.placeholder.com/300x200?text=SE+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SE", rank: 2 },
-      { id: "19", name: "SA Live Casino", image: "https://via.placeholder.com/300x200?text=SA+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SA", rank: 3 },
+      { id: "5", name: "BG Live Casino", image: "https://via.placeholder.com/300x200?text=BG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "BG", rank: 1, gpid: 5 },
+      { id: "7", name: "SE Live Casino", image: "https://via.placeholder.com/300x200?text=SE+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SE", rank: 2, gpid: 7 },
+      { id: "19", name: "SA Live Casino", image: "https://via.placeholder.com/300x200?text=SA+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SA", rank: 3, gpid: 19 },
       // Slots games matching menu GPIDs
-      { id: "2", name: "CQ9 Slots", image: "https://via.placeholder.com/300x200?text=CQ9+Slots", type: "Slot", category: "slots", isActive: true, provider: "CQ9", rank: 1 },
-      { id: "3", name: "PP Slots", image: "https://via.placeholder.com/300x200?text=PP+Slots", type: "Slot", category: "slots", isActive: true, provider: "Pragmatic Play", rank: 2 },
-      { id: "13", name: "WM Slots", image: "https://via.placeholder.com/300x200?text=WM+Slots", type: "Slot", category: "slots", isActive: true, provider: "WM", rank: 3 },
+      { id: "2", name: "CQ9 Slots", image: "https://via.placeholder.com/300x200?text=CQ9+Slots", type: "Slot", category: "slots", isActive: true, provider: "CQ9", rank: 1, gpid: 2 },
+      { id: "3", name: "PP Slots", image: "https://via.placeholder.com/300x200?text=PP+Slots", type: "Slot", category: "slots", isActive: true, provider: "Pragmatic Play", rank: 2, gpid: 3 },
+      { id: "13", name: "WM Slots", image: "https://via.placeholder.com/300x200?text=WM+Slots", type: "Slot", category: "slots", isActive: true, provider: "WM", rank: 3, gpid: 13 },
       // Sports games matching menu GPIDs
-      { id: "44", name: "SABA Thể Thao", image: "https://via.placeholder.com/300x200?text=SABA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "SABA", rank: 1 },
-      { id: "1015", name: "AFB Thể Thao", image: "https://via.placeholder.com/300x200?text=AFB+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "AFB", rank: 2 },
-      { id: "1022", name: "BTI Thể Thao", image: "https://via.placeholder.com/300x200?text=BTI+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "BTI", rank: 3 }
+      { id: "44", name: "SABA Thể Thao", image: "https://via.placeholder.com/300x200?text=SABA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "SABA", rank: 1, gpid: 44 },
+      { id: "1015", name: "AFB Thể Thao", image: "https://via.placeholder.com/300x200?text=AFB+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "AFB", rank: 2, gpid: 1015 },
+      { id: "1022", name: "BTI Thể Thao", image: "https://via.placeholder.com/300x200?text=BTI+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "BTI", rank: 3, gpid: 1022 }
     ],
     "casino": [
       // Casino games with exact GPIDs from menu items
-      { id: "5", name: "BG Live Casino", image: "https://via.placeholder.com/300x200?text=BG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "BG", rank: 1 },
-      { id: "7", name: "SE Live Casino", image: "https://via.placeholder.com/300x200?text=SE+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SE", rank: 2 },
-      { id: "19", name: "SA Live Casino", image: "https://via.placeholder.com/300x200?text=SA+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SA", rank: 3 },
-      { id: "20", name: "EVO Live Casino", image: "https://via.placeholder.com/300x200?text=EVO+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "Evolution", rank: 4 },
-      { id: "28", name: "AB Live Casino", image: "https://via.placeholder.com/300x200?text=AB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "AB", rank: 5 },
-      { id: "33", name: "GD Live Casino", image: "https://via.placeholder.com/300x200?text=GD+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "GD", rank: 6 },
-      { id: "38", name: "PP Live Casino", image: "https://via.placeholder.com/300x200?text=PP+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "Pragmatic Play", rank: 7 },
-      { id: "1019", name: "YB Live Casino", image: "https://via.placeholder.com/300x200?text=YB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "YB", rank: 8 },
-      { id: "1021", name: "OG Live Casino", image: "https://via.placeholder.com/300x200?text=OG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "OG", rank: 9 },
-      { id: "1024", name: "AFB Live Casino", image: "https://via.placeholder.com/300x200?text=AFB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "AFB", rank: 10 }
+      { id: "5", name: "BG Live Casino", image: "https://via.placeholder.com/300x200?text=BG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "BG", rank: 1, gpid: 5 },
+      { id: "7", name: "SE Live Casino", image: "https://via.placeholder.com/300x200?text=SE+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SE", rank: 2, gpid: 7 },
+      { id: "19", name: "SA Live Casino", image: "https://via.placeholder.com/300x200?text=SA+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "SA", rank: 3, gpid: 19 },
+      { id: "20", name: "EVO Live Casino", image: "https://via.placeholder.com/300x200?text=EVO+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "Evolution", rank: 4, gpid: 20 },
+      { id: "28", name: "AB Live Casino", image: "https://via.placeholder.com/300x200?text=AB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "AB", rank: 5, gpid: 28 },
+      { id: "33", name: "GD Live Casino", image: "https://via.placeholder.com/300x200?text=GD+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "GD", rank: 6, gpid: 33 },
+      { id: "38", name: "PP Live Casino", image: "https://via.placeholder.com/300x200?text=PP+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "Pragmatic Play", rank: 7, gpid: 38 },
+      { id: "1019", name: "YB Live Casino", image: "https://via.placeholder.com/300x200?text=YB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "YB", rank: 8, gpid: 1019 },
+      { id: "1021", name: "OG Live Casino", image: "https://via.placeholder.com/300x200?text=OG+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "OG", rank: 9, gpid: 1021 },
+      { id: "1024", name: "AFB Live Casino", image: "https://via.placeholder.com/300x200?text=AFB+Casino", type: "Live Casino", category: "casino", isActive: true, provider: "AFB", rank: 10, gpid: 1024 }
     ],
     "slots": [
       // NoHu/Slots games with exact GPIDs from menu items  
-      { id: "2", name: "CQ9 Slots", image: "https://via.placeholder.com/300x200?text=CQ9+Slots", type: "Slot", category: "slots", isActive: true, provider: "CQ9", rank: 1 },
-      { id: "3", name: "PP Slots", image: "https://via.placeholder.com/300x200?text=PP+Slots", type: "Slot", category: "slots", isActive: true, provider: "Pragmatic Play", rank: 2 },
-      { id: "13", name: "WM Slots", image: "https://via.placeholder.com/300x200?text=WM+Slots", type: "Slot", category: "slots", isActive: true, provider: "WM", rank: 3 },
-      { id: "14", name: "SBO Slots", image: "https://via.placeholder.com/300x200?text=SBO+Slots", type: "Slot", category: "slots", isActive: true, provider: "SBO", rank: 4 },
-      { id: "16", name: "FK Slots", image: "https://via.placeholder.com/300x200?text=FK+Slots", type: "Slot", category: "slots", isActive: true, provider: "FK", rank: 5 },
-      { id: "22", name: "YG Slots", image: "https://via.placeholder.com/300x200?text=YG+Slots", type: "Slot", category: "slots", isActive: true, provider: "YG", rank: 6 },
-      { id: "29", name: "MG Slots", image: "https://via.placeholder.com/300x200?text=MG+Slots", type: "Slot", category: "slots", isActive: true, provider: "MG", rank: 7 },
-      { id: "35", name: "PG Slots", image: "https://via.placeholder.com/300x200?text=PG+Slots", type: "Slot", category: "slots", isActive: true, provider: "PG", rank: 8 },
-      { id: "1010", name: "YGR Slots", image: "https://via.placeholder.com/300x200?text=YGR+Slots", type: "Slot", category: "slots", isActive: true, provider: "YGR", rank: 9 },
-      { id: "1018", name: "PT Slots", image: "https://via.placeholder.com/300x200?text=PT+Slots", type: "Slot", category: "slots", isActive: true, provider: "PT", rank: 10 },
-      { id: "1020", name: "JIL Slots", image: "https://via.placeholder.com/300x200?text=JIL+Slots", type: "Slot", category: "slots", isActive: true, provider: "JIL", rank: 11 }
+      { id: "2", name: "CQ9 Slots", image: "https://via.placeholder.com/300x200?text=CQ9+Slots", type: "Slot", category: "slots", isActive: true, provider: "CQ9", rank: 1, gpid: 2 },
+      { id: "3", name: "PP Slots", image: "https://via.placeholder.com/300x200?text=PP+Slots", type: "Slot", category: "slots", isActive: true, provider: "Pragmatic Play", rank: 2, gpid: 3 },
+      { id: "13", name: "WM Slots", image: "https://via.placeholder.com/300x200?text=WM+Slots", type: "Slot", category: "slots", isActive: true, provider: "WM", rank: 3, gpid: 13 },
+      { id: "14", name: "SBO Slots", image: "https://via.placeholder.com/300x200?text=SBO+Slots", type: "Slot", category: "slots", isActive: true, provider: "SBO", rank: 4, gpid: 14 },
+      { id: "16", name: "FK Slots", image: "https://via.placeholder.com/300x200?text=FK+Slots", type: "Slot", category: "slots", isActive: true, provider: "FK", rank: 5, gpid: 16 },
+      { id: "22", name: "YG Slots", image: "https://via.placeholder.com/300x200?text=YG+Slots", type: "Slot", category: "slots", isActive: true, provider: "YG", rank: 6, gpid: 22 },
+      { id: "29", name: "MG Slots", image: "https://via.placeholder.com/300x200?text=MG+Slots", type: "Slot", category: "slots", isActive: true, provider: "MG", rank: 7, gpid: 29 },
+      { id: "35", name: "PG Slots", image: "https://via.placeholder.com/300x200?text=PG+Slots", type: "Slot", category: "slots", isActive: true, provider: "PG", rank: 8, gpid: 35 },
+      { id: "1010", name: "YGR Slots", image: "https://via.placeholder.com/300x200?text=YGR+Slots", type: "Slot", category: "slots", isActive: true, provider: "YGR", rank: 9, gpid: 1010 },
+      { id: "1018", name: "PT Slots", image: "https://via.placeholder.com/300x200?text=PT+Slots", type: "Slot", category: "slots", isActive: true, provider: "PT", rank: 10, gpid: 1018 },
+      { id: "1020", name: "JIL Slots", image: "https://via.placeholder.com/300x200?text=JIL+Slots", type: "Slot", category: "slots", isActive: true, provider: "JIL", rank: 11, gpid: 1020 }
     ],
     "sports": [
       // Sports games with exact GPIDs from menu items
-      { id: "44", name: "SABA Thể Thao", image: "https://via.placeholder.com/300x200?text=SABA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "SABA", rank: 1 },
-      { id: "1015", name: "AFB Thể Thao", image: "https://via.placeholder.com/300x200?text=AFB+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "AFB", rank: 2 },
-      { id: "1022", name: "BTI Thể Thao", image: "https://via.placeholder.com/300x200?text=BTI+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "BTI", rank: 3 },
-      { id: "1053", name: "PANDA Thể Thao", image: "https://via.placeholder.com/300x200?text=PANDA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "PANDA", rank: 4 },
-      { id: "1070", name: "WS168 Thể Thao", image: "https://via.placeholder.com/300x200?text=WS168+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "WS168", rank: 5 },
-      { id: "1080", name: "LUCKY Thể Thao", image: "https://via.placeholder.com/300x200?text=LUCKY+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "LUCKY", rank: 6 },
-      { id: "1086", name: "APG Thể Thao", image: "https://via.placeholder.com/300x200?text=APG+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "APG", rank: 7 }
+      { id: "44", name: "SABA Thể Thao", image: "https://via.placeholder.com/300x200?text=SABA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "SABA", rank: 1, gpid: 44 },
+      { id: "1015", name: "AFB Thể Thao", image: "https://via.placeholder.com/300x200?text=AFB+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "AFB", rank: 2, gpid: 1015 },
+      { id: "1022", name: "BTI Thể Thao", image: "https://via.placeholder.com/300x200?text=BTI+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "BTI", rank: 3, gpid: 1022 },
+      { id: "1053", name: "PANDA Thể Thao", image: "https://via.placeholder.com/300x200?text=PANDA+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "PANDA", rank: 4, gpid: 1053 },
+      { id: "1070", name: "WS168 Thể Thao", image: "https://via.placeholder.com/300x200?text=WS168+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "WS168", rank: 5, gpid: 1070 },
+      { id: "1080", name: "LUCKY Thể Thao", image: "https://via.placeholder.com/300x200?text=LUCKY+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "LUCKY", rank: 6, gpid: 1080 },
+      { id: "1086", name: "APG Thể Thao", image: "https://via.placeholder.com/300x200?text=APG+Sports", type: "Sports Betting", category: "sports", isActive: true, provider: "APG", rank: 7, gpid: 1086 }
     ],
     "fishing": [
       // Fishing/BanCa games with exact GPIDs from menu items
-      { id: "1020", name: "JIL Bắn Cá", image: "https://via.placeholder.com/300x200?text=JIL+Fishing", type: "Fishing Game", category: "fishing", isActive: true, provider: "JIL", rank: 1 },
-      { id: "1012", name: "TCG Bắn Cá", image: "https://via.placeholder.com/300x200?text=TCG+Fishing", type: "Fishing Game", category: "fishing", isActive: true, provider: "TCG", rank: 2 }
+      { id: "1020", name: "JIL Bắn Cá", image: "https://via.placeholder.com/300x200?text=JIL+Fishing", type: "Fishing Game", category: "fishing", isActive: true, provider: "JIL", rank: 1, gpid: 1020 },
+      { id: "1012", name: "TCG Bắn Cá", image: "https://via.placeholder.com/300x200?text=TCG+Fishing", type: "Fishing Game", category: "fishing", isActive: true, provider: "TCG", rank: 2, gpid: 1012 }
     ],
     "card-games": [
       // Card games with exact GPIDs from menu items
-      { id: "10", name: "JOKER Game Bài", image: "https://via.placeholder.com/300x200?text=JOKER+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "JOKER", rank: 1 },
-      { id: "1011", name: "Mipoker Game Bài", image: "https://via.placeholder.com/300x200?text=Mipoker+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "Mipoker", rank: 2 },
-      { id: "1013", name: "JGR Game Bài", image: "https://via.placeholder.com/300x200?text=JGR+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "JGR", rank: 3 }
+      { id: "10", name: "JOKER Game Bài", image: "https://via.placeholder.com/300x200?text=JOKER+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "JOKER", rank: 1, gpid: 10 },
+      { id: "1011", name: "Mipoker Game Bài", image: "https://via.placeholder.com/300x200?text=Mipoker+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "Mipoker", rank: 2, gpid: 1011 },
+      { id: "1013", name: "JGR Game Bài", image: "https://via.placeholder.com/300x200?text=JGR+Cards", type: "Card Game", category: "card-games", isActive: true, provider: "JGR", rank: 3, gpid: 1013 }
     ],
     "cockfight": [
       // Cockfight/DaGa games with exact GPIDs from menu items
-      { id: "1001", name: "WS168 Đá Gà", image: "https://via.placeholder.com/300x200?text=WS168+Cockfight", type: "Cockfight", category: "cockfight", isActive: true, provider: "WS168", rank: 1 },
-      { id: "1002", name: "AOG Đá Gà", image: "https://via.placeholder.com/300x200?text=AOG+Cockfight", type: "Cockfight", category: "cockfight", isActive: true, provider: "AOG", rank: 2 }
+      { id: "1001", name: "WS168 Đá Gà", image: "https://via.placeholder.com/300x200?text=WS168+Cockfight", type: "Cockfight", category: "cockfight", isActive: true, provider: "WS168", rank: 1, gpid: 1001 },
+      { id: "1002", name: "AOG Đá Gà", image: "https://via.placeholder.com/300x200?text=AOG+Cockfight", type: "Cockfight", category: "cockfight", isActive: true, provider: "AOG", rank: 2, gpid: 1002 }
     ],
     "lottery": [
       // Lottery/XoSo games with exact GPIDs from menu items
-      { id: "1003", name: "TC Xổ Số", image: "https://via.placeholder.com/300x200?text=TC+Lottery", type: "Lottery", category: "lottery", isActive: true, provider: "TC", rank: 1 }
+      { id: "1003", name: "TC Xổ Số", image: "https://via.placeholder.com/300x200?text=TC+Lottery", type: "Lottery", category: "lottery", isActive: true, provider: "TC", rank: 1, gpid: 1003 }
     ]
   };
 

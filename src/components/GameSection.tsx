@@ -113,11 +113,13 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
 
   const { games: apiGames, loading: apiLoading } = useGamesList(1, 6, getCategoryForTab(activeTab), gpids);
 
-  const handleGameClick = async (gameId?: string | number) => {
+  const handleGameClick = async (game: any) => {
     try {
-      // Use gameId if available, otherwise use random GPID
-      const gpid = gameId ? Number(gameId) : getRandomGPID();
+      // Use game's gpid if available, otherwise use random GPID
+      const gpid = game.gpid || getRandomGPID();
       const isThethao = getCategoryForTab(activeTab) === "sports";
+      
+      console.log('🎮 Clicking game:', game.name, 'with GPID:', gpid);
       
       const gameUrl = await loginToGame(gpid, isThethao);
       if (gameUrl) {
@@ -218,7 +220,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                            description={game.type || game.category || 'Game'}
                            image={game.image}
                            featured={game.isActive === true}
-                           onClick={() => handleGameClick(game.id)}
+                           onClick={() => handleGameClick(game)}
                          />
                        ))}
                      </div>
@@ -249,14 +251,14 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                            description={game.type || game.category || 'Game'}
                            image={game.image}
                            featured={game.isActive === true}
-                           onClick={() => handleGameClick(game.id)}
+                           onClick={() => handleGameClick(game)}
                          />
                        ))}
                      </div>
                   ) : (
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                        {lobby.games.map((game, index) => (
-                         <GameCard key={index} {...game} onClick={() => handleGameClick()} />
+                          <GameCard key={index} {...game} onClick={() => handleGameClick({ ...game, gpid: null })} />
                        ))}
                      </div>
                   )}
@@ -267,7 +269,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
         ) : games && games.length > 0 ? (
            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
              {games.map((game, index) => (
-               <GameCard key={index} {...game} onClick={() => handleGameClick()} />
+               <GameCard key={index} {...game} onClick={() => handleGameClick({ ...game, gpid: null })} />
              ))}
            </div>
         ) : (
