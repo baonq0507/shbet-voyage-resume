@@ -25,14 +25,14 @@ export function AdminLayout({ children, activeSection = 'dashboard', onSectionCh
           <AdminHeader />
           
           {/* Content Container */}
-          <main className="flex-1 relative">
+          <main className="flex-1 relative overflow-hidden">
             {/* Content Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/30" />
             
             {/* Scrollable Content */}
-            <div className="relative h-full overflow-auto custom-scrollbar">
-              <div className="p-4 md:p-6 lg:p-8 space-y-6 animate-fade-in">
-                <div className="max-w-7xl mx-auto">
+            <div className="h-full overflow-auto custom-scrollbar">
+              <div className="p-4 md:p-6 lg:p-8 space-y-6 animate-fade-in min-h-full">
+                <div className="max-w-7xl mx-auto w-full">
                   {children}
                 </div>
               </div>
