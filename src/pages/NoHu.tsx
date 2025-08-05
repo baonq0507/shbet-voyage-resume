@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
+import { PromotionBanner } from "@/components/PromotionBanner";
 import { Zap, Coins, Gift } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
 import nohuGame from "@/assets/nohu-game.jpg";
@@ -46,27 +47,8 @@ const NoHu = () => {
     <div className="min-h-screen">
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative h-[400px] flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${nohuGame})` }}
-        />
-        <div className="absolute inset-0 bg-black/60" />
-        
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-            <span className="text-gradient">NỔ HŨ JACKPOT</span>
-          </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Hàng nghìn game nổ hũ với jackpot lên đến hàng tỷ đồng
-          </p>
-          <Button variant="gold" size="lg" className="text-lg px-8 py-4">
-            <Zap className="w-6 h-6" />
-            Nổ Hũ Ngay
-          </Button>
-        </div>
-      </section>
+      {/* Banner */}
+      <PromotionBanner />
 
       {/* Jackpot Info */}
       <section className="py-16 bg-gradient-hero">

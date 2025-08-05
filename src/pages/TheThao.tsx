@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
+import { PromotionBanner } from "@/components/PromotionBanner";
 import { Trophy, Target, TrendingUp, Users, Star } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
 import sportsGame from "@/assets/sports-game.jpg";
@@ -47,27 +48,8 @@ const TheThao = () => {
     <div className="min-h-screen">
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative h-[400px] flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${sportsGame})` }}
-        />
-        <div className="absolute inset-0 bg-black/60" />
-        
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-            <span className="text-gradient">CÁ CƯỢC THỂ THAO</span>
-          </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Cá cược thể thao với tỷ lệ cược cao nhất thị trường
-          </p>
-          <Button variant="casino" size="lg" className="text-lg px-8 py-4">
-            <Trophy className="w-6 h-6" />
-            Đặt Cược Ngay
-          </Button>
-        </div>
-      </section>
+      {/* Banner */}
+      <PromotionBanner />
 
       {/* Stats */}
       <section className="py-12 bg-card">

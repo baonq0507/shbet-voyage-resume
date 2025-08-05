@@ -1,33 +1,14 @@
 import React from 'react';
-import { PromotionCard } from './PromotionCard';
-import { usePromotions } from '@/hooks/usePromotions';
-import { Gift } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 export const PromotionBanner: React.FC = () => {
-  const { getLatestPromotion, loading } = usePromotions();
-  const latestPromotion = getLatestPromotion();
-
-  if (loading || !latestPromotion) {
-    return null;
-  }
-
   return (
-    <section className="py-8 bg-gradient-to-r from-primary/10 to-secondary/10">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Gift className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Khuyến mãi mới nhất</h3>
-          </div>
-          <Link to="/khuyen-mai">
-            <Button variant="outline" size="sm">
-              Xem tất cả
-            </Button>
-          </Link>
-        </div>
-        <PromotionCard promotion={latestPromotion} variant="compact" />
+    <section className="relative h-[200px] md:h-[250px] lg:h-[300px] overflow-hidden">
+      <div className="absolute inset-0">
+        <img 
+          src="/lovable-uploads/973568b4-22dc-4593-b4a5-cf21aba80a76.png" 
+          alt="DIAMONDBET68 Promotion Banner" 
+          className="w-full h-full object-cover object-center"
+        />
       </div>
     </section>
   );

@@ -13,6 +13,7 @@ import { useGameLogin } from "@/hooks/useGameLogin";
 import { useGameFrame } from "@/hooks/useGameFrame";
 import AuthModal from "./AuthModal";
 import TransactionModal from "./TransactionModal";
+import { AuthButtons } from "./AuthButtons";
 import casinoIcon from "@/assets/menu/casino-green.png";
 import nohuIcon from "@/assets/menu/nohu-green.png";
 import bancaIcon from "@/assets/menu/banca-green.png";
@@ -341,7 +342,10 @@ const Header = () => {
               </>
             ) : (
               <>
-                {/* Not logged in state - No buttons, just mobile menu */}
+                {/* Not logged in state - Auth buttons */}
+                <div className="hidden lg:block">
+                  <AuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
+                </div>
               </>
             )}
 
@@ -438,11 +442,20 @@ const Header = () => {
                           Đăng xuất
                         </Button>
                       </>
-                    ) : (
+                     ) : (
                       <>
-                        {/* Empty section for non-logged in users */}
+                        {/* Auth buttons for mobile menu */}
+                        <div className="px-4 py-2 space-y-2">
+                          <AuthButtons 
+                            onAuthClick={() => {
+                              setIsAuthModalOpen(true);
+                              setIsMobileMenuOpen(false);
+                            }} 
+                            className="flex-col space-y-2"
+                          />
+                        </div>
                       </>
-                    )}
+                     )}
                   </div>
                 </nav>
               </SheetContent>
