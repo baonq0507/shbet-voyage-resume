@@ -67,24 +67,20 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
               <button
                 key={provider.id}
                 onClick={() => setSelectedProvider(Number(provider.id))}
-                className={`w-full flex flex-col sm:flex-row items-center gap-1 sm:gap-2 lg:gap-3 p-1 sm:p-2 lg:p-3 rounded-lg transition-all duration-200 text-left ${
+                className={`w-full flex items-center justify-center p-2 sm:p-3 lg:p-4 rounded-lg transition-all duration-200 ${
                   selectedProvider === provider.id
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'hover:bg-muted/50'
                 }`}
-                title={provider.text} // Tooltip for mobile
+                title={provider.text}
               >
-                <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex-shrink-0">
                   <img 
                     src={provider.icon} 
                     alt={provider.text}
                     className="w-full h-full object-contain rounded"
                   />
                 </div>
-                <span className="text-[8px] sm:text-xs lg:text-sm font-medium text-center sm:text-left leading-tight">
-                  <span className="hidden lg:inline">{provider.text}</span>
-                  <span className="lg:hidden">{provider.text.split(' ')[0]}</span>
-                </span>
               </button>
             ))}
           </div>
