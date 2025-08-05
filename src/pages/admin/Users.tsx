@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit } from 'lucide-react';
+import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit, Trash2 } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import { EditUserModal } from '@/components/EditUserModal';
 
@@ -33,6 +34,9 @@ const Users: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { toast } = useToast();
 
@@ -60,6 +64,80 @@ const Users: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete user roles first
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userToDelete.user_id);
+
+      if (roleError) throw roleError;
+
+      // Delete user transactions
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('user_id', userToDelete.user_id);
+
+      if (transactionError) throw transactionError;
+
+      // Delete user bank accounts
+      const { error: bankError } = await supabase
+        .from('user_bank_accounts')
+        .delete()
+        .eq('user_id', userToDelete.user_id);
+
+      if (bankError) throw bankError;
+
+      // Delete user notifications
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userToDelete.user_id);
+
+      if (notificationError) throw notificationError;
+
+      // Delete user profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', userToDelete.user_id);
+
+      if (profileError) throw profileError;
+
+      // Delete from auth.users (requires service role)
+      const { error: authError } = await supabase.auth.admin.deleteUser(userToDelete.user_id);
+      
+      if (authError && authError.message !== 'User not found') {
+        console.warn('Could not delete auth user:', authError);
+        // Continue anyway since profile is deleted
+      }
+
+      toast({
+        title: 'Thành công',
+        description: `Đã xóa người dùng ${userToDelete.username}`,
+        variant: 'default',
+      });
+
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể xóa người dùng. Vui lòng thử lại.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -238,6 +316,18 @@ const Users: React.FC = () => {
                               <Edit className="w-4 h-4 mr-1" />
                               Sửa
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setUserToDelete(user);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Xóa
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -339,6 +429,55 @@ const Users: React.FC = () => {
         user={selectedUser}
         onUserUpdated={fetchUsers}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa người dùng</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Bạn có chắc chắn muốn xóa người dùng <strong>{userToDelete?.username}</strong> không?
+              </p>
+              <p className="text-destructive font-medium">
+                ⚠️ Hành động này sẽ xóa toàn bộ dữ liệu của người dùng bao gồm:
+              </p>
+              <ul className="list-disc list-inside text-sm space-y-1 ml-4">
+                <li>Thông tin cá nhân</li>
+                <li>Lịch sử giao dịch</li>
+                <li>Tài khoản ngân hàng</li>
+                <li>Thông báo</li>
+                <li>Vai trò và quyền hạn</li>
+              </ul>
+              <p className="text-destructive font-medium">
+                Dữ liệu sẽ không thể khôi phục sau khi xóa.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              Hủy bỏ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Đang xóa...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Xóa người dùng
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };
