@@ -1,35 +1,28 @@
 import { useState } from 'react';
 import { useAuth } from './useAuth';
-
-interface GameLoginData {
-  Username: string;
-  IsWapSports: boolean;
-  CompanyKey: string;
-  Portfolio: string;
-  ServerId: string;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface GameLoginResponse {
-  url: string;
+  success: boolean;
+  gameUrl?: string;
+  error?: string;
+  message?: string;
 }
 
 export const useGameLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { profile } = useAuth();
-
-  const detectDevice = (): 'm' | 'd' => {
-    if (typeof window !== 'undefined') {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-      return isMobile ? 'm' : 'd';
-    }
-    return 'd';
-  };
+  const { user, profile } = useAuth();
 
   const loginToGame = async (gpid: number, isSports: boolean = false): Promise<string | null> => {
-    if (!profile?.username) {
+    if (!user || !profile?.username) {
       setError('Vui lòng đăng nhập trước khi chơi game');
+      toast({
+        title: "Lỗi đăng nhập",
+        description: "Vui lòng đăng nhập trước khi chơi game",
+        variant: "destructive"
+      });
       return null;
     }
 
@@ -37,43 +30,59 @@ export const useGameLogin = () => {
     setError(null);
 
     try {
-      const loginData: GameLoginData = {
-        Username: profile.username,
-        IsWapSports: isSports,
-        CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
-        Portfolio: isSports ? 'ThirdPartySportsBook' : 'SeamlessGame',
-        ServerId: '206.206.126.141'
-      };
-
-      console.log('Sending game login request:', loginData);
-
-      const response = await fetch('https://ex-api-yy5.tw946.com/web-root/restricted/player/login.aspx', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData)
+      console.log('🎮 Starting game login process for GPID:', gpid);
+      
+      // Show loading toast
+      toast({
+        title: "Đang kết nối...",
+        description: "Đang đăng nhập vào game, vui lòng chờ...",
       });
 
-      console.log('Game login response status:', response.status);
-
-      if (response.status === 200) {
-        const result: GameLoginResponse = await response.json();
-        console.log('Game login response data:', result);
-        
-        if (result.url) {
-          const device = detectDevice();
-          const gameUrl = `https://${result.url}&gpid=${gpid}&gameid=0&device=${device}&lang=vi-VN`;
-          console.log('Constructed game URL:', gameUrl);
-          return gameUrl;
+      const { data, error: functionError } = await supabase.functions.invoke('game-login', {
+        body: {
+          gpid: gpid,
+          isSports: isSports
         }
+      });
+
+      console.log('📤 Game login response:', data);
+
+      if (functionError) {
+        console.error('❌ Supabase function error:', functionError);
+        throw new Error(functionError.message || 'Lỗi kết nối đến server');
       }
 
-      setError('Không thể kết nối đến game. Vui lòng thử lại.');
-      return null;
+      const response = data as GameLoginResponse;
+
+      if (!response.success || !response.gameUrl) {
+        const errorMessage = response.error || 'Không thể lấy URL game';
+        console.error('❌ Game login failed:', errorMessage);
+        setError(errorMessage);
+        toast({
+          title: "Lỗi đăng nhập game",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      console.log('✅ Game login successful, URL:', response.gameUrl);
+      toast({
+        title: "Thành công!",
+        description: "Đăng nhập game thành công, đang mở game...",
+      });
+
+      return response.gameUrl;
+
     } catch (err) {
-      console.error('Game login error:', err);
-      setError('Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.');
+      console.error('💥 Game login error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Lỗi không xác định';
+      setError(errorMessage);
+      toast({
+        title: "Lỗi kết nối",
+        description: "Không thể kết nối đến server game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
       return null;
     } finally {
       setLoading(false);
