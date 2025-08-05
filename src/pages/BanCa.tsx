@@ -4,11 +4,15 @@ import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
+import MobileAuthButtons from "@/components/MobileAuthButtons";
 import { Target, Fish, Waves } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
 import bancaGame from "@/assets/banca-game.jpg";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 
 const BanCa = () => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const bancaGames = [
     {
       title: "Thần Tài Bắn Cá",
@@ -48,6 +52,9 @@ const BanCa = () => {
     <div className="min-h-screen">
       <Header />
       
+      {/* Mobile Auth Buttons */}
+      <MobileAuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
+      
       {/* Banner */}
       <PromotionBanner />
 
@@ -64,6 +71,12 @@ const BanCa = () => {
       />
 
       <Footer />
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 };

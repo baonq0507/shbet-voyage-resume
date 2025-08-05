@@ -3,17 +3,24 @@ import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
+import MobileAuthButtons from "@/components/MobileAuthButtons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Play, Trophy, Star, DollarSign } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 
 export default function XoSo() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const xosoGpids = menuItems.find(item => item.id === 'xoso')?.dropdown?.map(item => Number(item.id)) || [];
 
   return (
     <div className="min-h-screen">
       <Header />
+      
+      {/* Mobile Auth Buttons */}
+      <MobileAuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
       
       {/* Banner */}
       <PromotionBanner />
@@ -58,6 +65,12 @@ export default function XoSo() {
       </section>
 
       <Footer />
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }

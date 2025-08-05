@@ -4,13 +4,20 @@ import Footer from "@/components/Footer";
 import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
+import MobileAuthButtons from "@/components/MobileAuthButtons";
 import { Users, Trophy, Star } from "lucide-react";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 
 const Casino = () => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen">
       <Header />
+      
+      {/* Mobile Auth Buttons */}
+      <MobileAuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
       
       {/* Banner */}
       <PromotionBanner />
@@ -58,6 +65,12 @@ const Casino = () => {
       </section>
 
       <Footer />
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 };

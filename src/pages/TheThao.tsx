@@ -5,11 +5,15 @@ import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
+import MobileAuthButtons from "@/components/MobileAuthButtons";
 import { Trophy, Target, TrendingUp, Users, Star } from "lucide-react";
 import { menuItems } from "@/utils/menuItems";
 import sportsGame from "@/assets/sports-game.jpg";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 
 const TheThao = () => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const sportsGames = [
     {
       title: "SABA Thể Thao",
@@ -48,6 +52,9 @@ const TheThao = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      
+      {/* Mobile Auth Buttons */}
+      <MobileAuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
       
       {/* Banner */}
       <PromotionBanner />
@@ -155,6 +162,12 @@ const TheThao = () => {
       </section>
 
       <Footer />
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 };

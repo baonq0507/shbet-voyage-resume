@@ -3,10 +3,14 @@ import Footer from "@/components/Footer";
 import SimpleGamesList from "@/components/SimpleGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import MobileNavigation from "@/components/MobileNavigation";
+import MobileAuthButtons from "@/components/MobileAuthButtons";
 import { menuItems } from "@/utils/menuItems";
 import dagaGame from "@/assets/daga-game.jpg";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 
 const DaGa = () => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const dagaGames = [
     {
       title: "Đá Gà Trực Tiếp",
@@ -36,6 +40,9 @@ const DaGa = () => {
     <div className="min-h-screen">
       <Header />
       
+      {/* Mobile Auth Buttons */}
+      <MobileAuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
+      
       {/* Banner */}
       <PromotionBanner />
 
@@ -51,6 +58,12 @@ const DaGa = () => {
       />
 
       <Footer />
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 };
