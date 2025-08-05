@@ -23,10 +23,10 @@ export const menuItems: MenuItem[] = [
     type: 'image',
     path: '/casino',
     dropdown: [
+      { id: 20, text: 'EVO Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/evo.png', type: "image" },
       { id: 5, text: 'BG Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/bg.png', type: "image" },
       { id: 7, text: 'SE Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/se.png', type: "image" },
       { id: 19, text: 'SA Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/sa.png', type: "image" },
-      { id: 20, text: 'EVO Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/evo.png', type: "image" },
       { id: 28, text: 'AB Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/ab.png', type: "image" },
       { id: 33, text: 'GD Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/gd.png', type: "image" },
       { id: 38, text: 'PP Trực tuyến', icon: 'https://qk3x72.katawee.net/system-requirement/Web.Portal/_Common/Supplier/30x30/pp.png', type: "image" },
