@@ -5,18 +5,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Star, Trophy, Gift, Globe } from "lucide-react";
 import { useGamesList } from "@/hooks/useGamesList";
 import { LazyImage } from "@/components/ui/lazy-image";
+import { useGameLogin } from "@/hooks/useGameLogin";
+import { useGameFrame } from "@/hooks/useGameFrame";
+import { getRandomGPID } from "@/config/gameConfig";
 
 interface GameCardProps {
   title: string;
   description: string;
   image: string;
   featured?: boolean;
+  onClick?: () => void;
 }
 
-const GameCard = ({ title, description, image, featured }: GameCardProps) => (
-  <Card className={`group cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 border-2 overflow-hidden ${
-    featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
-  } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}>
+const GameCard = ({ title, description, image, featured, onClick }: GameCardProps) => (
+  <Card 
+    className={`group cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 border-2 overflow-hidden ${
+      featured ? "casino-glow border-primary shadow-2xl" : "border-border/50 hover:border-primary/50"
+    } bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm rounded-xl`}
+    onClick={onClick}
+  >
     <CardHeader className="p-2 sm:p-3">
       <div className="relative overflow-hidden rounded-xl shadow-lg">
         <LazyImage 
@@ -29,7 +36,7 @@ const GameCard = ({ title, description, image, featured }: GameCardProps) => (
         
         {/* Play button */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-          <Button variant="casino" size="sm" className="text-xs sm:text-sm transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+          <Button variant="casino" size="sm" className="text-xs sm:text-sm transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl pointer-events-none">
             <Play className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline ml-1">Chơi Ngay</span>
           </Button>
@@ -82,6 +89,8 @@ interface GameSectionProps {
 
 const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpids }: GameSectionProps) => {
   const [activeTab, setActiveTab] = useState<string>(showApiGames ? "api-games" : lobbies?.[0]?.id || "");
+  const { loginToGame } = useGameLogin();
+  const { openGame } = useGameFrame();
   
   // Map lobby IDs to API categories
   const getCategoryForTab = (tabId: string) => {
@@ -103,6 +112,21 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
   };
 
   const { games: apiGames, loading: apiLoading } = useGamesList(1, 6, getCategoryForTab(activeTab), gpids);
+
+  const handleGameClick = async (gameId?: string | number) => {
+    try {
+      // Use gameId if available, otherwise use random GPID
+      const gpid = gameId ? Number(gameId) : getRandomGPID();
+      const isThethao = getCategoryForTab(activeTab) === "sports";
+      
+      const gameUrl = await loginToGame(gpid, isThethao);
+      if (gameUrl) {
+        openGame(gameUrl);
+      }
+    } catch (error) {
+      console.error('Error launching game:', error);
+    }
+  };
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,17 +210,18 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                      {apiGames.map((game) => (
-                        <GameCard 
-                          key={game.id} 
-                          title={game.name}
-                          description={game.type || game.category || 'Game'}
-                          image={game.image}
-                          featured={game.isActive === true}
-                        />
-                      ))}
-                    </div>
+                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                       {apiGames.map((game) => (
+                         <GameCard 
+                           key={game.id} 
+                           title={game.name}
+                           description={game.type || game.category || 'Game'}
+                           image={game.image}
+                           featured={game.isActive === true}
+                           onClick={() => handleGameClick(game.id)}
+                         />
+                       ))}
+                     </div>
                   )}
                 </TabsContent>
               )}
@@ -216,34 +241,35 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                       ))}
                     </div>
                   ) : activeTab === lobby.id && apiGames.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                      {apiGames.map((game) => (
-                        <GameCard 
-                          key={game.id} 
-                          title={game.name}
-                          description={game.type || game.category || 'Game'}
-                          image={game.image}
-                          featured={game.isActive === true}
-                        />
-                      ))}
-                    </div>
+                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                       {apiGames.map((game) => (
+                         <GameCard 
+                           key={game.id} 
+                           title={game.name}
+                           description={game.type || game.category || 'Game'}
+                           image={game.image}
+                           featured={game.isActive === true}
+                           onClick={() => handleGameClick(game.id)}
+                         />
+                       ))}
+                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                      {lobby.games.map((game, index) => (
-                        <GameCard key={index} {...game} />
-                      ))}
-                    </div>
+                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                       {lobby.games.map((game, index) => (
+                         <GameCard key={index} {...game} onClick={() => handleGameClick()} />
+                       ))}
+                     </div>
                   )}
                 </TabsContent>
               ))}
             </Tabs>
           </div>
         ) : games && games.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-            {games.map((game, index) => (
-              <GameCard key={index} {...game} />
-            ))}
-          </div>
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+             {games.map((game, index) => (
+               <GameCard key={index} {...game} onClick={() => handleGameClick()} />
+             ))}
+           </div>
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground">Không có game nào để hiển thị</p>
