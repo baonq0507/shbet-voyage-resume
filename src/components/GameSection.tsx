@@ -297,16 +297,10 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
         )}
 
         <div className="text-center mt-8 md:mt-12">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Button variant="casino" size="lg" className="w-full sm:w-auto">
-              <Trophy className="w-5 h-5" />
-              Xem Tất Cả Game
-            </Button>
-            <Button variant="gold" size="lg" className="w-full sm:w-auto">
-              <Gift className="w-5 h-5" />
-              Nhận Thưởng
-            </Button>
-          </div>
+          <Button variant="casino" size="lg" className="w-full sm:w-auto">
+            <Trophy className="w-5 h-5" />
+            Xem Tất Cả Game
+          </Button>
         </div>
       </div>
     </section>
