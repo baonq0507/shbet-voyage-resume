@@ -28,7 +28,7 @@ export function AdminLayout({ children, activeSection = 'dashboard', onSectionCh
           {/* Main Content Area */}
           <main className="flex-1 overflow-hidden">
             {/* Scrollable Content */}
-            <div className="h-full overflow-auto custom-scrollbar flex justify-center">
+            <div className="h-full overflow-auto custom-scrollbar w-full">
               <div className="p-4 md:p-6 lg:p-8 space-y-6 animate-fade-in">
                 {children}
               </div>
