@@ -1,48 +1,11 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SimpleGamesList from "@/components/SimpleGamesList";
+import CategoryGamesList from "@/components/CategoryGamesList";
 import { PromotionBanner } from "@/components/PromotionBanner";
-import { Play, Users, Trophy, Star } from "lucide-react";
-import { menuItems } from "@/utils/menuItems";
-import casinoHero from "@/assets/casino-hero.jpg";
+import { Users, Trophy, Star } from "lucide-react";
 
 const Casino = () => {
-  const casinoGames = [
-    {
-      title: "Baccarat Live",
-      description: "Chơi Baccarat với dealer thật từ studio HD",
-      image: casinoHero,
-      featured: true
-    },
-    {
-      title: "Blackjack VIP",
-      description: "Bàn blackjack cao cấp với tỷ lệ thắng cao",
-      image: casinoHero,
-      featured: true
-    },
-    {
-      title: "Roulette European",
-      description: "Roulette châu Âu chuẩn quốc tế",
-      image: casinoHero
-    },
-    {
-      title: "Dragon Tiger",
-      description: "Game bài đơn giản, tỷ lệ thắng cao",
-      image: casinoHero
-    },
-    {
-      title: "Sicbo Live",
-      description: "Xóc đĩa trực tuyến với dealer Việt Nam",
-      image: casinoHero
-    },
-    {
-      title: "Poker Live",
-      description: "Poker Texas Hold'em chuyên nghiệp",
-      image: casinoHero
-    }
-  ];
 
   return (
     <div className="min-h-screen">
@@ -76,11 +39,9 @@ const Casino = () => {
       </section>
 
       {/* Games */}
-      <SimpleGamesList 
-        title="GAME CASINO HOT NHẤT" 
-        category="casino"
-        gpids={menuItems.find(item => item.id === 'casino')?.dropdown?.map(item => Number(item.id)) || []} 
-        maxGames={12} 
+      <CategoryGamesList 
+        categoryId="casino"
+        title="GAME CASINO"
       />
 
       {/* Live Dealers */}
