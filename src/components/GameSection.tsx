@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Play, Star, Trophy, Gift, Globe } from "lucide-react";
 import { useGamesList } from "@/hooks/useGamesList";
 import { LazyImage } from "@/components/ui/lazy-image";
@@ -93,27 +92,6 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
   const { loginToGame } = useGameLogin();
   const { openGame } = useGameFrame();
   
-  // Ref for scroll container
-  const [scrollContainerRef, setScrollContainerRef] = useState<HTMLDivElement | null>(null);
-  
-  // Scroll functions
-  const scrollLeft = () => {
-    if (scrollContainerRef) {
-      scrollContainerRef.scrollBy({
-        left: -200,
-        behavior: 'smooth'
-      });
-    }
-  };
-  
-  const scrollRight = () => {
-    if (scrollContainerRef) {
-      scrollContainerRef.scrollBy({
-        left: 200,
-        behavior: 'smooth'
-      });
-    }
-  };
   
   // Map lobby IDs to API categories
   const getCategoryForTab = (tabId: string) => {
@@ -175,52 +153,20 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                 ← Vuốt để xem thêm →
               </div>
               
-              <div className="relative flex items-center">
-                {/* Left scroll button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={scrollLeft}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 p-0 
-                    bg-card/90 hover:bg-primary/20 border border-border/50 rounded-full 
-                    shadow-lg backdrop-blur-sm transition-all duration-300"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                
-                {/* Right scroll button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={scrollRight}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 p-0 
-                    bg-card/90 hover:bg-primary/20 border border-border/50 rounded-full 
-                    shadow-lg backdrop-blur-sm transition-all duration-300"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-                
-                {/* Left gradient overlay */}
-                <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-card/90 to-transparent pointer-events-none z-10"></div>
-                {/* Right gradient overlay */}
-                <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-card/90 to-transparent pointer-events-none z-10"></div>
-                
-                <TabsList 
-                  ref={setScrollContainerRef}
-                  className="
-                    flex 
-                    overflow-x-auto overflow-y-hidden 
-                    scrollbar-hide
-                    gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 
-                    bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 
-                    border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm
-                    snap-x snap-mandatory
-                    scroll-smooth
-                    touch-pan-x
-                    [-webkit-overflow-scrolling:touch]
-                    mx-10
-                  "
-                >
+              <TabsList className="
+                flex 
+                justify-center
+                md:justify-center
+                overflow-x-auto overflow-y-hidden 
+                scrollbar-hide
+                gap-2 sm:gap-3 mb-4 sm:mb-6 h-auto p-1.5 
+                bg-gradient-to-r from-primary/20 via-card/80 to-primary/20 
+                border-2 border-primary/30 shadow-inner rounded-xl backdrop-blur-sm
+                snap-x snap-mandatory
+                scroll-smooth
+                touch-pan-x
+                [-webkit-overflow-scrolling:touch]
+              ">
                   {/* API Games Tab */}
                   {showApiGames && (
                     <TabsTrigger 
@@ -268,8 +214,7 @@ const GameSection = ({ title, lobbies, games, showApiGames, defaultCategory, gpi
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full group-data-[state=active]:w-full transition-all duration-300"></div>
                   </TabsTrigger>
                 ))}
-              </TabsList>
-            </div>
+               </TabsList>
 
               {/* API Games Tab Content */}
               {showApiGames && (
