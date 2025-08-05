@@ -114,11 +114,11 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
               {games.map((game) => (
                 <Card 
                   key={game.id} 
-                  className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 aspect-square"
                   onClick={() => handleGameClick(game)}
                 >
-                  <CardContent className="p-0">
-                    <div className="relative aspect-square overflow-hidden">
+                  <CardContent className="p-0 h-full flex flex-col">
+                    <div className="relative flex-1 overflow-hidden">
                       <LazyImage
                         src={game.image}
                         alt={game.name}
@@ -135,7 +135,7 @@ const CategoryGamesList = ({ categoryId, title }: CategoryGamesListProps) => {
                         </Badge>
                       )}
                     </div>
-                    <div className="p-1 sm:p-2">
+                    <div className="p-1 sm:p-2 flex-shrink-0">
                       <h3 className="font-medium text-[10px] sm:text-xs mb-1 line-clamp-1">{game.name}</h3>
                       <div className="flex items-center justify-between">
                         <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate flex-1 mr-1">{game.provider}</span>
