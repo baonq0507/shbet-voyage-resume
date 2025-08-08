@@ -116,17 +116,17 @@ serve(async (req) => {
 
     // Step 3: Call external player registration API
     console.log(`📝 Step 3: Registering player externally - ${username}, ${fullName}`);
+    // ĐĂNG KÝ VỚI SẢNH
+    // const externalRequestData = {
+    //   Username: username,
+    //   DisplayName: fullName,
+    //   Agent: 'VND1_dimonbet',
+    //   CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
+    //   ServerId: '206.206.126.141',
+    // };
 
-    const externalRequestData = {
-      Username: username,
-      DisplayName: fullName,
-      Agent: 'VND1_dimonbet',
-      CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
-      ServerId: '206.206.126.141',
-    };
+    // console.log('📤 Calling external register API:', externalRequestData);
 
-    console.log('📤 Calling external register API:', externalRequestData);
-    //đăng ký với sảnh
     // const externalResponse = await fetch('https://ex-api-yy5.tw946.com/web-root/restricted/player/register-player.aspx', {
     //   method: 'POST',
     //   headers: {
