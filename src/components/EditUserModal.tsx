@@ -22,6 +22,7 @@ interface UserProfile {
   last_login_at?: string;
   last_login_ip?: string;
   updated_at: string;
+  referred_by?: string | null;
 }
 
 interface UserRole {
@@ -53,6 +54,9 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
 
   const { toast } = useToast();
 
+  const [agentsOptions, setAgentsOptions] = useState<{ id: string; display: string }[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>('');
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -64,6 +68,8 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
       });
       fetchUserRole();
       fetchAgentInfo();
+      fetchAllAgents();
+      setSelectedAgentId(user.referred_by || '');
     }
   }, [user]);
 
@@ -124,6 +130,37 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     }
   };
 
+  const fetchAllAgents = async () => {
+    try {
+      const { data: agents, error } = await supabase
+        .from('agents')
+        .select('id, user_id, referral_code, is_active');
+      if (error) throw error;
+
+      const userIds = (agents || []).map((a: any) => a.user_id);
+      let profilesMap = new Map<string, { full_name: string; username: string }>();
+
+      if (userIds.length > 0) {
+        const { data: profiles, error: pErr } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, username')
+          .in('user_id', userIds);
+        if (!pErr && profiles) {
+          profiles.forEach((p: any) => profilesMap.set(p.user_id, { full_name: p.full_name, username: p.username }));
+        }
+      }
+
+      const options = (agents || []).map((a: any) => {
+        const p = profilesMap.get(a.user_id);
+        const name = p ? `${p.full_name} (@${p.username})` : a.user_id;
+        const code = a.referral_code ? ` · ${a.referral_code}` : '';
+        return { id: a.id as string, display: `${name}${code}` };
+      });
+      setAgentsOptions(options);
+    } catch (err) {
+      console.error('Error fetching agents list:', err);
+    }
+  };
   const handleMakeAgent = async () => {
     if (!user) return;
     setLoading(true);
@@ -155,7 +192,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
       setLoading(false);
     }
   };
-
   const handleUpdateCommission = async () => {
     if (!user) return;
     setLoading(true);
@@ -177,7 +213,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
       setLoading(false);
     }
   };
-
   const handleRevokeAgent = async () => {
     if (!user) return;
     setLoading(true);
@@ -252,6 +287,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
           balance: formData.balance,
           phone_number: formData.phone_number || null,
           avatar_url: formData.avatar_url || null,
+          referred_by: selectedAgentId || null,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.user_id);
@@ -429,6 +465,26 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
               </p>
             </div>
           </div>
+          {/* Assign Agent */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b pb-2">Phân công đại lý</h3>
+            <div className="space-y-2">
+              <Label>Đại lý phụ trách</Label>
+              <Select value={selectedAgentId} onValueChange={(v) => setSelectedAgentId(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn đại lý" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Không gán</SelectItem>
+                  {agentsOptions.map((opt) => (
+                    <SelectItem key={opt.id} value={opt.id}>{opt.display}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Gán đại lý quản lý cho người dùng này.</p>
+            </div>
+          </div>
+
           {/* Agent Management */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold border-b pb-2">Quản lý đại lý</h3>

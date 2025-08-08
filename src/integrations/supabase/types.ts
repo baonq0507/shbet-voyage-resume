@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_commission_levels: {
+        Row: {
+          agent_id: string
+          commission_percentage: number
+          created_at: string
+          id: string
+          level: number
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          commission_percentage?: number
+          created_at?: string
+          id?: string
+          level: number
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          commission_percentage?: number
+          created_at?: string
+          id?: string
+          level?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_commission_levels_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_referrals: {
         Row: {
           agent_id: string
@@ -292,6 +327,13 @@ export type Database = {
           username?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_profiles_referred_by_agents"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_referred_by_fkey"
             columns: ["referred_by"]
