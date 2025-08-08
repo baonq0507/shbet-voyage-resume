@@ -29,6 +29,16 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
   });
   const { toast } = useToast();
   
+  // Referral code from URL (?ref=CODE)
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      if (ref) setReferralCode(ref);
+    } catch {}
+  }, []);
+  
   // Controlled tab state
   const [tab, setTab] = useState<'login' | 'register'>(activeTab);
   useEffect(() => {
@@ -166,7 +176,8 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
           phoneNumber: formData.phoneNumber,
           username: formData.username,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          referralCode: referralCode || undefined
         }
       });
 

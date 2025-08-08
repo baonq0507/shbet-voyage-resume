@@ -18,7 +18,7 @@ serve(async (req) => {
   try {
     console.log('🚀 User registration process started');
     
-    const { fullName, phoneNumber, username, email, password } = await req.json();
+    const { fullName, phoneNumber, username, email, password, referralCode } = await req.json();
     
     if (!fullName || !phoneNumber || !username || !email || !password) {
       console.log('❌ Missing required fields');
@@ -187,9 +187,74 @@ serve(async (req) => {
       );
     }
 
-    // Step 5: User created successfully - profile is created automatically by trigger
+    // Step 5: User created successfully - handle referral if provided
     console.log('✅ User created successfully in Supabase Auth');
-    console.log('✅ Profile will be created automatically by trigger');
+
+    try {
+      if (referralCode) {
+        console.log('🔗 Referral code provided:', referralCode);
+        const { data: agentRow } = await supabaseAdmin
+          .from('agents')
+          .select('id, referral_count')
+          .eq('referral_code', referralCode)
+          .maybeSingle();
+
+        if (agentRow?.id) {
+          const agentId = agentRow.id;
+
+          // Update existing profile with referred_by or insert if missing
+          const { data: updatedProfile, error: updateProfileError } = await supabaseAdmin
+            .from('profiles')
+            .update({
+              full_name: fullName,
+              username: username,
+              phone_number: phoneNumber,
+              referred_by: agentId,
+            })
+            .eq('user_id', authData.user.id)
+            .select('id')
+            .maybeSingle();
+
+          if (updateProfileError || !updatedProfile) {
+            await supabaseAdmin.from('profiles').insert({
+              user_id: authData.user.id,
+              full_name: fullName,
+              username: username,
+              phone_number: phoneNumber,
+              referred_by: agentId,
+            });
+          }
+
+          // Ensure referral record exists
+          const { data: existingRef } = await supabaseAdmin
+            .from('agent_referrals')
+            .select('id')
+            .eq('agent_id', agentId)
+            .eq('referred_user_id', authData.user.id)
+            .maybeSingle();
+
+          if (!existingRef) {
+            await supabaseAdmin.from('agent_referrals').insert({
+              agent_id: agentId,
+              referred_user_id: authData.user.id,
+              status: 'active',
+              commission_earned: 0,
+            });
+
+            const newCount = ((agentRow as any).referral_count ?? 0) + 1;
+            await supabaseAdmin
+              .from('agents')
+              .update({ referral_count: newCount })
+              .eq('id', agentId);
+          }
+        } else {
+          console.log('ℹ️ Referral code not found or no matching agent');
+        }
+      }
+    } catch (e) {
+      console.error('⚠️ Referral processing error:', e);
+    }
+
     console.log('✅ Registration process completed successfully');
 
     return new Response(
