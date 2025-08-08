@@ -35,13 +35,18 @@ export const AdminAgents: React.FC = () => {
   const { toast } = useToast();
 
   const [agents, setAgents] = useState<AgentRow[]>([]);
-  const [activeTab, setActiveTab] = useState<'list' | 'levels' | 'users'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'levels' | 'users'>('list');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [levels, setLevels] = useState<CommissionLevel[]>([]);
   const [newLevel, setNewLevel] = useState<number | ''>('');
   const [newPercent, setNewPercent] = useState<number | ''>('');
   const [assignUsername, setAssignUsername] = useState('');
   const [assignToAgentId, setAssignToAgentId] = useState<string | null>(null);
+  
+  // States for adding new agent
+  const [newAgentUsername, setNewAgentUsername] = useState('');
+  const [newAgentCommission, setNewAgentCommission] = useState<number | ''>('');
+  const [userProfiles, setUserProfiles] = useState<any[]>([]);
 
   const fetchAgents = async () => {
     try {
@@ -150,6 +155,66 @@ export const AdminAgents: React.FC = () => {
     }
   };
 
+  const fetchAllUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, username, full_name')
+        .order('username');
+      if (error) throw error;
+      setUserProfiles(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const createNewAgent = async () => {
+    if (!newAgentUsername || newAgentCommission === '') {
+      toast({ title: 'Thiếu dữ liệu', description: 'Chọn người dùng và nhập % hoa hồng', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      // Find user by username
+      const selectedUser = userProfiles.find(u => u.username === newAgentUsername);
+      if (!selectedUser) {
+        toast({ title: 'Lỗi', description: 'Không tìm thấy người dùng', variant: 'destructive' });
+        return;
+      }
+
+      // Check if user is already an agent
+      const { data: existingAgent } = await supabase
+        .from('agents')
+        .select('id')
+        .eq('user_id', selectedUser.user_id)
+        .maybeSingle();
+
+      if (existingAgent) {
+        toast({ title: 'Lỗi', description: 'Người dùng này đã là đại lý', variant: 'destructive' });
+        return;
+      }
+
+      // Create new agent
+      const { error } = await supabase
+        .from('agents')
+        .insert({
+          user_id: selectedUser.user_id,
+          commission_percentage: Number(newAgentCommission),
+          is_active: true
+        });
+
+      if (error) throw error;
+
+      toast({ title: 'Thành công', description: 'Đã tạo đại lý mới' });
+      setNewAgentUsername('');
+      setNewAgentCommission('');
+      fetchAgents();
+    } catch (error) {
+      console.error('Error creating agent:', error);
+      toast({ title: 'Lỗi', description: 'Không thể tạo đại lý', variant: 'destructive' });
+    }
+  };
+
   const assignUser = async () => {
     if (!assignUsername || !assignToAgentId) {
       toast({ title: 'Thiếu dữ liệu', description: 'Nhập username và chọn đại lý', variant: 'destructive' });
@@ -208,6 +273,7 @@ export const AdminAgents: React.FC = () => {
 
   useEffect(() => {
     fetchAgents();
+    fetchAllUsers();
   }, []);
 
   return (
@@ -219,6 +285,7 @@ export const AdminAgents: React.FC = () => {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList>
           <TabsTrigger value="list">Danh sách đại lý</TabsTrigger>
+          <TabsTrigger value="add">Thêm đại lý mới</TabsTrigger>
           <TabsTrigger value="levels">Cấp bậc hoa hồng</TabsTrigger>
           <TabsTrigger value="users">Quản lý người dùng</TabsTrigger>
         </TabsList>
@@ -291,6 +358,49 @@ export const AdminAgents: React.FC = () => {
                   })}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ADD NEW AGENT */}
+        <TabsContent value="add" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Thêm đại lý mới</CardTitle>
+              <CardDescription>Chọn người dùng và thiết lập % hoa hồng để tạo đại lý mới</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Chọn người dùng</Label>
+                  <Select value={newAgentUsername} onValueChange={setNewAgentUsername}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn người dùng" />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-popover border-border max-h-60">
+                      {userProfiles.map((user) => (
+                        <SelectItem key={user.user_id} value={user.username}>
+                          {user.username} - {user.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>% Hoa hồng</Label>
+                  <Input 
+                    type="number" 
+                    value={newAgentCommission} 
+                    onChange={(e) => setNewAgentCommission(e.target.value === '' ? '' : Number(e.target.value))} 
+                    placeholder="VD: 10" 
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button onClick={createNewAgent} className="w-full">
+                    Tạo đại lý
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
