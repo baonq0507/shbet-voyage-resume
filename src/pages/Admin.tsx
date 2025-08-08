@@ -106,7 +106,8 @@ const Admin = () => {
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [addBonusUser, setAddBonusUser] = useState<UserProfile | null>(null);
   const [bettingHistoryUser, setBettingHistoryUser] = useState<UserProfile | null>(null);
-
+  
+  const [userDetailsViewMode, setUserDetailsViewMode] = useState<'details' | 'transactions'>('details');
   const { applyPromotionToDeposit } = usePromotionApplication();
   const { approveDeposit } = useDepositApproval();
 
@@ -598,6 +599,7 @@ const Admin = () => {
                           onSelect={() => {
                             setSelectedUser(user);
                             setUserDetailsOpenId(user.user_id);
+                            setUserDetailsViewMode('details');
                           }}
                         >
                           <Eye className="mr-2 h-4 w-4" />
@@ -620,6 +622,7 @@ const Admin = () => {
                           onSelect={() => {
                             setSelectedUser(user);
                             setUserDetailsOpenId(user.user_id);
+                            setUserDetailsViewMode('transactions');
                           }}
                         >
                           <TrendingUp className="mr-2 h-4 w-4" />
@@ -634,20 +637,21 @@ const Admin = () => {
 
                     <Dialog
                       open={userDetailsOpenId === user.user_id}
-                      onOpenChange={(open) => {
-                        if (!open) {
-                          setUserDetailsOpenId(null);
-                          setSelectedUser(null);
-                          setBonusAmount('');
-                        }
-                      }}
+                       onOpenChange={(open) => {
+                         if (!open) {
+                           setUserDetailsOpenId(null);
+                           setSelectedUser(null);
+                           setBonusAmount('');
+                           setUserDetailsViewMode('details');
+                         }
+                       }}
                     >
                       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Chi tiết người dùng</DialogTitle>
+                          <DialogTitle>{userDetailsViewMode === 'transactions' ? 'Giao dịch người dùng' : 'Chi tiết người dùng'}</DialogTitle>
                         </DialogHeader>
                         <DialogDescription className="sr-only">Xem chi tiết người dùng</DialogDescription>
-                        <ViewUserDetails user={user} />
+                        {userDetailsViewMode === 'details' && <ViewUserDetails user={user} />}
 
                         <div className="mt-6">
                           <Label>Lịch sử giao dịch</Label>
@@ -697,20 +701,22 @@ const Admin = () => {
                           </div>
                         </div>
 
-                        <div className="mt-6 p-4 border rounded-lg">
-                          <Label>Cộng tiền bonus</Label>
-                          <div className="flex gap-2 mt-2">
-                            <Input
-                              type="number"
-                              placeholder="Nhập số tiền..."
-                              value={bonusAmount}
-                              onChange={(e) => setBonusAmount(e.target.value)}
-                            />
-                            <Button onClick={() => handleAddBonus()}>
-                              Cộng tiền
-                            </Button>
+                        {userDetailsViewMode === 'details' && (
+                          <div className="mt-6 p-4 border rounded-lg">
+                            <Label>Cộng tiền bonus</Label>
+                            <div className="flex gap-2 mt-2">
+                              <Input
+                                type="number"
+                                placeholder="Nhập số tiền..."
+                                value={bonusAmount}
+                                onChange={(e) => setBonusAmount(e.target.value)}
+                              />
+                              <Button onClick={() => handleAddBonus()}>
+                                Cộng tiền
+                              </Button>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </DialogContent>
                     </Dialog>
 
