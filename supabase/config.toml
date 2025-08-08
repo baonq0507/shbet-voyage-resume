@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.register-player]
 verify_jwt = false
+
+[functions.check-username]
+verify_jwt = false

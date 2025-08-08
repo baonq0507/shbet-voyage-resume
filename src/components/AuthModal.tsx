@@ -474,7 +474,14 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
             
             <Button 
               onClick={handleRegister}
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                usernameCheck.isChecking ||
+                usernameCheck.isAvailable === false ||
+                !!usernameCheck.error ||
+                !formData.username ||
+                formData.username.length < 3
+              }
               className="w-full"
               variant="gold"
             >

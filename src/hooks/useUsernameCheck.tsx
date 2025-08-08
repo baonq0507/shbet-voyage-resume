@@ -43,11 +43,9 @@ export const useUsernameCheck = (username: string, debounceMs: number = 500) => 
       try {
         console.log('🔍 Checking username availability:', username);
         
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('username', username)
-          .maybeSingle();
+        const { data, error } = await supabase.functions.invoke('check-username', {
+          body: { username }
+        });
 
         if (error) {
           console.error('❌ Username check error:', error);
@@ -59,13 +57,13 @@ export const useUsernameCheck = (username: string, debounceMs: number = 500) => 
           return;
         }
 
-        const isAvailable = !data;
+        const isAvailable = data?.isAvailable === true;
         console.log('✅ Username check result:', { username, isAvailable });
         
         setResult({
           isChecking: false,
           isAvailable,
-          error: null
+          error: data?.error ? String(data.error) : null
         });
       } catch (error) {
         console.error('❌ Username check failed:', error);
