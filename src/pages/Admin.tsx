@@ -644,96 +644,72 @@ const Admin = () => {
                         <DialogHeader>
                           <DialogTitle>Chi tiết người dùng</DialogTitle>
                         </DialogHeader>
-                        {selectedUser && (
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label>Tên đăng nhập</Label>
-                                <div className="text-sm font-medium">{selectedUser.username}</div>
-                              </div>
-                              <div>
-                                <Label>Họ tên</Label>
-                                <div className="text-sm font-medium">{selectedUser.full_name}</div>
-                              </div>
-                              <div>
-                                <Label>Số dư hiện tại</Label>
-                                <div className="text-sm font-medium text-green-600">
-                                  {selectedUser?.balance.toLocaleString()} VND
-                                </div>
-                              </div>
-                              <div>
-                                <Label>Tổng nạp tiền</Label>
-                                <div className="text-sm font-medium">
-                                  {selectedUser ? getUserDepositStats(selectedUser.user_id).total.toLocaleString() : 0} VND
-                                </div>
-                              </div>
-                            </div>
+                        <DialogDescription className="sr-only">Xem chi tiết người dùng</DialogDescription>
+                        <ViewUserDetails user={user} />
 
-                            <div className="mt-6">
-                              <Label>Lịch sử giao dịch</Label>
-                              <div className="mt-2 max-h-60 overflow-y-auto">
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Loại</TableHead>
-                                      <TableHead>Số tiền</TableHead>
-                                      <TableHead>Trạng thái</TableHead>
-                                      <TableHead>Thời gian</TableHead>
+                        <div className="mt-6">
+                          <Label>Lịch sử giao dịch</Label>
+                          <div className="mt-2 max-h-60 overflow-y-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Loại</TableHead>
+                                  <TableHead>Số tiền</TableHead>
+                                  <TableHead>Trạng thái</TableHead>
+                                  <TableHead>Thời gian</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {transactions
+                                  .filter(t => t.user_id === user.user_id)
+                                  .slice(0, 10)
+                                  .map((transaction) => (
+                                    <TableRow key={transaction.id}>
+                                      <TableCell>
+                                        <Badge variant={
+                                          transaction.type === 'deposit' ? 'default' : 
+                                          transaction.type === 'withdrawal' ? 'secondary' : 'outline'
+                                        }>
+                                          {transaction.type === 'deposit' ? 'Nạp' : 
+                                           transaction.type === 'withdrawal' ? 'Rút' : 'Bonus'}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell>
+                                        {transaction.amount.toLocaleString()} VND
+                                      </TableCell>
+                                      <TableCell>
+                                        <Badge variant={
+                                          transaction.status === 'approved' ? 'default' : 
+                                          transaction.status === 'rejected' ? 'destructive' : 'secondary'
+                                        }>
+                                          {transaction.status === 'approved' ? 'Duyệt' : 
+                                           transaction.status === 'rejected' ? 'Từ chối' : 'Chờ'}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell>
+                                        {new Date(transaction.created_at).toLocaleDateString('vi-VN')}
+                                      </TableCell>
                                     </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {transactions
-                                      .filter(t => t.user_id === selectedUser.user_id)
-                                      .slice(0, 10)
-                                      .map((transaction) => (
-                                        <TableRow key={transaction.id}>
-                                          <TableCell>
-                                            <Badge variant={
-                                              transaction.type === 'deposit' ? 'default' : 
-                                              transaction.type === 'withdrawal' ? 'secondary' : 'outline'
-                                            }>
-                                              {transaction.type === 'deposit' ? 'Nạp' : 
-                                               transaction.type === 'withdrawal' ? 'Rút' : 'Bonus'}
-                                            </Badge>
-                                          </TableCell>
-                                          <TableCell>
-                                            {transaction.amount.toLocaleString()} VND
-                                          </TableCell>
-                                          <TableCell>
-                                            <Badge variant={
-                                              transaction.status === 'approved' ? 'default' : 
-                                              transaction.status === 'rejected' ? 'destructive' : 'secondary'
-                                            }>
-                                              {transaction.status === 'approved' ? 'Duyệt' : 
-                                               transaction.status === 'rejected' ? 'Từ chối' : 'Chờ'}
-                                            </Badge>
-                                          </TableCell>
-                                          <TableCell>
-                                            {new Date(transaction.created_at).toLocaleDateString('vi-VN')}
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                  </TableBody>
-                                </Table>
-                              </div>
-                            </div>
-
-                            <div className="mt-6 p-4 border rounded-lg">
-                              <Label>Cộng tiền bonus</Label>
-                              <div className="flex gap-2 mt-2">
-                                <Input
-                                  type="number"
-                                  placeholder="Nhập số tiền..."
-                                  value={bonusAmount}
-                                  onChange={(e) => setBonusAmount(e.target.value)}
-                                />
-                                <Button onClick={handleAddBonus}>
-                                  Cộng tiền
-                                </Button>
-                              </div>
-                            </div>
+                                  ))}
+                              </TableBody>
+                            </Table>
                           </div>
-                        )}
+                        </div>
+
+                        <div className="mt-6 p-4 border rounded-lg">
+                          <Label>Cộng tiền bonus</Label>
+                          <div className="flex gap-2 mt-2">
+                            <Input
+                              type="number"
+                              placeholder="Nhập số tiền..."
+                              value={bonusAmount}
+                              onChange={(e) => setBonusAmount(e.target.value)}
+                            />
+                            <Button onClick={handleAddBonus}>
+                              Cộng tiền
+                            </Button>
+                          </div>
+                        </div>
                       </DialogContent>
                     </Dialog>
 
