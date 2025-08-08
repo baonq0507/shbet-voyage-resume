@@ -640,7 +640,7 @@ const Admin = () => {
                         }
                       }}
                     >
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Chi tiết người dùng</DialogTitle>
                         </DialogHeader>
@@ -662,7 +662,6 @@ const Admin = () => {
                               <TableBody>
                                 {transactions
                                   .filter(t => t.user_id === user.user_id)
-                                  .slice(0, 10)
                                   .map((transaction) => (
                                     <TableRow key={transaction.id}>
                                       <TableCell>
