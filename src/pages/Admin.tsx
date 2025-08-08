@@ -165,7 +165,7 @@ const Admin = () => {
         .select(`
           *,
           profiles!inner(full_name, username, balance),
-          bank(bank_name, account_number)
+          bank!transactions_bank_id_fkey(bank_name, account_number)
         `)
         .order('created_at', { ascending: false });
 
