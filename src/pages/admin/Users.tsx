@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit, Trash2 } from 'lucide-react';
+import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit, Trash2, List, History, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import AdminLayout from '@/components/AdminLayout';
 import { EditUserModal } from '@/components/EditUserModal';
 
@@ -27,6 +28,15 @@ interface UserProfile {
   updated_at: string;
 }
 
+interface SimpleTransaction {
+  id: string;
+  type: 'deposit' | 'withdrawal' | 'bonus';
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+
 const Users: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +47,13 @@ const Users: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
+  const [addAmount, setAddAmount] = useState('');
+  const [isTransactionsOpen, setIsTransactionsOpen] = useState(false);
+  const [userTransactions, setUserTransactions] = useState<SimpleTransaction[]>([]);
+  const [isTransLoading, setIsTransLoading] = useState(false);
+  const [isBetHistoryOpen, setIsBetHistoryOpen] = useState(false);
 
   const { toast } = useToast();
 
@@ -65,6 +82,63 @@ const Users: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Cộng tiền cho người dùng
+  const handleAddFunds = async () => {
+    if (!selectedUser || !addAmount) return;
+    try {
+      const amount = parseFloat(addAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({ title: 'Lỗi', description: 'Số tiền không hợp lệ', variant: 'destructive' });
+        return;
+      }
+      const { error } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: selectedUser.user_id,
+          type: 'bonus',
+          amount,
+          status: 'approved',
+          admin_note: `Admin cộng tiền: ${amount.toLocaleString()} VND`,
+        });
+      if (error) throw error;
+      toast({ title: 'Thành công', description: `Đã cộng ${amount.toLocaleString()} VND` });
+      setAddAmount('');
+      setIsAddFundsOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error adding funds:', error);
+      toast({ title: 'Lỗi', description: 'Không thể cộng tiền', variant: 'destructive' });
+    }
+  };
+
+  // Mở dialog xem giao dịch theo người dùng
+  const openTransactionsForUser = async (user: UserProfile) => {
+    setSelectedUser(user);
+    setIsTransactionsOpen(true);
+    setIsTransLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('id, type, amount, status, created_at')
+        .eq('user_id', user.user_id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      setUserTransactions((data || []) as SimpleTransaction[]);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      toast({ title: 'Lỗi', description: 'Không thể tải danh sách giao dịch', variant: 'destructive' });
+    } finally {
+      setIsTransLoading(false);
+    }
+  };
+
+  // Mở dialog lịch sử cá cược (demo)
+  const openBetHistoryForUser = (user: UserProfile) => {
+    setSelectedUser(user);
+    setIsBetHistoryOpen(true);
   };
 
   const handleDeleteUser = async () => {
@@ -293,44 +367,35 @@ const Users: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell className="w-[280px]">
-                          <div className="flex gap-2 flex-wrap">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setIsUserDetailsDialogOpen(true);
-                              }}
-                              className="min-w-[80px]"
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              Chi tiết
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setIsEditUserModalOpen(true);
-                              }}
-                              className="min-w-[60px]"
-                            >
-                              <Edit className="w-4 h-4 mr-1" />
-                              Sửa
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setUserToDelete(user);
-                                setIsDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive hover:text-destructive min-w-[60px]"
-                            >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Xóa
-                            </Button>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+                                Thao tác
+                                <MoreVertical className="ml-2 h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-64 bg-card/95 backdrop-blur-xl border-border/30 shadow-xl z-50">
+                              <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsUserDetailsDialogOpen(true); }}>
+                                <Eye className="mr-2 h-4 w-4" /> Xem chi tiết
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsAddFundsOpen(true); }}>
+                                <DollarSign className="mr-2 h-4 w-4" /> Cộng tiền
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsEditUserModalOpen(true); }}>
+                                <Edit className="mr-2 h-4 w-4" /> Chỉnh sửa người dùng
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { openTransactionsForUser(user); }}>
+                                <List className="mr-2 h-4 w-4" /> Danh sách giao dịch
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { openBetHistoryForUser(user); }}>
+                                <History className="mr-2 h-4 w-4" /> Lịch sử cá cược (demo)
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => { setUserToDelete(user); setIsDeleteDialogOpen(true); }}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Xóa người dùng
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -431,6 +496,100 @@ const Users: React.FC = () => {
         user={selectedUser}
         onUserUpdated={fetchUsers}
       />
+
+      {/* Add Funds Dialog */}
+      <Dialog open={isAddFundsOpen} onOpenChange={setIsAddFundsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cộng tiền cho người dùng</DialogTitle>
+            <DialogDescription>Nhập số tiền cần cộng vào tài khoản của {selectedUser?.username}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Số tiền (VND)</Label>
+              <Input placeholder="Ví dụ: 100000" value={addAmount} onChange={(e) => setAddAmount(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsAddFundsOpen(false)}>Hủy</Button>
+              <Button onClick={handleAddFunds}>Cộng tiền</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Transactions Dialog */}
+      <Dialog open={isTransactionsOpen} onOpenChange={setIsTransactionsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Danh sách giao dịch</DialogTitle>
+            <DialogDescription>Giao dịch gần đây của {selectedUser?.username}</DialogDescription>
+          </DialogHeader>
+          {isTransLoading ? (
+            <div className="flex items-center justify-center h-40">Đang tải...</div>
+          ) : userTransactions.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Thời gian</TableHead>
+                    <TableHead>Loại</TableHead>
+                    <TableHead className="text-right">Số tiền</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {userTransactions.map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell>{new Date(t.created_at).toLocaleString('vi-VN')}</TableCell>
+                      <TableCell className="capitalize">{t.type}</TableCell>
+                      <TableCell className="text-right">{t.amount.toLocaleString()} VND</TableCell>
+                      <TableCell className="capitalize">{t.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-6">Chưa có giao dịch</div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Betting History Demo Dialog */}
+      <Dialog open={isBetHistoryOpen} onOpenChange={setIsBetHistoryOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Lịch sử cá cược (Demo)</DialogTitle>
+            <DialogDescription>Sẽ tích hợp API bên thứ 3 sau. Dữ liệu dưới đây chỉ để minh họa.</DialogDescription>
+          </DialogHeader>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Thời gian</TableHead>
+                  <TableHead>Trò chơi</TableHead>
+                  <TableHead className="text-right">Cược</TableHead>
+                  <TableHead className="text-right">Kết quả</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  { time: new Date().toLocaleString('vi-VN'), game: 'Slot Demo', bet: 50000, result: '+150000' },
+                  { time: new Date(Date.now()-3600*1000).toLocaleString('vi-VN'), game: 'Baccarat Demo', bet: 100000, result: '-100000' },
+                  { time: new Date(Date.now()-7200*1000).toLocaleString('vi-VN'), game: 'Roulette Demo', bet: 20000, result: '+40000' },
+                ].map((r, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{r.time}</TableCell>
+                    <TableCell>{r.game}</TableCell>
+                    <TableCell className="text-right">{r.bet.toLocaleString()} VND</TableCell>
+                    <TableCell className="text-right">{r.result}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
