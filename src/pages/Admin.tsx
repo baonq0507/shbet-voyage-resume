@@ -21,7 +21,7 @@ import { useDepositApproval } from '@/hooks/useDepositApproval';
 import { AdminLayout } from '@/components/AdminLayout';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditUserModal } from '@/components/EditUserModal';
-
+import { ViewUserDetails } from '@/components/ViewUserDetails';
 interface Transaction {
   id: string;
   user_id: string;

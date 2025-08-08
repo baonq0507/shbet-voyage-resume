@@ -13,7 +13,7 @@ import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edi
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import AdminLayout from '@/components/AdminLayout';
 import { EditUserModal } from '@/components/EditUserModal';
-
+import { ViewUserDetails } from '@/components/ViewUserDetails';
 interface UserProfile {
   id: string;
   user_id: string;
@@ -418,54 +418,7 @@ const Users: React.FC = () => {
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Họ tên</Label>
-                  <p className="text-lg font-medium">{selectedUser.full_name}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Username</Label>
-                  <p className="text-lg font-medium">@{selectedUser.username}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Số dư</Label>
-                  <p className="text-lg font-medium text-green-600">
-                    {selectedUser.balance.toLocaleString()} VND
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Số điện thoại</Label>
-                  <p className="text-lg font-medium">
-                    {selectedUser.phone_number || 'Chưa cập nhật'}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Email</Label>
-                  <p className="text-lg font-medium">{selectedUser.user_id}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Ngày tạo</Label>
-                  <p className="text-lg font-medium">
-                    {new Date(selectedUser.created_at).toLocaleDateString('vi-VN')}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Đăng nhập cuối</Label>
-                  <p className="text-lg font-medium">
-                    {selectedUser.last_login_at ? (
-                      <>
-                        {new Date(selectedUser.last_login_at).toLocaleDateString('vi-VN')}
-                        <br />
-                        <span className="text-sm text-gray-500">
-                          {new Date(selectedUser.last_login_at).toLocaleTimeString('vi-VN')}
-                        </span>
-                      </>
-                    ) : (
-                      'Chưa đăng nhập'
-                    )}
-                  </p>
-                </div>
-              </div>
+              <ViewUserDetails user={selectedUser} />
 
               <div className="border-t pt-4">
                 <h3 className="text-lg font-medium mb-3">Thống kê giao dịch</h3>
