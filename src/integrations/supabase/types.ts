@@ -447,6 +447,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_transactions_bank"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "bank"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_transactions_profiles_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "transactions_bank_id_fkey"
             columns: ["bank_id"]
             isOneToOne: false
