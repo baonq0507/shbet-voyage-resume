@@ -22,6 +22,7 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditUserModal } from '@/components/EditUserModal';
 import { ViewUserDetails } from '@/components/ViewUserDetails';
+import { AdminAgents } from '@/components/AdminAgents';
 interface Transaction {
   id: string;
   user_id: string;
@@ -133,6 +134,15 @@ const Admin = () => {
   const [userDetailsViewMode, setUserDetailsViewMode] = useState<'details' | 'transactions'>('details');
   const { applyPromotionToDeposit } = usePromotionApplication();
   const { approveDeposit } = useDepositApproval();
+
+  // Agents management state
+  const [activeAgentTab, setActiveAgentTab] = useState<'list' | 'levels' | 'users'>('list');
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [commissionLevels, setCommissionLevels] = useState<CommissionLevel[]>([]);
+  const [newLevel, setNewLevel] = useState<number | ''>('');
+  const [newLevelPercent, setNewLevelPercent] = useState<number | ''>('');
+  const [assignUsername, setAssignUsername] = useState('');
+  const [assignToAgentId, setAssignToAgentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) {
@@ -1055,69 +1065,6 @@ const Admin = () => {
     </div>
   );
 
-  const renderAgents = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Quản lý đại lý</h2>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Danh sách đại lý</CardTitle>
-          <CardDescription>Link giới thiệu và thống kê hoa hồng</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Đại lý</TableHead>
-                <TableHead>Mã giới thiệu</TableHead>
-                <TableHead>Link giới thiệu</TableHead>
-                <TableHead>% Hoa hồng</TableHead>
-                <TableHead>Số người mời</TableHead>
-                <TableHead>Tổng hoa hồng</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {agents.map((agent) => {
-                const link = `${window.location.origin}?ref=${agent.referral_code ?? ''}`;
-                return (
-                  <TableRow key={agent.id}>
-                    <TableCell className="font-medium">
-                      {agent.profile?.username || agent.user_id}
-                    </TableCell>
-                    <TableCell>{agent.referral_code || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="truncate max-w-[200px]" title={link}>{link}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(link);
-                              toast({ title: 'Đã sao chép', description: 'Link giới thiệu đã được sao chép' });
-                            } catch (e) {
-                              toast({ title: 'Lỗi', description: 'Không thể sao chép link', variant: 'destructive' });
-                            }
-                          }}
-                        >
-                          Sao chép
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>{agent.commission_percentage}%</TableCell>
-                    <TableCell>{agent.referral_count}</TableCell>
-                    <TableCell>{Number(agent.total_commission || 0).toLocaleString()} VND</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
 
   const renderPromotionManagement = () => (
     <div className="space-y-6">
@@ -1285,7 +1232,7 @@ const Admin = () => {
       case 'users':
         return renderUserManagement();
       case 'agents':
-        return renderAgents();
+        return <AdminAgents />;
       case 'transactions':
         return renderTransactionManagement();
       case 'promotions':
