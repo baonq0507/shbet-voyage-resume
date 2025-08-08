@@ -282,8 +282,9 @@ const Admin = () => {
     }
   };
 
-  const handleAddBonus = async () => {
-    if (!selectedUser || !bonusAmount) return;
+  const handleAddBonus = async (targetUser?: UserProfile) => {
+    const userForBonus = targetUser || selectedUser;
+    if (!userForBonus || !bonusAmount) return;
 
     try {
       const amountToAdd = parseFloat(bonusAmount);
@@ -299,7 +300,7 @@ const Admin = () => {
       const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
-          user_id: selectedUser.user_id,
+          user_id: userForBonus.user_id,
           type: 'bonus',
           amount: amountToAdd,
           status: 'approved',
@@ -315,6 +316,7 @@ const Admin = () => {
 
       setBonusAmount('');
       setSelectedUser(null);
+      setAddBonusUser(null);
       fetchUsers();
       fetchTransactions();
       fetchStats();
@@ -704,7 +706,7 @@ const Admin = () => {
                               value={bonusAmount}
                               onChange={(e) => setBonusAmount(e.target.value)}
                             />
-                            <Button onClick={handleAddBonus}>
+                            <Button onClick={() => handleAddBonus()}>
                               Cộng tiền
                             </Button>
                           </div>
@@ -763,7 +765,7 @@ const Admin = () => {
                               onChange={(e) => setBonusAmount(e.target.value)}
                             />
                           </div>
-                          <Button onClick={() => { setSelectedUser(addBonusUser); handleAddBonus(); }}>
+                          <Button onClick={() => handleAddBonus(addBonusUser!)}>
                             Cộng tiền
                           </Button>
                         </div>
