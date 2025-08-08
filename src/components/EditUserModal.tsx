@@ -45,6 +45,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     phone_number: '',
     avatar_url: '',
   });
+  const [uploading, setUploading] = useState(false);
 
   const { toast } = useToast();
 
@@ -92,6 +93,34 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     }));
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filePath = `${user?.user_id || 'temp'}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = data.publicUrl;
+
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      toast({ title: 'Thành công', description: 'Đã tải lên avatar.' });
+    } catch (error) {
+      console.error('Upload avatar error:', error);
+      toast({ title: 'Lỗi', description: 'Tải lên avatar thất bại.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = '';
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -223,13 +252,41 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="avatar_url">URL Avatar</Label>
-              <Input
-                id="avatar_url"
-                value={formData.avatar_url}
-                onChange={(e) => handleInputChange('avatar_url', e.target.value)}
-                placeholder="Nhập URL avatar"
-              />
+              <Label>Ảnh đại diện</Label>
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full overflow-hidden border">
+                  <img
+                    src={formData.avatar_url || '/placeholder.svg'}
+                    alt="Xem trước avatar người dùng"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    disabled={uploading}
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    {uploading ? (
+                      <span className="inline-flex items-center">
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        Đang tải lên...
+                      </span>
+                    ) : (
+                      'Chọn ảnh để tải lên hoặc nhập URL bên dưới.'
+                    )}
+                  </div>
+                  <Input
+                    id="avatar_url"
+                    value={formData.avatar_url}
+                    onChange={(e) => handleInputChange('avatar_url', e.target.value)}
+                    placeholder="Dán URL avatar (tùy chọn)"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
