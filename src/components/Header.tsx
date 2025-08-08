@@ -31,6 +31,7 @@ import sportsLobby from "@/assets/lobbies/sports.png";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'deposit' | 'withdrawal'>('deposit');
   const location = useLocation();
@@ -356,7 +357,7 @@ const Header = () => {
               <>
                 {/* Not logged in state - Auth buttons */}
                 <div className="hidden lg:block">
-                  <AuthButtons onAuthClick={() => setIsAuthModalOpen(true)} />
+                  <AuthButtons onAuthClick={(tab) => { setAuthTab(tab); setIsAuthModalOpen(true); }} />
                 </div>
               </>
             )}
@@ -481,6 +482,7 @@ const Header = () => {
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+        activeTab={authTab}
       />
       
       <TransactionModal 

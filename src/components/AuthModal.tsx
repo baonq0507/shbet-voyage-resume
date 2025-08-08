@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,10 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAuthSuccess: () => void;
+  activeTab?: 'login' | 'register';
 }
 
-const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
+const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: AuthModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,9 +29,16 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
   });
   const { toast } = useToast();
   
+  // Controlled tab state
+  const [tab, setTab] = useState<'login' | 'register'>(activeTab);
+  useEffect(() => {
+    if (isOpen) {
+      setTab(activeTab);
+    }
+  }, [isOpen, activeTab]);
+
   // Username check hook
   const usernameCheck = useUsernameCheck(formData.username);
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -274,7 +282,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
           </DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="login" className="w-full animate-fade-in delay-200">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as 'login' | 'register')} className="w-full animate-fade-in delay-200">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login" className="text-sm font-medium">
               Đăng Nhập
