@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 interface AgentRow {
   id: string;
@@ -43,10 +44,12 @@ export const AdminAgents: React.FC = () => {
   const [assignUsername, setAssignUsername] = useState('');
   const [assignToAgentId, setAssignToAgentId] = useState<string | null>(null);
   
-  // States for adding new agent
-  const [newAgentUsername, setNewAgentUsername] = useState('');
-  const [newAgentCommission, setNewAgentCommission] = useState<number | ''>('');
-  const [userProfiles, setUserProfiles] = useState<any[]>([]);
+  // States for adding new agent level
+  const [newLevelName, setNewLevelName] = useState('');
+  const [newLevelCode, setNewLevelCode] = useState('');
+  const [newLevelCommission, setNewLevelCommission] = useState<number | ''>('');
+  const [newLevelDescription, setNewLevelDescription] = useState('');
+  const [agentLevels, setAgentLevels] = useState<any[]>([]);
 
   const fetchAgents = async () => {
     try {
@@ -155,63 +158,59 @@ export const AdminAgents: React.FC = () => {
     }
   };
 
-  const fetchAllUsers = async () => {
+  const fetchAgentLevels = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, username, full_name')
-        .order('username');
+        .from('agent_levels' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      setUserProfiles(data || []);
+      setAgentLevels(data || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching agent levels:', error);
     }
   };
 
-  const createNewAgent = async () => {
-    if (!newAgentUsername || newAgentCommission === '') {
-      toast({ title: 'Thiếu dữ liệu', description: 'Chọn người dùng và nhập % hoa hồng', variant: 'destructive' });
+  const createNewAgentLevel = async () => {
+    if (!newLevelName || !newLevelCode || newLevelCommission === '') {
+      toast({ title: 'Thiếu dữ liệu', description: 'Vui lòng điền đầy đủ thông tin', variant: 'destructive' });
       return;
     }
 
     try {
-      // Find user by username
-      const selectedUser = userProfiles.find(u => u.username === newAgentUsername);
-      if (!selectedUser) {
-        toast({ title: 'Lỗi', description: 'Không tìm thấy người dùng', variant: 'destructive' });
-        return;
-      }
-
-      // Check if user is already an agent
-      const { data: existingAgent } = await supabase
-        .from('agents')
+      // Check if code already exists
+      const { data: existing } = await supabase
+        .from('agent_levels' as any)
         .select('id')
-        .eq('user_id', selectedUser.user_id)
+        .eq('code', newLevelCode)
         .maybeSingle();
 
-      if (existingAgent) {
-        toast({ title: 'Lỗi', description: 'Người dùng này đã là đại lý', variant: 'destructive' });
+      if (existing) {
+        toast({ title: 'Lỗi', description: 'Mã cấp bậc đã tồn tại', variant: 'destructive' });
         return;
       }
 
-      // Create new agent
+      // Create new agent level
       const { error } = await supabase
-        .from('agents')
+        .from('agent_levels' as any)
         .insert({
-          user_id: selectedUser.user_id,
-          commission_percentage: Number(newAgentCommission),
+          name: newLevelName,
+          code: newLevelCode,
+          commission_percentage: Number(newLevelCommission),
           is_active: true
         });
 
       if (error) throw error;
 
-      toast({ title: 'Thành công', description: 'Đã tạo đại lý mới' });
-      setNewAgentUsername('');
-      setNewAgentCommission('');
-      fetchAgents();
+      toast({ title: 'Thành công', description: 'Đã tạo cấp bậc đại lý mới' });
+      setNewLevelName('');
+      setNewLevelCode('');
+      setNewLevelCommission('');
+      setNewLevelDescription('');
+      fetchAgentLevels();
     } catch (error) {
-      console.error('Error creating agent:', error);
-      toast({ title: 'Lỗi', description: 'Không thể tạo đại lý', variant: 'destructive' });
+      console.error('Error creating agent level:', error);
+      toast({ title: 'Lỗi', description: 'Không thể tạo cấp bậc đại lý', variant: 'destructive' });
     }
   };
 
@@ -273,7 +272,7 @@ export const AdminAgents: React.FC = () => {
 
   useEffect(() => {
     fetchAgents();
-    fetchAllUsers();
+    fetchAgentLevels();
   }, []);
 
   return (
@@ -285,7 +284,7 @@ export const AdminAgents: React.FC = () => {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList>
           <TabsTrigger value="list">Danh sách đại lý</TabsTrigger>
-          <TabsTrigger value="add">Thêm đại lý mới</TabsTrigger>
+          <TabsTrigger value="add">Tạo cấp bậc</TabsTrigger>
           <TabsTrigger value="levels">Cấp bậc hoa hồng</TabsTrigger>
           <TabsTrigger value="users">Quản lý người dùng</TabsTrigger>
         </TabsList>
@@ -362,45 +361,99 @@ export const AdminAgents: React.FC = () => {
           </Card>
         </TabsContent>
 
-        {/* ADD NEW AGENT */}
+        {/* CREATE AGENT LEVEL */}
         <TabsContent value="add" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Thêm đại lý mới</CardTitle>
-              <CardDescription>Chọn người dùng và thiết lập % hoa hồng để tạo đại lý mới</CardDescription>
+              <CardTitle>Tạo cấp bậc đại lý mới</CardTitle>
+              <CardDescription>Tạo các cấp bậc đại lý với tên, mã và % hoa hồng</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Chọn người dùng</Label>
-                  <Select value={newAgentUsername} onValueChange={setNewAgentUsername}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn người dùng" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-popover border-border max-h-60">
-                      {userProfiles.map((user) => (
-                        <SelectItem key={user.user_id} value={user.username}>
-                          {user.username} - {user.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Tên cấp bậc</Label>
+                  <Input 
+                    value={newLevelName} 
+                    onChange={(e) => setNewLevelName(e.target.value)} 
+                    placeholder="VD: Cấp 1, Cấp 2, VIP..." 
+                  />
+                </div>
+                <div>
+                  <Label>Mã cấp bậc</Label>
+                  <Input 
+                    value={newLevelCode} 
+                    onChange={(e) => setNewLevelCode(e.target.value)} 
+                    placeholder="VD: LEVEL1, VIP, BRONZE..." 
+                  />
                 </div>
                 <div>
                   <Label>% Hoa hồng</Label>
                   <Input 
                     type="number" 
-                    value={newAgentCommission} 
-                    onChange={(e) => setNewAgentCommission(e.target.value === '' ? '' : Number(e.target.value))} 
+                    value={newLevelCommission} 
+                    onChange={(e) => setNewLevelCommission(e.target.value === '' ? '' : Number(e.target.value))} 
                     placeholder="VD: 10" 
                   />
                 </div>
                 <div className="flex items-end">
-                  <Button onClick={createNewAgent} className="w-full">
-                    Tạo đại lý
+                  <Button onClick={createNewAgentLevel} className="w-full">
+                    Tạo cấp bậc
                   </Button>
                 </div>
               </div>
+
+              {/* Display existing levels */}
+              {agentLevels.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Các cấp bậc hiện có</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tên cấp bậc</TableHead>
+                        <TableHead>Mã</TableHead>
+                        <TableHead>% Hoa hồng</TableHead>
+                        <TableHead>Trạng thái</TableHead>
+                        <TableHead>Thao tác</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {agentLevels.map((level) => (
+                        <TableRow key={level.id}>
+                          <TableCell className="font-medium">{level.name}</TableCell>
+                          <TableCell>{level.code}</TableCell>
+                          <TableCell>{level.commission_percentage}%</TableCell>
+                          <TableCell>
+                            <Badge variant={level.is_active ? "default" : "secondary"}>
+                              {level.is_active ? "Hoạt động" : "Tạm dừng"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const { error } = await supabase
+                                    .from('agent_levels' as any)
+                                    .update({ is_active: !level.is_active })
+                                    .eq('id', level.id);
+                                  if (error) throw error;
+                                  fetchAgentLevels();
+                                  toast({ title: 'Đã cập nhật', description: 'Trạng thái cấp bậc đã được thay đổi' });
+                                } catch (error) {
+                                  toast({ title: 'Lỗi', description: 'Không thể cập nhật trạng thái', variant: 'destructive' });
+                                }
+                              }}
+                            >
+                              {level.is_active ? "Tạm dừng" : "Kích hoạt"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
