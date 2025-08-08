@@ -104,6 +104,7 @@ const Admin = () => {
   const [bonusAmount, setBonusAmount] = useState('');
   const [userDetailsOpenId, setUserDetailsOpenId] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
+  const [addBonusUser, setAddBonusUser] = useState<UserProfile | null>(null);
   const [bettingHistoryUser, setBettingHistoryUser] = useState<UserProfile | null>(null);
 
   const { applyPromotionToDeposit } = usePromotionApplication();
@@ -602,8 +603,7 @@ const Admin = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onSelect={() => {
-                            setSelectedUser(user);
-                            setUserDetailsOpenId(user.user_id);
+                            setAddBonusUser(user);
                           }}
                         >
                           <DollarSign className="mr-2 h-4 w-4" />
@@ -735,6 +735,38 @@ const Admin = () => {
                         </DialogHeader>
                         <div className="text-sm text-muted-foreground">
                           Tính năng đang phát triển. Vui lòng kiểm tra sau.
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Dialog cộng tiền nhanh */}
+                    <Dialog
+                      open={!!addBonusUser && addBonusUser.user_id === user.user_id}
+                      onOpenChange={(open) => {
+                        if (!open) {
+                          setAddBonusUser(null);
+                          setBonusAmount('');
+                        }
+                      }}
+                    >
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Cộng tiền bonus</DialogTitle>
+                          <DialogDescription>Nhập số tiền bonus để cộng cho người dùng.</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          <div>
+                            <Label>Số tiền</Label>
+                            <Input
+                              type="number"
+                              placeholder="Nhập số tiền..."
+                              value={bonusAmount}
+                              onChange={(e) => setBonusAmount(e.target.value)}
+                            />
+                          </div>
+                          <Button onClick={() => { setSelectedUser(addBonusUser); handleAddBonus(); }}>
+                            Cộng tiền
+                          </Button>
                         </div>
                       </DialogContent>
                     </Dialog>
