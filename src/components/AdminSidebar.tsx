@@ -12,6 +12,7 @@ import {
   UserCheck,
   TrendingUp,
   FileText,
+  Building2,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -47,6 +48,12 @@ const menuItems = [
     title: 'Quản lý người dùng',
     icon: Users,
     description: 'Danh sách và quản lý user'
+  },
+  {
+    id: 'agents',
+    title: 'Đại lý',
+    icon: Building2,
+    description: 'Quản lý đại lý & hoa hồng'
   },
   {
     id: 'transactions',

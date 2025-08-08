@@ -77,6 +77,28 @@ interface Promotion {
   updated_at: string;
 }
 
+interface Agent {
+  id: string;
+  user_id: string;
+  commission_percentage: number;
+  total_commission: number;
+  referral_code?: string | null;
+  referral_count: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  profile?: { full_name: string; username: string; phone_number?: string };
+}
+
+interface CommissionLevel {
+  id: string;
+  agent_id?: string;
+  level: number;
+  commission_percentage: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 const Admin = () => {
   const { isAdmin, isLoading } = useRole();
   const { user } = useAuth();
@@ -96,6 +118,7 @@ const Admin = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -117,6 +140,7 @@ const Admin = () => {
       fetchTransactions();
       fetchUsers();
       fetchPromotions();
+      fetchAgents();
     }
   }, [isAdmin]);
 
@@ -223,6 +247,38 @@ const Admin = () => {
         title: "Lỗi",
         description: "Không thể tải danh sách khuyến mãi",
         variant: "destructive"
+      });
+    }
+  };
+
+  const fetchAgents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agents')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      const list = data || [];
+      const userIds = list.map((a: any) => a.user_id);
+
+      let profilesMap = new Map<string, any>();
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, username, phone_number')
+          .in('user_id', userIds);
+        profiles?.forEach((p: any) => profilesMap.set(p.user_id, p));
+      }
+
+      const merged = list.map((a: any) => ({ ...a, profile: profilesMap.get(a.user_id) }));
+      setAgents(merged as Agent[]);
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể tải danh sách đại lý',
+        variant: 'destructive',
       });
     }
   };
@@ -428,6 +484,7 @@ const Admin = () => {
     const titles = {
       dashboard: 'Tổng quan hệ thống',
       users: 'Quản lý người dùng',
+      agents: 'Quản lý đại lý',
       transactions: 'Quản lý giao dịch',
       promotions: 'Quản lý khuyến mãi',
       notifications: 'Quản lý thông báo',
