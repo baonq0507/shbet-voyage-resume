@@ -14,7 +14,7 @@ import { useRole } from '@/hooks/useRole';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
-import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash, History } from 'lucide-react';
 import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 import { usePromotionApplication } from '@/hooks/usePromotionApplication';
 import { useDepositApproval } from '@/hooks/useDepositApproval';
@@ -597,6 +597,7 @@ const Admin = () => {
                             setUserDetailsOpenId(user.user_id);
                           }}
                         >
+                          <Eye className="mr-2 h-4 w-4" />
                           Xem chi tiết
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -605,10 +606,12 @@ const Admin = () => {
                             setUserDetailsOpenId(user.user_id);
                           }}
                         >
+                          <DollarSign className="mr-2 h-4 w-4" />
                           Cộng tiền
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={() => setEditUser(user)}>
+                          <Edit className="mr-2 h-4 w-4" />
                           Chỉnh sửa
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -617,9 +620,11 @@ const Admin = () => {
                             setUserDetailsOpenId(user.user_id);
                           }}
                         >
+                          <TrendingUp className="mr-2 h-4 w-4" />
                           Xem giao dịch
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => setBettingHistoryUser(user)}>
+                          <History className="mr-2 h-4 w-4" />
                           Lịch sử cược
                         </DropdownMenuItem>
                       </DropdownMenuContent>
