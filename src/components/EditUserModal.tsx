@@ -470,12 +470,12 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
             <h3 className="text-lg font-semibold border-b pb-2">Phân công đại lý</h3>
             <div className="space-y-2">
               <Label>Đại lý phụ trách</Label>
-              <Select value={selectedAgentId} onValueChange={(v) => setSelectedAgentId(v)}>
+              <Select value={selectedAgentId || 'none'} onValueChange={(v) => setSelectedAgentId(v === 'none' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn đại lý" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Không gán</SelectItem>
+                <SelectContent className="z-50 bg-background">
+                  <SelectItem value="none">Không gán</SelectItem>
                   {agentsOptions.map((opt) => (
                     <SelectItem key={opt.id} value={opt.id}>{opt.display}</SelectItem>
                   ))}
