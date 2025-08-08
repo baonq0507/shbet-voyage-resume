@@ -19,6 +19,8 @@ import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 import { usePromotionApplication } from '@/hooks/usePromotionApplication';
 import { useDepositApproval } from '@/hooks/useDepositApproval';
 import { AdminLayout } from '@/components/AdminLayout';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { EditUserModal } from '@/components/EditUserModal';
 
 interface Transaction {
   id: string;
@@ -48,7 +50,11 @@ interface UserProfile {
   username: string;
   balance: number;
   phone_number?: string;
+  avatar_url?: string;
   created_at: string;
+  last_login_at?: string;
+  last_login_ip?: any;
+  updated_at: string;
 }
 
 interface Promotion {
@@ -96,6 +102,9 @@ const Admin = () => {
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [isPromotionFormOpen, setIsPromotionFormOpen] = useState(false);
   const [bonusAmount, setBonusAmount] = useState('');
+  const [userDetailsOpenId, setUserDetailsOpenId] = useState<string | null>(null);
+  const [editUser, setEditUser] = useState<UserProfile | null>(null);
+  const [bettingHistoryUser, setBettingHistoryUser] = useState<UserProfile | null>(null);
 
   const { applyPromotionToDeposit } = usePromotionApplication();
   const { approveDeposit } = useDepositApproval();
@@ -575,17 +584,57 @@ const Admin = () => {
                     {new Date(user.created_at).toLocaleDateString('vi-VN')}
                   </TableCell>
                   <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedUser(user)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Chi tiết
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          Hành động
                         </Button>
-                      </DialogTrigger>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56 z-50">
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setSelectedUser(user);
+                            setUserDetailsOpenId(user.user_id);
+                          }}
+                        >
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setSelectedUser(user);
+                            setUserDetailsOpenId(user.user_id);
+                          }}
+                        >
+                          Cộng tiền
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => setEditUser(user)}>
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setSelectedUser(user);
+                            setUserDetailsOpenId(user.user_id);
+                          }}
+                        >
+                          Xem giao dịch
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setBettingHistoryUser(user)}>
+                          Lịch sử cược
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Dialog
+                      open={userDetailsOpenId === user.user_id}
+                      onOpenChange={(open) => {
+                        if (!open) {
+                          setUserDetailsOpenId(null);
+                          setSelectedUser(null);
+                          setBonusAmount('');
+                        }
+                      }}
+                    >
                       <DialogContent className="max-w-2xl">
                         <DialogHeader>
                           <DialogTitle>Chi tiết người dùng</DialogTitle>
@@ -680,6 +729,32 @@ const Admin = () => {
                             </div>
                           </div>
                         )}
+                      </DialogContent>
+                    </Dialog>
+
+                    <EditUserModal
+                      isOpen={!!editUser && editUser.user_id === user.user_id}
+                      onClose={() => setEditUser(null)}
+                      user={editUser}
+                      onUserUpdated={() => {
+                        fetchUsers();
+                        setEditUser(null);
+                      }}
+                    />
+
+                    <Dialog
+                      open={!!bettingHistoryUser && bettingHistoryUser.user_id === user.user_id}
+                      onOpenChange={(open) => {
+                        if (!open) setBettingHistoryUser(null);
+                      }}
+                    >
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Lịch sử cược</DialogTitle>
+                        </DialogHeader>
+                        <div className="text-sm text-muted-foreground">
+                          Tính năng đang phát triển. Vui lòng kiểm tra sau.
+                        </div>
                       </DialogContent>
                     </Dialog>
                   </TableCell>
