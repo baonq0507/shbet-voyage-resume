@@ -14,12 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_referrals: {
+        Row: {
+          agent_id: string
+          commission_earned: number | null
+          created_at: string
+          id: string
+          referral_date: string
+          referred_user_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          commission_earned?: number | null
+          created_at?: string
+          id?: string
+          referral_date?: string
+          referred_user_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          commission_earned?: number | null
+          created_at?: string
+          id?: string
+          referral_date?: string
+          referred_user_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_referrals_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           commission_percentage: number
           created_at: string
           id: string
           is_active: boolean
+          referral_code: string | null
           referral_count: number
           total_commission: number
           updated_at: string
@@ -30,6 +79,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          referral_code?: string | null
           referral_count?: number
           total_commission?: number
           updated_at?: string
@@ -40,6 +90,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          referral_code?: string | null
           referral_count?: number
           total_commission?: number
           updated_at?: string
@@ -207,6 +258,7 @@ export type Database = {
           last_login_at: string | null
           last_login_ip: unknown | null
           phone_number: string | null
+          referred_by: string | null
           updated_at: string
           user_id: string
           username: string
@@ -220,6 +272,7 @@ export type Database = {
           last_login_at?: string | null
           last_login_ip?: unknown | null
           phone_number?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id: string
           username: string
@@ -233,11 +286,20 @@ export type Database = {
           last_login_at?: string | null
           last_login_ip?: unknown | null
           phone_number?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id?: string
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promotion_codes: {
         Row: {
@@ -458,6 +520,10 @@ export type Database = {
       create_or_update_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      generate_referral_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
