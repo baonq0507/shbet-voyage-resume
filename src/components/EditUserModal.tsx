@@ -46,6 +46,10 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     avatar_url: '',
   });
   const [uploading, setUploading] = useState(false);
+  const [isAgent, setIsAgent] = useState(false);
+  const [commission, setCommission] = useState<number>(10);
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [referralCount, setReferralCount] = useState<number>(0);
 
   const { toast } = useToast();
 
@@ -59,6 +63,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
         avatar_url: user.avatar_url || '',
       });
       fetchUserRole();
+      fetchAgentInfo();
     }
   }, [user]);
 
@@ -83,6 +88,117 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole('user');
+    }
+  };
+
+  const fetchAgentInfo = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('agents')
+        .select('commission_percentage, referral_code, referral_count')
+        .eq('user_id', user.user_id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching agent info:', error);
+        setIsAgent(false);
+        setReferralCode('');
+        setReferralCount(0);
+        return;
+      }
+
+      if (data) {
+        setIsAgent(true);
+        setCommission(Number((data as any).commission_percentage) || 10);
+        setReferralCode((data as any).referral_code || '');
+        setReferralCount(Number((data as any).referral_count) || 0);
+      } else {
+        setIsAgent(false);
+        setReferralCode('');
+        setReferralCount(0);
+      }
+    } catch (err) {
+      console.error('Error fetching agent info:', err);
+      setIsAgent(false);
+    }
+  };
+
+  const handleMakeAgent = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      // Generate a unique referral code via RPC
+      const { data: codeData, error: codeError } = await supabase.rpc('generate_referral_code');
+      if (codeError) throw codeError;
+      const code = (codeData as string) || '';
+
+      const { error } = await supabase
+        .from('agents')
+        .insert({
+          user_id: user.user_id,
+          commission_percentage: commission,
+          referral_code: code,
+        });
+
+      if (error) throw error;
+
+      toast({ title: 'Thành công', description: 'Đã chuyển người dùng thành đại lý.' });
+      setIsAgent(true);
+      setReferralCode(code);
+      await fetchAgentInfo();
+      onUserUpdated();
+    } catch (error) {
+      console.error('Error making agent:', error);
+      toast({ title: 'Lỗi', description: 'Không thể chuyển thành đại lý', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateCommission = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('agents')
+        .update({ commission_percentage: commission })
+        .eq('user_id', user.user_id);
+
+      if (error) throw error;
+
+      toast({ title: 'Thành công', description: 'Đã cập nhật % hoa hồng.' });
+      await fetchAgentInfo();
+      onUserUpdated();
+    } catch (error) {
+      console.error('Error updating commission:', error);
+      toast({ title: 'Lỗi', description: 'Không thể cập nhật hoa hồng', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRevokeAgent = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('agents')
+        .delete()
+        .eq('user_id', user.user_id);
+
+      if (error) throw error;
+
+      toast({ title: 'Thành công', description: 'Đã hủy đại lý cho người dùng.' });
+      setIsAgent(false);
+      setReferralCode('');
+      setReferralCount(0);
+      onUserUpdated();
+    } catch (error) {
+      console.error('Error revoking agent:', error);
+      toast({ title: 'Lỗi', description: 'Không thể hủy đại lý', variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -312,6 +428,62 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
                 }
               </p>
             </div>
+          </div>
+          {/* Agent Management */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b pb-2">Quản lý đại lý</h3>
+            {isAgent ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Mã giới thiệu</Label>
+                    <Input value={referralCode} readOnly />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Số lượt giới thiệu</Label>
+                    <Input value={referralCount} readOnly />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>% Hoa hồng</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={commission}
+                      onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={handleUpdateCommission} disabled={loading}>
+                    Cập nhật hoa hồng
+                  </Button>
+                  <Button type="button" variant="destructive" onClick={handleRevokeAgent} disabled={loading}>
+                    Hủy đại lý
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>% Hoa hồng (mặc định 10%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={commission}
+                    onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <Button type="button" onClick={handleMakeAgent} disabled={loading}>
+                  Chuyển thành đại lý
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Account Information */}
