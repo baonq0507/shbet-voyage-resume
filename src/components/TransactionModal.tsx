@@ -173,10 +173,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   };
 
   const handleDepositSubmit = async () => {
-    if (!selectedBank || !depositAmount || !user) {
+    if (!depositAmount || !user) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng điền đầy đủ thông tin",
+        description: "Vui lòng nhập số tiền nạp",
         variant: "destructive",
       });
       return;
@@ -188,9 +188,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         user_id: user.id,
         type: 'deposit',
         amount: parseFloat(depositAmount),
-        bank_id: selectedBank.id,
         status: 'pending'
       };
+
+      // Optional: attach selected bank if available
+      if (selectedBank?.id) {
+        transactionData.bank_id = selectedBank.id;
+      }
 
       // Add promotion code to admin note if provided
       if (promotionCode.trim()) {
@@ -479,46 +483,46 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                         </div>
                       </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="deposit-amount">Số tiền nạp (VND)</Label>
-                      <Input
-                        id="deposit-amount"
-                        type="number"
-                        placeholder="Nhập số tiền"
-                        value={depositAmount}
-                        onChange={(e) => setDepositAmount(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="promotion-code" className="flex items-center gap-2">
-                        <Tag className="w-4 h-4" />
-                        Mã khuyến mãi (tùy chọn)
-                      </Label>
-                      <Input
-                        id="promotion-code"
-                        type="text"
-                        placeholder="Nhập mã khuyến mãi nếu có"
-                        value={promotionCode}
-                        onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
-                      />
-                      {promotionCode && (
-                        <p className="text-xs text-muted-foreground">
-                          Mã khuyến mãi sẽ được áp dụng khi admin duyệt giao dịch
-                        </p>
-                      )}
-                    </div>
-
-                    <Button 
-                      onClick={handleDepositSubmit}
-                      disabled={loading || !depositAmount}
-                      className="w-full"
-                    >
-                      {loading ? "Đang xử lý..." : "Gửi yêu cầu nạp tiền"}
-                    </Button>
                   </div>
                 )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="deposit-amount">Số tiền nạp (VND)</Label>
+                  <Input
+                    id="deposit-amount"
+                    type="number"
+                    placeholder="Nhập số tiền"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="promotion-code" className="flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    Mã khuyến mãi (tùy chọn)
+                  </Label>
+                  <Input
+                    id="promotion-code"
+                    type="text"
+                    placeholder="Nhập mã khuyến mãi nếu có"
+                    value={promotionCode}
+                    onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
+                  />
+                  {promotionCode && (
+                    <p className="text-xs text-muted-foreground">
+                      Mã khuyến mãi sẽ được áp dụng khi admin duyệt giao dịch
+                    </p>
+                  )}
+                </div>
+
+                <Button 
+                  onClick={handleDepositSubmit}
+                  disabled={loading || !depositAmount}
+                  className="w-full"
+                >
+                  {loading ? "Đang xử lý..." : "Gửi yêu cầu nạp tiền"}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
