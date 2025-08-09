@@ -24,30 +24,64 @@ function randomOrderCode() {
 }
 
 Deno.serve(async (req) => {
+  console.log("=== CREATE DEPOSIT ORDER START ===");
+  console.log("Method:", req.method);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+    
+    console.log("Environment check:", { 
+      hasUrl: !!SUPABASE_URL, 
+      hasKey: !!SUPABASE_ANON_KEY 
+    });
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.error("Missing environment variables");
+      return jsonResponse({ error: "Server configuration error" }, { status: 500 });
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    console.log("Auth header present:", !!authHeader);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
-        headers: { Authorization: req.headers.get("Authorization") || "" },
+        headers: { Authorization: authHeader || "" },
       },
     });
 
+    console.log("Getting user...");
     const {
       data: { user },
       error: userErr,
     } = await supabase.auth.getUser();
+    
+    console.log("User result:", { user: !!user, error: userErr });
+    
     if (userErr || !user) {
+      console.error("Auth error:", userErr);
       return jsonResponse({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { amount, promotionCode } = await req.json();
+    console.log("Parsing request body...");
+    let bodyData;
+    try {
+      bodyData = await req.json();
+      console.log("Request body:", bodyData);
+    } catch (e) {
+      console.error("Failed to parse JSON:", e);
+      return jsonResponse({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const { amount, promotionCode } = bodyData;
+    console.log("Extracted data:", { amount, promotionCode });
+    
     if (!amount || amount <= 0) {
+      console.error("Invalid amount:", amount);
       return jsonResponse({ error: "Số tiền không hợp lệ" }, { status: 400 });
     }
 
@@ -136,7 +170,15 @@ Deno.serve(async (req) => {
       accountName,
     });
   } catch (e) {
-    console.error(e);
-    return jsonResponse({ error: "Internal Server Error" }, { status: 500 });
+    console.error("=== UNHANDLED ERROR ===");
+    console.error("Error type:", e.constructor.name);
+    console.error("Error message:", e.message);
+    console.error("Error stack:", e.stack);
+    console.error("=== END ERROR ===");
+    return jsonResponse({ 
+      error: "Internal Server Error", 
+      details: e.message,
+      type: e.constructor.name 
+    }, { status: 500 });
   }
 });
