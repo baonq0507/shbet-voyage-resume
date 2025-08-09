@@ -130,7 +130,9 @@ Deno.serve(async (req) => {
     console.log("PayOS config check:", {
       hasClientId: !!clientId,
       hasApiKey: !!apiKey,
-      hasChecksumKey: !!checksumKey
+      hasChecksumKey: !!checksumKey,
+      clientIdLength: clientId?.length || 0,
+      apiKeyLength: apiKey?.length || 0
     });
 
     // If PayOS keys are configured, create payment order
