@@ -54,6 +54,21 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const { user, profile } = useAuth();
   const { validatePromotionCode } = usePromotionCodes();
 
+  // New deposit flow state
+  const [depositStep, setDepositStep] = useState<'method' | 'amount' | 'qr'>('method');
+  const [selectedMethod, setSelectedMethod] = useState<'vietqr' | null>(null);
+  const [creatingOrder, setCreatingOrder] = useState(false);
+  const [orderInfo, setOrderInfo] = useState<{
+    transactionId?: string;
+    orderCode?: string | number;
+    bankCode?: string;
+    accountNumber?: string;
+    accountName?: string;
+    description?: string;
+    amount?: number;
+  } | null>(null);
+  const [txStatus, setTxStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+
   // Update active tab when initialTab changes or modal opens
   useEffect(() => {
     console.log('useEffect triggered:', { isOpen, initialTab });
@@ -72,7 +87,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
   useEffect(() => {
     if (isOpen) {
-      fetchBanks();
+      // Reset deposit flow each time modal opens
+      setDepositStep('method');
+      setSelectedMethod(null);
+      setOrderInfo(null);
+      setTxStatus(null);
       fetchUserBankAccounts();
     }
   }, [isOpen]);
@@ -121,27 +140,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     };
   }, [user, toast]);
 
-  const fetchBanks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('bank')
-        .select('*')
-        .eq('is_active', true);
-
-      if (error) throw error;
-      setBanks(data || []);
-      if (data && data.length > 0) {
-        setSelectedBank(data[0]);
-      }
-    } catch (error) {
-      console.error('Error fetching banks:', error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể tải thông tin ngân hàng",
-        variant: "destructive",
-      });
-    }
-  };
+  // Legacy bank fetch removed in new flow
 
   const fetchUserBankAccounts = async () => {
     if (!user) return;
@@ -172,61 +171,68 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     }
   };
 
-  const handleDepositSubmit = async () => {
+  const handleCreateDepositOrder = async () => {
     if (!depositAmount || !user) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng nhập số tiền nạp",
-        variant: "destructive",
-      });
+      toast({ title: 'Lỗi', description: 'Vui lòng nhập số tiền nạp', variant: 'destructive' });
       return;
     }
 
-    setLoading(true);
+    setCreatingOrder(true);
     try {
-      const transactionData: any = {
-        user_id: user.id,
-        type: 'deposit',
-        amount: parseFloat(depositAmount),
-        status: 'pending'
-      };
-
-      // Optional: attach selected bank if available
-      if (selectedBank?.id) {
-        transactionData.bank_id = selectedBank.id;
-      }
-
-      // Add promotion code to admin note if provided
-      if (promotionCode.trim()) {
-        transactionData.admin_note = `Mã khuyến mãi: ${promotionCode.trim()}`;
-      }
-
-      const { error } = await supabase
-        .from('transactions')
-        .insert([transactionData]);
+      const amount = parseFloat(depositAmount);
+      const { data, error } = await supabase.functions.invoke('create-deposit-order', {
+        body: {
+          amount,
+          promotionCode: promotionCode?.trim() || undefined,
+        },
+        headers: { 'Content-Type': 'application/json' }
+      });
 
       if (error) throw error;
 
-      toast({
-        title: "Thành công",
-        description: "Yêu cầu nạp tiền đã được gửi. Vui lòng chờ admin duyệt.",
-      });
+      if (!data) throw new Error('Không nhận được dữ liệu từ máy chủ');
 
-      setDepositAmount("");
-      setPromotionCode("");
-      setProofImage(null);
-      onClose();
-    } catch (error) {
-      console.error('Error creating deposit request:', error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể tạo yêu cầu nạp tiền",
-        variant: "destructive",
+      setOrderInfo({
+        transactionId: data.transactionId,
+        orderCode: data.orderCode,
+        bankCode: data.bankCode,
+        accountNumber: data.accountNumber,
+        accountName: data.accountName,
+        description: data.description,
+        amount,
       });
+      setTxStatus('pending');
+      setDepositStep('qr');
+    } catch (err) {
+      console.error('Error creating deposit order:', err);
+      toast({ title: 'Lỗi', description: 'Không thể tạo đơn nạp tiền', variant: 'destructive' });
     } finally {
-      setLoading(false);
+      setCreatingOrder(false);
     }
   };
+
+  // Poll transaction status when showing QR
+  useEffect(() => {
+    let interval: number | undefined;
+    if (depositStep === 'qr' && orderInfo?.transactionId) {
+      interval = window.setInterval(async () => {
+        const { data } = await supabase
+          .from('transactions')
+          .select('status')
+          .eq('id', orderInfo.transactionId)
+          .maybeSingle();
+        if (data?.status) {
+          setTxStatus(data.status as any);
+          if (data.status === 'approved' || data.status === 'rejected') {
+            window.clearInterval(interval);
+          }
+        }
+      }, 5000);
+    }
+    return () => {
+      if (interval) window.clearInterval(interval);
+    };
+  }, [depositStep, orderInfo?.transactionId]);
 
   const handleWithdrawSubmit = async () => {
     if (!user || !profile?.username) {
@@ -394,135 +400,143 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
               <CardHeader>
                 <CardTitle className="text-lg">Nạp tiền vào tài khoản</CardTitle>
                 <CardDescription>
-                  Chuyển khoản theo thông tin bên dưới và gửi yêu cầu
+                  Chọn phương thức nạp, nhập số tiền và quét VietQR để thanh toán
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="bank-select">Chọn ngân hàng</Label>
-                  <Select 
-                    value={selectedBank?.id || ""}
-                    onValueChange={(value) => {
-                      const bank = banks.find(b => b.id === value);
-                      setSelectedBank(bank || null);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn ngân hàng" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {banks.map((bank) => (
-                        <SelectItem key={bank.id} value={bank.id}>
-                          {bank.bank_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {depositStep === 'method' && (
+                  <div className="space-y-4">
+                    <Label className="text-sm">Phương thức nạp tiền</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMethod('vietqr')}
+                        className={`p-4 rounded-lg border text-left transition ${selectedMethod === 'vietqr' ? 'border-primary ring-2 ring-primary/20' : ''}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Chuyển khoản VietQR (PayOS)</p>
+                            <p className="text-sm text-muted-foreground">Quét mã VietQR, hệ thống tự động cộng tiền khi thanh toán thành công</p>
+                          </div>
+                          <CreditCard className="w-5 h-5 text-primary" />
+                        </div>
+                      </button>
+                    </div>
+                    <Button
+                      className="w-full"
+                      disabled={!selectedMethod}
+                      onClick={() => setDepositStep('amount')}
+                    >
+                      Tiếp tục
+                    </Button>
+                  </div>
+                )}
 
-                {selectedBank && (
-                  <div className="space-y-3">
-                    <div className="flex flex-col space-y-4">
-                      {/* QR Code Section */}
-                      <div className="text-center">
-                        <Label className="text-sm font-medium">QR Code chuyển khoản</Label>
-                        {selectedBank.qr_code_url && (
-                          <div className="mt-2">
-                            <img 
-                              src={selectedBank.qr_code_url} 
-                              alt="QR Code" 
-                              className="w-32 h-32 md:w-48 md:h-48 mx-auto border rounded-lg shadow-sm"
-                            />
+                {depositStep === 'amount' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Số tiền nạp (VND)</Label>
+                      <Input
+                        type="number"
+                        placeholder="Nhập số tiền"
+                        value={depositAmount}
+                        onChange={(e) => setDepositAmount(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[100000, 200000, 500000, 1000000, 2000000, 5000000].map(v => (
+                        <Button key={v} variant="outline" onClick={() => setDepositAmount(String(v))}>
+                          {v.toLocaleString()}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Tag className="w-4 h-4" /> Mã khuyến mãi (tùy chọn)
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Nhập mã khuyến mãi nếu có"
+                        value={promotionCode}
+                        onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1" onClick={() => setDepositStep('method')}>Quay lại</Button>
+                      <Button className="flex-1" onClick={handleCreateDepositOrder} disabled={creatingOrder || !depositAmount}>
+                        {creatingOrder ? 'Đang tạo đơn...' : 'Tiếp tục'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {depositStep === 'qr' && (
+                  <div className="space-y-4">
+                    {!orderInfo?.bankCode || !orderInfo?.accountNumber || !orderInfo?.accountName ? (
+                      <Alert>
+                        <AlertDescription>
+                          Chưa cấu hình PayOS hoặc tài khoản nhận tiền. Vui lòng cung cấp khóa PayOS để hoàn tất tự động nạp.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="text-center space-y-3">
+                        <Label className="text-sm font-medium">Quét mã VietQR để thanh toán</Label>
+                        <img
+                          src={`https://img.vietqr.io/image/${orderInfo.bankCode}-${orderInfo.accountNumber}-compact2.png?amount=${orderInfo.amount || 0}&addInfo=${encodeURIComponent(orderInfo.description || '')}&accountName=${encodeURIComponent(orderInfo.accountName || '')}`}
+                          alt="VietQR"
+                          className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm"
+                        />
+                        <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Ngân hàng</span>
+                            <span className="font-medium">{orderInfo.bankCode}</span>
                           </div>
-                        )}
-                      </div>
-                      
-                      {/* Bank Information Section */}
-                      <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
-                        <Label className="text-sm font-medium text-center block">Thông tin chuyển khoản</Label>
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Ngân hàng</Label>
-                            <div className="flex items-center justify-between p-2 bg-background rounded border">
-                              <span className="font-medium">{selectedBank.bank_name}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => copyToClipboard(selectedBank.bank_name)}
-                              >
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Số tài khoản</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{orderInfo.accountNumber}</span>
+                              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.accountNumber!)}>
                                 <Copy className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Số tài khoản</Label>
-                            <div className="flex items-center justify-between p-2 bg-background rounded border">
-                              <span className="font-medium text-lg">{selectedBank.account_number}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => copyToClipboard(selectedBank.account_number)}
-                              >
-                                <Copy className="w-4 h-4" />
-                              </Button>
-                            </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Chủ tài khoản</span>
+                            <span className="font-medium">{orderInfo.accountName}</span>
                           </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Chủ tài khoản</Label>
-                            <div className="flex items-center justify-between p-2 bg-background rounded border">
-                              <span className="font-medium">{selectedBank.account_holder}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => copyToClipboard(selectedBank.account_holder)}
-                              >
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Số tiền</span>
+                            <span className="font-bold">{(orderInfo.amount || 0).toLocaleString()} VND</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Nội dung chuyển khoản</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium truncate max-w-[180px]" title={orderInfo.description}>{orderInfo.description}</span>
+                              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.description || '')}>
                                 <Copy className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         </div>
+                        <div className="text-sm">
+                          Trạng thái: {txStatus === 'approved' ? (
+                            <span className="text-green-600 font-medium">Đã nhận tiền</span>
+                          ) : txStatus === 'rejected' ? (
+                            <span className="text-red-600 font-medium">Từ chối</span>
+                          ) : (
+                            <span className="text-orange-600 font-medium">Đang chờ thanh toán...</span>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1" onClick={() => setDepositStep('amount')}>Quay lại</Button>
+                          <Button className="flex-1" onClick={onClose} disabled={txStatus !== 'approved'}>
+                            Đóng
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="deposit-amount">Số tiền nạp (VND)</Label>
-                  <Input
-                    id="deposit-amount"
-                    type="number"
-                    placeholder="Nhập số tiền"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="promotion-code" className="flex items-center gap-2">
-                    <Tag className="w-4 h-4" />
-                    Mã khuyến mãi (tùy chọn)
-                  </Label>
-                  <Input
-                    id="promotion-code"
-                    type="text"
-                    placeholder="Nhập mã khuyến mãi nếu có"
-                    value={promotionCode}
-                    onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
-                  />
-                  {promotionCode && (
-                    <p className="text-xs text-muted-foreground">
-                      Mã khuyến mãi sẽ được áp dụng khi admin duyệt giao dịch
-                    </p>
-                  )}
-                </div>
-
-                <Button 
-                  onClick={handleDepositSubmit}
-                  disabled={loading || !depositAmount}
-                  className="w-full"
-                >
-                  {loading ? "Đang xử lý..." : "Gửi yêu cầu nạp tiền"}
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>
