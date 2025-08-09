@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -92,7 +93,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     }
   };
 
-
   const fetchAllAgents = async () => {
     try {
       const { data: agents, error } = await supabase
@@ -124,6 +124,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
       console.error('Error fetching agents list:', err);
     }
   };
+
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
@@ -159,6 +160,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
       if (e.target) e.target.value = '';
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -352,6 +354,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
               </p>
             </div>
           </div>
+
           {/* Assign Agent */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold border-b pb-2">Phân công đại lý</h3>
@@ -370,63 +373,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
               </Select>
               <p className="text-xs text-muted-foreground">Gán đại lý quản lý cho người dùng này.</p>
             </div>
-          </div>
-
-          {/* Agent Management */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold border-b pb-2">Quản lý đại lý</h3>
-            {isAgent ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Mã giới thiệu</Label>
-                    <Input value={referralCode} readOnly />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Số lượt giới thiệu</Label>
-                    <Input value={referralCount} readOnly />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>% Hoa hồng</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={commission}
-                      onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button type="button" variant="outline" onClick={handleUpdateCommission} disabled={loading}>
-                    Cập nhật hoa hồng
-                  </Button>
-                  <Button type="button" variant="destructive" onClick={handleRevokeAgent} disabled={loading}>
-                    Hủy đại lý
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label>% Hoa hồng (mặc định 10%)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={commission}
-                    onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-                <Button type="button" onClick={handleMakeAgent} disabled={loading}>
-                  Chuyển thành đại lý
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Account Information */}
