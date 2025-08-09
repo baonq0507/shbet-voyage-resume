@@ -41,7 +41,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const [activeTab, setActiveTab] = useState(initialTab);
   console.log('TransactionModal props:', { isOpen, initialTab, activeTab });
   const [banks, setBanks] = useState<Bank[]>([]);
-  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [promotionCode, setPromotionCode] = useState("");
@@ -55,15 +54,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const { validatePromotionCode } = usePromotionCodes();
 
   // New deposit flow state
-  const [depositStep, setDepositStep] = useState<'method' | 'amount' | 'qr'>('method');
+  const [depositStep, setDepositStep] = useState<'method' | 'amount' | 'bank' | 'qr'>('method');
   const [selectedMethod, setSelectedMethod] = useState<'vietqr' | null>(null);
+  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [orderInfo, setOrderInfo] = useState<{
     transactionId?: string;
     orderCode?: string | number;
-    bankCode?: string;
-    accountNumber?: string;
-    accountName?: string;
     description?: string;
     amount?: number;
   } | null>(null);
@@ -85,14 +82,30 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     }
   }, [profile]);
 
+  const fetchBanks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bank')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setBanks(data || []);
+    } catch (error) {
+      console.error('Error fetching banks:', error);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       // Reset deposit flow each time modal opens
       setDepositStep('method');
       setSelectedMethod(null);
+      setSelectedBank(null);
       setOrderInfo(null);
       setTxStatus(null);
       fetchUserBankAccounts();
+      fetchBanks();
     }
   }, [isOpen]);
 
@@ -219,9 +232,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       setOrderInfo({
         transactionId: data.transactionId,
         orderCode: data.orderCode,
-        bankCode: data.bankCode,
-        accountNumber: data.accountNumber,
-        accountName: data.accountName,
         description: data.description,
         amount,
       });
@@ -487,8 +497,37 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => setDepositStep('method')}>Quay lại</Button>
-                      <Button className="flex-1" onClick={handleCreateDepositOrder} disabled={creatingOrder || !depositAmount}>
-                        {creatingOrder ? 'Đang tạo đơn...' : 'Tiếp tục'}
+                      <Button className="flex-1" onClick={() => setDepositStep('bank')} disabled={!depositAmount}>
+                        Tiếp tục
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {depositStep === 'bank' && (
+                  <div className="space-y-4">
+                    <Label className="text-sm">Chọn ngân hàng nhận tiền</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {banks.map((bank) => (
+                        <button
+                          key={bank.id}
+                          type="button"
+                          onClick={() => setSelectedBank(bank)}
+                          className={`p-4 rounded-lg border text-left transition ${selectedBank?.id === bank.id ? 'border-primary ring-2 ring-primary/20' : ''}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{bank.bank_name}</p>
+                              <p className="text-sm text-muted-foreground">{bank.account_number} - {bank.account_holder}</p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1" onClick={() => setDepositStep('amount')}>Quay lại</Button>
+                      <Button className="flex-1" onClick={handleCreateDepositOrder} disabled={creatingOrder || !selectedBank}>
+                        {creatingOrder ? 'Đang tạo đơn...' : 'Tạo đơn nạp tiền'}
                       </Button>
                     </div>
                   </div>
@@ -496,47 +535,30 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
                 {depositStep === 'qr' && (
                   <div className="space-y-4">
-                    {!orderInfo?.bankCode || !orderInfo?.accountNumber || !orderInfo?.accountName ? (
+                    {!selectedBank ? (
                       <Alert>
                         <AlertDescription>
-                          Chưa cấu hình PayOS hoặc tài khoản nhận tiền. Vui lòng cung cấp khóa PayOS để hoàn tất tự động nạp.
+                          Vui lòng chọn ngân hàng trước khi tạo mã QR.
                         </AlertDescription>
                       </Alert>
                     ) : (
                       <div className="text-center space-y-3">
                         <Label className="text-sm font-medium">Quét mã VietQR để thanh toán</Label>
                         <img
-                          src={`https://img.vietqr.io/image/${orderInfo.bankCode}-${orderInfo.accountNumber}-compact2.png?amount=${orderInfo.amount || 0}&addInfo=${encodeURIComponent(orderInfo.description || '')}&accountName=${encodeURIComponent(orderInfo.accountName || '')}`}
+                          src={`https://img.vietqr.io/image/${selectedBank.bank_name}-${selectedBank.account_number}-compact2.png?amount=${orderInfo?.amount || 0}&addInfo=${encodeURIComponent(orderInfo?.description || '')}`}
                           alt="VietQR"
                           className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm"
                         />
                         <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Ngân hàng</span>
-                            <span className="font-medium">{orderInfo.bankCode}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Số tài khoản</span>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{orderInfo.accountNumber}</span>
-                              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.accountNumber!)}>
-                                <Copy className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Chủ tài khoản</span>
-                            <span className="font-medium">{orderInfo.accountName}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Số tiền</span>
-                            <span className="font-bold">{(orderInfo.amount || 0).toLocaleString()} VND</span>
+                            <span className="font-bold">{(orderInfo?.amount || 0).toLocaleString()} VND</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Nội dung chuyển khoản</span>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium truncate max-w-[180px]" title={orderInfo.description}>{orderInfo.description}</span>
-                              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.description || '')}>
+                              <span className="font-medium truncate max-w-[180px]" title={orderInfo?.description}>{orderInfo?.description}</span>
+                              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo?.description || '')}>
                                 <Copy className="w-4 h-4" />
                               </Button>
                             </div>
@@ -552,7 +574,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                           )}
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" onClick={() => setDepositStep('amount')}>Quay lại</Button>
+                          <Button variant="outline" className="flex-1" onClick={() => setDepositStep('bank')}>Quay lại</Button>
                           <Button className="flex-1" onClick={onClose} disabled={txStatus !== 'approved'}>
                             Đóng
                           </Button>
