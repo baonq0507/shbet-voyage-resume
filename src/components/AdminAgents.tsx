@@ -36,7 +36,7 @@ export const AdminAgents: React.FC = () => {
   const { toast } = useToast();
 
   const [agents, setAgents] = useState<AgentRow[]>([]);
-  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'levels' | 'users'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'levels' | 'users'>('add');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [levels, setLevels] = useState<CommissionLevel[]>([]);
   const [newLevel, setNewLevel] = useState<number | ''>('');
@@ -283,83 +283,11 @@ export const AdminAgents: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList>
-          <TabsTrigger value="list">Danh sách đại lý</TabsTrigger>
           <TabsTrigger value="add">Tạo cấp bậc</TabsTrigger>
           <TabsTrigger value="levels">Cấp bậc hoa hồng</TabsTrigger>
           <TabsTrigger value="users">Quản lý người dùng</TabsTrigger>
         </TabsList>
 
-        {/* LIST */}
-        <TabsContent value="list" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách đại lý</CardTitle>
-              <CardDescription>Tên, % hoa hồng, link mời và số liệu</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Đại lý</TableHead>
-                    <TableHead>% Hoa hồng</TableHead>
-                    <TableHead>Mã giới thiệu</TableHead>
-                    <TableHead>Link mời</TableHead>
-                    <TableHead>Đã giới thiệu</TableHead>
-                    <TableHead>Tổng hoa hồng</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {agents.map((agent) => {
-                    const username = agent.profile?.username || agent.user_id.slice(0, 6);
-                    const link = agent.referral_code ? `${window.location.origin}?ref=${agent.referral_code}` : '';
-                    return (
-                      <TableRow key={agent.id}>
-                        <TableCell className="font-medium">{username}</TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            defaultValue={Number(agent.commission_percentage)}
-                            className="w-24"
-                            onBlur={(e) => {
-                              const v = Number(e.currentTarget.value);
-                              if (!isNaN(v)) updateAgentCommission(agent.id, v);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>{agent.referral_code || '-'}</TableCell>
-                        <TableCell>
-                          {agent.referral_code ? (
-                            <div className="flex items-center gap-2">
-                              <span className="truncate max-w-[240px]" title={link}>{link}</span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={async () => {
-                                  try {
-                                    await navigator.clipboard.writeText(link);
-                                    toast({ title: 'Đã sao chép', description: 'Link mời đã được sao chép' });
-                                  } catch (e) {
-                                    toast({ title: 'Lỗi', description: 'Không thể sao chép link', variant: 'destructive' });
-                                  }
-                                }}
-                              >
-                                Sao chép
-                              </Button>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">Chưa có</span>
-                          )}
-                        </TableCell>
-                        <TableCell>{agent.referral_count}</TableCell>
-                        <TableCell>{Number(agent.total_commission || 0).toLocaleString()} VND</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* CREATE AGENT LEVEL */}
         <TabsContent value="add" className="space-y-4">
