@@ -504,6 +504,45 @@ const Admin = () => {
     };
   };
 
+  // Derived lists for Users (Dashboard)
+  const filteredUsersDash = users.filter((u) => {
+    const q = userSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (u.full_name || '').toLowerCase().includes(q) ||
+      (u.username || '').toLowerCase().includes(q)
+    );
+  });
+
+  const sortedUsersDash = React.useMemo(() => {
+    const arr = [...filteredUsersDash];
+    const getVal = (u: UserProfile, key: UserSortKey): string | number => {
+      switch (key) {
+        case 'username':
+          return (u.username || '').toLowerCase();
+        case 'full_name':
+          return (u.full_name || '').toLowerCase();
+        case 'balance':
+          return Number(u.balance) || 0;
+        case 'total_deposit':
+          return getUserDepositStats(u.user_id).total || 0;
+        case 'created_at':
+          return new Date(u.created_at).getTime();
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, userSortKey);
+      const vb = getVal(b, userSortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return userSortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredUsersDash, userSortKey, userSortDir]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -648,43 +687,6 @@ const Admin = () => {
   );
 
   // Derived lists for Users (Dashboard)
-  const filteredUsersDash = users.filter((u) => {
-    const q = userSearch.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      (u.full_name || '').toLowerCase().includes(q) ||
-      (u.username || '').toLowerCase().includes(q)
-    );
-  });
-
-  const sortedUsersDash = React.useMemo(() => {
-    const arr = [...filteredUsersDash];
-    const getVal = (u: UserProfile, key: UserSortKey): string | number => {
-      switch (key) {
-        case 'username':
-          return (u.username || '').toLowerCase();
-        case 'full_name':
-          return (u.full_name || '').toLowerCase();
-        case 'balance':
-          return Number(u.balance) || 0;
-        case 'total_deposit':
-          return getUserDepositStats(u.user_id).total || 0;
-        case 'created_at':
-          return new Date(u.created_at).getTime();
-        default:
-          return 0;
-      }
-    };
-    arr.sort((a, b) => {
-      const va = getVal(a, userSortKey);
-      const vb = getVal(b, userSortKey);
-      let cmp = 0;
-      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-      else cmp = String(va).localeCompare(String(vb));
-      return userSortDir === 'asc' ? cmp : -cmp;
-    });
-    return arr;
-  }, [filteredUsersDash, userSortKey, userSortDir]);
 
   const renderUserManagement = () => (
     <div className="space-y-6">
