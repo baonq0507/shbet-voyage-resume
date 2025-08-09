@@ -444,7 +444,7 @@ export const AdminAgents: React.FC = () => {
           </Card>
 
           <Dialog open={viewUsersOpen} onOpenChange={setViewUsersOpen}>
-            <DialogContent className="sm:max-w-[480px]">
+            <DialogContent className="sm:max-w-[720px]">
               <DialogHeader>
                 <DialogTitle>Số người dùng của đại lý</DialogTitle>
                 <DialogDescription>Đại lý: {selectedAgentName}</DialogDescription>
