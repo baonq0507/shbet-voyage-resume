@@ -67,6 +67,7 @@ export const AdminAgents: React.FC = () => {
   const [viewUsersCount, setViewUsersCount] = useState<number | null>(null);
   const [viewUsersLoading, setViewUsersLoading] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState<string>('');
+  const [selectedAgentCommission, setSelectedAgentCommission] = useState<number>(0);
 
   const [referredUsers, setReferredUsers] = useState<ReferredUserDetail[]>([]);
 
@@ -243,6 +244,7 @@ export const AdminAgents: React.FC = () => {
       setSelectedAgentName(
         agent.profile?.username || agent.profile?.full_name || agent.referral_code || 'Đại lý'
       );
+      setSelectedAgentCommission(Number(agent.commission_percentage) || 0);
       setViewUsersOpen(true);
       setViewUsersLoading(true);
       const { count, error } = await supabase
@@ -467,7 +469,7 @@ export const AdminAgents: React.FC = () => {
                             <TableHead>Họ tên</TableHead>
                             <TableHead className="text-right">Tổng nạp</TableHead>
                             <TableHead className="text-right">Tổng rút</TableHead>
-                            <TableHead className="text-right">Hoa hồng</TableHead>
+                            <TableHead className="text-right">Hoa hồng (theo % hiện tại)</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -477,7 +479,7 @@ export const AdminAgents: React.FC = () => {
                               <TableCell>{u.full_name}</TableCell>
                               <TableCell className="text-right">{u.total_deposit.toLocaleString()}</TableCell>
                               <TableCell className="text-right">{u.total_withdrawal.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">{u.commission_earned.toLocaleString()}</TableCell>
+                              <TableCell className="text-right">{Math.floor((u.total_deposit * (selectedAgentCommission ?? 0)) / 100).toLocaleString()}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
