@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Plus, Edit, Trash, Send, Eye } from 'lucide-react';
+import { Bell, Plus, Edit, Trash, Send, Eye, ArrowUpDown } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 
 interface Notification {
@@ -29,6 +29,18 @@ const Notifications: React.FC = () => {
   const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
   const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
   const [notificationLoading, setNotificationLoading] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  type SortKey = 'title' | 'type' | 'target_audience' | 'is_published' | 'created_at';
+  const [sortKey, setSortKey] = useState<SortKey>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
 
   // Form state
   const [title, setTitle] = useState('');
@@ -205,6 +217,44 @@ const Notifications: React.FC = () => {
   const publishedNotifications = notifications.filter(n => n.is_published);
   const draftNotifications = notifications.filter(n => !n.is_published);
 
+  const filteredNotifications = notifications.filter((n) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (n.title || '').toLowerCase().includes(q) ||
+      (n.content || '').toLowerCase().includes(q)
+    );
+  });
+
+  const sortedNotifications = React.useMemo(() => {
+    const arr = [...filteredNotifications];
+    const getVal = (n: Notification, key: SortKey): string | number => {
+      switch (key) {
+        case 'title':
+          return (n.title || '').toLowerCase();
+        case 'type':
+          return n.type;
+        case 'target_audience':
+          return n.target_audience;
+        case 'is_published':
+          return n.is_published ? 1 : 0;
+        case 'created_at':
+          return new Date(n.created_at).getTime();
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, sortKey);
+      const vb = getVal(b, sortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredNotifications, sortKey, sortDir]);
+
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'info': return 'bg-blue-100 text-blue-800';
@@ -296,20 +346,47 @@ const Notifications: React.FC = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
+                <div className="mb-4">
+                  <Input
+                    placeholder="Tìm theo tiêu đề hoặc nội dung"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tiêu đề</TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('title')}>
+                          Tiêu đề <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead>Nội dung</TableHead>
-                      <TableHead>Loại</TableHead>
-                      <TableHead>Đối tượng</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Ngày tạo</TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('type')}>
+                          Loại <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('target_audience')}>
+                          Đối tượng <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('is_published')}>
+                          Trạng thái <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('created_at')}>
+                          Ngày tạo <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead>Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {notifications.map((notification) => (
+                    {sortedNotifications.map((notification) => (
                       <TableRow key={notification.id}>
                         <TableCell className="font-medium">{notification.title}</TableCell>
                         <TableCell className="max-w-xs truncate">{notification.content}</TableCell>

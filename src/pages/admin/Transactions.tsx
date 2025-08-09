@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, X, Eye, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { Check, X, Eye, DollarSign, TrendingUp, AlertCircle, ArrowUpDown } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 
 interface Transaction {
@@ -54,6 +54,18 @@ const Transactions: React.FC = () => {
   const [searchDateFrom, setSearchDateFrom] = useState('');
   const [searchDateTo, setSearchDateTo] = useState('');
   const [searchUserInfo, setSearchUserInfo] = useState('');
+
+  // Sort state
+  type SortKey = 'user' | 'type' | 'amount' | 'status' | 'created_at';
+  const [sortKey, setSortKey] = useState<SortKey>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
 
   const { toast } = useToast();
 
@@ -306,7 +318,7 @@ const Transactions: React.FC = () => {
     if (searchTransactionType && transaction.type !== searchTransactionType) {
       return false;
     }
-
+    
     // Amount range filter
     if (searchAmountMin && transaction.amount < parseFloat(searchAmountMin)) {
       return false;
@@ -314,7 +326,7 @@ const Transactions: React.FC = () => {
     if (searchAmountMax && transaction.amount > parseFloat(searchAmountMax)) {
       return false;
     }
-
+    
     // Date range filter
     if (searchDateFrom) {
       const transactionDate = new Date(transaction.created_at).toISOString().split('T')[0];
@@ -328,7 +340,7 @@ const Transactions: React.FC = () => {
         return false;
       }
     }
-
+    
     // User info filter
     if (searchUserInfo) {
       const userInfo = searchUserInfo.toLowerCase();
@@ -339,9 +351,38 @@ const Transactions: React.FC = () => {
         return false;
       }
     }
-
+    
     return true;
   });
+
+  const sortedTransactions = React.useMemo(() => {
+    const arr = [...filteredTransactions];
+    const getVal = (t: Transaction, key: SortKey): string | number => {
+      switch (key) {
+        case 'user':
+          return (t.profiles?.full_name || t.profiles?.username || '').toLowerCase();
+        case 'type':
+          return t.type;
+        case 'amount':
+          return Number(t.amount) || 0;
+        case 'status':
+          return t.status;
+        case 'created_at':
+          return new Date(t.created_at).getTime();
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, sortKey);
+      const vb = getVal(b, sortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredTransactions, sortKey, sortDir]);
 
   const pendingTransactions = transactions.filter(t => t.status === 'pending');
   const totalDeposits = transactions.filter(t => t.type === 'deposit' && t.status === 'approved').reduce((sum, t) => sum + t.amount, 0);
@@ -503,16 +544,36 @@ const Transactions: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Người dùng</TableHead>
-                      <TableHead>Loại</TableHead>
-                      <TableHead>Số tiền</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Ngày tạo</TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('user')}>
+                          Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('type')}>
+                          Loại <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('amount')}>
+                          Số tiền <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('status')}>
+                          Trạng thái <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('created_at')}>
+                          Ngày tạo <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead>Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTransactions.map((transaction) => (
+                    {sortedTransactions.map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>
                           <div>
@@ -533,7 +594,7 @@ const Transactions: React.FC = () => {
                           <Badge className={getStatusColor(transaction.status)}>
                             {getStatusText(transaction.status)}
                           </Badge>
-                        </TableCell>
+                         </TableCell>
                         <TableCell>
                           {new Date(transaction.created_at).toLocaleDateString('vi-VN')}
                         </TableCell>

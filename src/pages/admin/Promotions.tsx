@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Gift, Plus, Edit, Trash, Calendar, Users, DollarSign } from 'lucide-react';
+import { Gift, Plus, Edit, Trash, Calendar, Users, DollarSign, ArrowUpDown } from 'lucide-react';
 import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -35,6 +36,18 @@ const Promotions: React.FC = () => {
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [promotionLoading, setPromotionLoading] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  type SortKey = 'title' | 'promotion_type' | 'is_active' | 'current_uses' | 'start_date' | 'end_date';
+  const [sortKey, setSortKey] = useState<SortKey>('start_date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
 
   const { toast } = useToast();
 
@@ -195,6 +208,47 @@ const Promotions: React.FC = () => {
   const activePromotions = promotions.filter(p => p.is_active);
   const totalUses = promotions.reduce((sum, p) => sum + p.current_uses, 0);
 
+  const filteredPromotions = promotions.filter((p) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (p.title || '').toLowerCase().includes(q) ||
+      (p.description || '').toLowerCase().includes(q) ||
+      (p.promotion_code || '').toLowerCase().includes(q)
+    );
+  });
+
+  const sortedPromotions = React.useMemo(() => {
+    const arr = [...filteredPromotions];
+    const getVal = (p: Promotion, key: SortKey): string | number => {
+      switch (key) {
+        case 'title':
+          return (p.title || '').toLowerCase();
+        case 'promotion_type':
+          return p.promotion_type;
+        case 'is_active':
+          return p.is_active ? 1 : 0;
+        case 'current_uses':
+          return Number(p.current_uses) || 0;
+        case 'start_date':
+          return new Date(p.start_date).getTime();
+        case 'end_date':
+          return new Date(p.end_date).getTime();
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, sortKey);
+      const vb = getVal(b, sortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredPromotions, sortKey, sortDir]);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -266,20 +320,53 @@ const Promotions: React.FC = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
+                <div className="mb-4">
+                  <Input
+                    placeholder="Tìm theo tiêu đề, mô tả, mã khuyến mãi"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tiêu đề</TableHead>
-                      <TableHead>Loại</TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('title')}>
+                          Tiêu đề <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('promotion_type')}>
+                          Loại <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead>Phần thưởng</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Lượt sử dụng</TableHead>
-                      <TableHead>Thời gian</TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('is_active')}>
+                          Trạng thái <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('current_uses')}>
+                          Lượt sử dụng <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('start_date')}>
+                            Bắt đầu <ArrowUpDown className="ml-1 h-4 w-4" />
+                          </Button>
+                          <span>/</span>
+                          <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('end_date')}>
+                            Kết thúc <ArrowUpDown className="ml-1 h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableHead>
                       <TableHead>Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {promotions.map((promotion) => (
+                    {sortedPromotions.map((promotion) => (
                       <TableRow key={promotion.id}>
                         <TableCell>
                           <div>
