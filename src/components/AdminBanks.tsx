@@ -32,7 +32,6 @@ export function AdminBanks() {
     bank_name: "",
     account_number: "",
     account_holder: "",
-    qr_code_url: "",
     is_active: true,
   });
 
@@ -59,7 +58,7 @@ export function AdminBanks() {
   }, []);
 
   const resetCreateForm = () => {
-    setNewBank({ bank_name: "", account_number: "", account_holder: "", qr_code_url: "", is_active: true });
+    setNewBank({ bank_name: "", account_number: "", account_holder: "", is_active: true });
   };
 
   const handleCreate = async () => {
@@ -74,7 +73,6 @@ export function AdminBanks() {
           bank_name: newBank.bank_name,
           account_number: newBank.account_number,
           account_holder: newBank.account_holder,
-          qr_code_url: newBank.qr_code_url || null,
           is_active: newBank.is_active,
         },
       ]);
@@ -109,7 +107,6 @@ export function AdminBanks() {
         bank_name: editData.bank_name,
         account_number: editData.account_number,
         account_holder: editData.account_holder,
-        qr_code_url: (editData.qr_code_url as string) || null,
         is_active: !!editData.is_active,
       };
       const { error } = await supabase.from("bank").update(payload).eq("id", editingId);
@@ -171,7 +168,6 @@ export function AdminBanks() {
                 <TableHead>Ngân hàng</TableHead>
                 <TableHead>Số tài khoản</TableHead>
                 <TableHead>Chủ tài khoản</TableHead>
-                <TableHead>QR Code URL</TableHead>
                 <TableHead>Đang bật</TableHead>
                 <TableHead>Hành động</TableHead>
               </TableRow>
@@ -198,13 +194,6 @@ export function AdminBanks() {
                       <Input value={editData.account_holder as string} onChange={(e) => setEditData((d) => ({ ...d, account_holder: e.target.value }))} />
                     ) : (
                       b.account_holder
-                    )}
-                  </TableCell>
-                  <TableCell className="max-w-[280px]">
-                    {editingId === b.id ? (
-                      <Input value={(editData.qr_code_url as string) || ""} onChange={(e) => setEditData((d) => ({ ...d, qr_code_url: e.target.value }))} placeholder="https://..." />
-                    ) : (
-                      <span className="truncate block" title={b.qr_code_url || ""}>{b.qr_code_url || "(chưa có)"}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -242,7 +231,7 @@ export function AdminBanks() {
               ))}
               {banks.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
                     Chưa có ngân hàng nào. Hãy thêm mới.
                   </TableCell>
                 </TableRow>
@@ -269,10 +258,6 @@ export function AdminBanks() {
             <div>
               <Label>Chủ tài khoản</Label>
               <Input value={newBank.account_holder} onChange={(e) => setNewBank((s) => ({ ...s, account_holder: e.target.value }))} placeholder="Nguyễn Văn A" />
-            </div>
-            <div>
-              <Label>QR Code URL (tùy chọn)</Label>
-              <Input value={newBank.qr_code_url} onChange={(e) => setNewBank((s) => ({ ...s, qr_code_url: e.target.value }))} placeholder="https://..." />
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={newBank.is_active} onCheckedChange={(v) => setNewBank((s) => ({ ...s, is_active: v }))} />
