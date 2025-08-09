@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ArrowUpDown } from 'lucide-react';
 
 interface AgentRow {
   id: string;
@@ -71,6 +72,24 @@ export const AdminAgents: React.FC = () => {
 
   const [referredUsers, setReferredUsers] = useState<ReferredUserDetail[]>([]);
   const [search, setSearch] = useState('');
+  type SortKey =
+    | 'full_name'
+    | 'username'
+    | 'referral_code'
+    | 'commission_percentage'
+    | 'total_commission'
+    | 'referral_count'
+    | 'is_active';
+  const [sortKey, setSortKey] = useState<SortKey>('referral_count');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
 
   const fetchAgents = async () => {
     try {
@@ -387,6 +406,44 @@ export const AdminAgents: React.FC = () => {
     });
   }, [agents, search]);
 
+  const sortedAgents = React.useMemo(() => {
+    const arr = [...filteredAgents];
+    const getVal = (a: AgentRow, key: SortKey): string | number => {
+      switch (key) {
+        case 'full_name':
+          return (a.profile?.full_name || '').toLowerCase();
+        case 'username':
+          return (a.profile?.username || '').toLowerCase();
+        case 'referral_code':
+          return (a.referral_code || '').toLowerCase();
+        case 'commission_percentage':
+          return Number(a.commission_percentage) || 0;
+        case 'total_commission':
+          return Number(a.total_commission) || 0;
+        case 'referral_count':
+          return Number(a.referral_count) || 0;
+        case 'is_active':
+          return a.is_active ? 1 : 0;
+        default:
+          return 0;
+      }
+    };
+
+    arr.sort((a, b) => {
+      const va = getVal(a, sortKey);
+      const vb = getVal(b, sortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') {
+        cmp = va - vb;
+      } else {
+        cmp = String(va).localeCompare(String(vb));
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return arr;
+  }, [filteredAgents, sortKey, sortDir]);
+
   useEffect(() => {
     fetchAgentLevels();
     fetchAgents();
@@ -421,22 +478,50 @@ export const AdminAgents: React.FC = () => {
                   placeholder="Tìm theo username, họ tên, mã giới thiệu"
                 />
               </div>
-              {filteredAgents.length > 0 ? (
+              {sortedAgents.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Đại lý</TableHead>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Mã giới thiệu</TableHead>
-                      <TableHead>% Hoa hồng</TableHead>
-                      <TableHead>Tổng hoa hồng</TableHead>
-                      <TableHead>Người dùng</TableHead>
-                      <TableHead>Trạng thái</TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('full_name')}>
+                          Đại lý <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('username')}>
+                          Username <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('referral_code')}>
+                          Mã giới thiệu <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('commission_percentage')}>
+                          % Hoa hồng <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('total_commission')}>
+                          Tổng hoa hồng <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('referral_count')}>
+                          Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('is_active')}>
+                          Trạng thái <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead>Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAgents.map((agent) => (
+                    {sortedAgents.map((agent) => (
                       <TableRow key={agent.id}>
                         <TableCell className="font-medium">{agent.profile?.full_name || '—'}</TableCell>
                         <TableCell>{agent.profile?.username || '—'}</TableCell>
