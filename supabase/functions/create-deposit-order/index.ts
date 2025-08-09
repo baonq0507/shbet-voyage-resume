@@ -172,8 +172,9 @@ Deno.serve(async (req) => {
       try {
         console.log("Creating PayOS payment order with HTTP request...");
         
-        const cancelUrl = `${req.url.split('/functions')[0]}/`;
-        const returnUrl = `${req.url.split('/functions')[0]}/`;
+        const baseUrl = req.url.split('/functions')[0];
+        const cancelUrl = `${baseUrl}/`;
+        const returnUrl = `${baseUrl}/`;
         
         // Generate signature
         const signature = await createPayOSSignature(orderCode, amount, description, cancelUrl, returnUrl, checksumKey);
