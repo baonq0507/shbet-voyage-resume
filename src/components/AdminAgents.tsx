@@ -284,7 +284,6 @@ export const AdminAgents: React.FC = () => {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList>
           <TabsTrigger value="add">Tạo cấp bậc</TabsTrigger>
-          <TabsTrigger value="levels">Cấp bậc hoa hồng</TabsTrigger>
           <TabsTrigger value="users">Quản lý người dùng</TabsTrigger>
         </TabsList>
 
@@ -386,88 +385,6 @@ export const AdminAgents: React.FC = () => {
           </Card>
         </TabsContent>
 
-        {/* LEVELS */}
-        <TabsContent value="levels" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cấp bậc hoa hồng</CardTitle>
-              <CardDescription>Quản lý level và % theo từng đại lý</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <Label>Chọn đại lý</Label>
-                  <Select value={selectedAgentId ?? ''} onValueChange={(v) => { setSelectedAgentId(v); fetchLevels(v); }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn đại lý" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-popover border-border">
-                      {agents.map((a) => (
-                        <SelectItem key={a.id} value={a.id}>
-                          {a.profile?.username || a.user_id.slice(0, 6)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Level</Label>
-                  <Input type="number" value={newLevel} onChange={(e) => setNewLevel(e.target.value === '' ? '' : Number(e.target.value))} placeholder="VD: 1" />
-                </div>
-                <div>
-                  <Label>% Hoa hồng</Label>
-                  <div className="flex gap-2">
-                    <Input type="number" value={newPercent} onChange={(e) => setNewPercent(e.target.value === '' ? '' : Number(e.target.value))} placeholder="VD: 10" />
-                    <Button onClick={addLevel}>Thêm</Button>
-                  </div>
-                </div>
-              </div>
-
-              {selectedAgentId && (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Level</TableHead>
-                      <TableHead>% Hoa hồng</TableHead>
-                      <TableHead>Thao tác</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {levels.map((lv) => (
-                      <TableRow key={lv.id}>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            defaultValue={lv.level}
-                            className="w-24"
-                            onBlur={(e) => {
-                              const levelVal = Number(e.currentTarget.value);
-                              if (!isNaN(levelVal)) updateLevel(lv.id, levelVal, lv.commission_percentage);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            defaultValue={Number(lv.commission_percentage)}
-                            className="w-24"
-                            onBlur={(e) => {
-                              const percentVal = Number(e.currentTarget.value);
-                              if (!isNaN(percentVal)) updateLevel(lv.id, lv.level, percentVal);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="destructive" size="sm" onClick={() => deleteLevel(lv.id)}>Xóa</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* USERS */}
         <TabsContent value="users" className="space-y-4">
