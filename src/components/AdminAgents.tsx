@@ -284,7 +284,7 @@ export const AdminAgents: React.FC = () => {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList>
           <TabsTrigger value="add">Tạo cấp bậc</TabsTrigger>
-          <TabsTrigger value="users">Quản lý người dùng</TabsTrigger>
+          
         </TabsList>
 
 
@@ -386,39 +386,6 @@ export const AdminAgents: React.FC = () => {
         </TabsContent>
 
 
-        {/* USERS */}
-        <TabsContent value="users" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gán người dùng cho đại lý</CardTitle>
-              <CardDescription>Nhập username và chọn đại lý để gán/chuyển</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <Label>Username</Label>
-                <Input value={assignUsername} onChange={(e) => setAssignUsername(e.target.value)} placeholder="nhap_username" />
-              </div>
-              <div>
-                <Label>Đại lý</Label>
-                <Select value={assignToAgentId ?? ''} onValueChange={(v) => setAssignToAgentId(v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn đại lý" />
-                  </SelectTrigger>
-                  <SelectContent className="z-50 bg-popover border-border">
-                    {agents.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.profile?.username || a.user_id.slice(0, 6)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end">
-                <Button onClick={assignUser}>Gán đại lý</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
