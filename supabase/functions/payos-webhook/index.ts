@@ -41,18 +41,65 @@ Deno.serve(async (req) => {
     // TODO: verify signature using PAYOS_CHECKSUM_KEY
 
     if (String(status).toUpperCase() === "PAID" || String(status).toUpperCase() === "SUCCESS") {
-      // Update the corresponding transaction using orderCode stored in admin_note
-      const { error } = await supabaseAdmin
+      console.log(`Processing successful payment for orderCode: ${orderCode}`);
+      
+      // First, get the transaction details
+      const { data: transaction, error: fetchError } = await supabaseAdmin
         .from("transactions")
-        .update({ status: "approved", approved_at: new Date().toISOString() })
-        .ilike("admin_note", `%orderCode=${orderCode}%`);
+        .select("*, profiles!inner(user_id, balance)")
+        .ilike("admin_note", `%orderCode=${orderCode}%`)
+        .eq("status", "pending")
+        .single();
 
-      if (error) {
-        console.error("Failed to update transaction:", error);
-        return jsonResponse({ ok: false });
+      if (fetchError || !transaction) {
+        console.error("Transaction not found or already processed:", fetchError);
+        return jsonResponse({ ok: false, error: "Transaction not found" }, { status: 404 });
       }
 
-      return jsonResponse({ ok: true });
+      console.log("Found transaction:", transaction.id, "for user:", transaction.user_id);
+
+      // Update transaction status to approved
+      const { error: updateError } = await supabaseAdmin
+        .from("transactions")
+        .update({ 
+          status: "approved", 
+          approved_at: new Date().toISOString() 
+        })
+        .eq("id", transaction.id);
+
+      if (updateError) {
+        console.error("Failed to update transaction:", updateError);
+        return jsonResponse({ ok: false, error: "Failed to update transaction" });
+      }
+
+      // Update user balance - this will trigger the existing function handle_deposit_approval
+      const newBalance = (transaction.profiles.balance || 0) + transaction.amount;
+      const { error: balanceError } = await supabaseAdmin
+        .from("profiles")
+        .update({ 
+          balance: newBalance,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", transaction.user_id);
+
+      if (balanceError) {
+        console.error("Failed to update user balance:", balanceError);
+        return jsonResponse({ ok: false, error: "Failed to update balance" });
+      }
+
+      console.log(`Successfully processed payment: ${transaction.amount} VND for user ${transaction.user_id}`);
+      console.log(`New balance: ${newBalance} VND`);
+
+      // The realtime notification will be sent automatically via the existing trigger
+      // when the transaction status is updated due to the real-time subscription in TransactionModal
+
+      return jsonResponse({ 
+        ok: true, 
+        message: "Payment processed successfully",
+        transactionId: transaction.id,
+        amount: transaction.amount,
+        newBalance: newBalance
+      });
     }
 
     // Non-success status; ignore or mark rejected if needed
