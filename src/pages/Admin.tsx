@@ -742,10 +742,10 @@ const Admin = () => {
                 <SelectValue placeholder="Vai trò" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả vai trò</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="agent">Agent</SelectItem>
-                <SelectItem value="user">User</SelectItem>
+              <SelectItem value="all">Tất cả vai trò</SelectItem>
+              <SelectItem value="admin">Quản trị</SelectItem>
+              <SelectItem value="agent">Đại lý</SelectItem>
+              <SelectItem value="user">Người dùng</SelectItem>
               </SelectContent>
             </Select>
           </div>
