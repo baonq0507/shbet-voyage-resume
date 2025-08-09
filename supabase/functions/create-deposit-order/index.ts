@@ -144,8 +144,20 @@ Deno.serve(async (req) => {
           orderCode,
           amount,
           description,
+          items: [
+            {
+              name: "Nạp tiền tài khoản",
+              quantity: 1,
+              price: amount
+            }
+          ],
           returnUrl: `${req.url.split('/functions')[0]}/`,
           cancelUrl: `${req.url.split('/functions')[0]}/`,
+          buyerName: username,
+          buyerEmail: user.email || "",
+          buyerPhone: "",
+          buyerAddress: "",
+          expiredAt: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
         };
 
         console.log("PayOS request body:", payosBody);
