@@ -23,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { EditUserModal } from '@/components/EditUserModal';
 import { ViewUserDetails } from '@/components/ViewUserDetails';
 import { AdminAgents } from '@/components/AdminAgents';
+import { AdminBanks } from '@/components/AdminBanks';
 interface Transaction {
   id: string;
   user_id: string;
@@ -1402,6 +1403,8 @@ const Admin = () => {
         return renderUserManagement();
       case 'agents':
         return <AdminAgents />;
+      case 'banks':
+        return <AdminBanks />;
       case 'transactions':
         return renderTransactionManagement();
       case 'promotions':
