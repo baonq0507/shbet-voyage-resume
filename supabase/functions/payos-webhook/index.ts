@@ -143,7 +143,8 @@ Deno.serve(async (req) => {
         .from('transactions')
         .update({ 
           status: 'approved',
-          admin_note: `${transaction.admin_note || ''} | PayOS confirmed: ${new Date().toISOString()}`
+          admin_note: `${transaction.admin_note || ''} | PayOS confirmed: ${new Date().toISOString()}`,
+          approved_at: new Date().toISOString()
         })
         .eq('id', transaction.id);
 
@@ -153,6 +154,7 @@ Deno.serve(async (req) => {
       }
 
       console.log("✅ Transaction updated successfully:", transaction.id);
+      console.log("✅ Balance update will be handled by database trigger");
       
       return jsonResponse({ 
         message: "Webhook processed successfully",

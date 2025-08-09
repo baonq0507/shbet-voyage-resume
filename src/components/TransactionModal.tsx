@@ -135,6 +135,19 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
           
           const transaction = payload.new as any;
           
+          // Check if this is the current transaction being processed
+          const isCurrentTransaction = orderInfo?.transactionId === transaction.id;
+          
+          if (isCurrentTransaction) {
+            // Update transaction status for current order
+            setTxStatus(transaction.status);
+            
+            // If payment confirmed but still awaiting approval (callback received)
+            if (transaction.status === 'approved' && transaction.admin_note?.includes('PayOS confirmed')) {
+              setTxStatus('pending'); // Show loading while balance is being updated
+            }
+          }
+          
           // Show notification for transaction status updates
           if (transaction.status === 'approved') {
             toast({
@@ -142,6 +155,22 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
               description: `${transaction.type === 'deposit' ? 'Nạp tiền' : 
                             transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} ${transaction.amount?.toLocaleString()} VND đã được duyệt`,
             });
+            
+            // Auto-close modal after successful deposit and balance update
+            if (isCurrentTransaction && transaction.type === 'deposit') {
+              setTimeout(() => {
+                onClose();
+                // Reset deposit flow
+                setDepositStep('method');
+                setSelectedMethod(null);
+                setSelectedBank(null);
+                setOrderInfo(null);
+                setTxStatus(null);
+                setQrCodeImageUrl(null);
+                setDepositAmount("");
+                setPromotionCode("");
+              }, 2000); // Close after 2 seconds to let user see the success message
+            }
           } else if (transaction.status === 'rejected') {
             toast({
               title: "Giao dịch bị từ chối ❌",
@@ -158,7 +187,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, toast]);
+  }, [user, toast, orderInfo?.transactionId, onClose]);
 
   // Legacy bank fetch removed in new flow
 
@@ -638,6 +667,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                              <span className="text-green-600 font-medium">✅ Thanh toán thành công</span>
                            ) : txStatus === 'rejected' ? (
                              <span className="text-red-600 font-medium">❌ Thanh toán thất bại</span>
+                           ) : txStatus === 'pending' ? (
+                             <div className="flex items-center gap-2 text-blue-600 font-medium">
+                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                               <span>🔄 Đang cập nhật số dư...</span>
+                             </div>
                            ) : txStatus === 'awaiting_payment' ? (
                              <span className="text-orange-600 font-medium">⏳ Chờ thanh toán</span>
                            ) : (
