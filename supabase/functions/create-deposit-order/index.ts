@@ -149,13 +149,9 @@ Deno.serve(async (req) => {
         console.log("Creating PayOS payment order with HTTP request...");
         
         const payosBody = {
-          orderCode,
-          amount,
-          description,
-          buyerName: username,
-          buyerEmail: user.email || "",
-          buyerPhone: "",
-          buyerAddress: "",
+          orderCode: orderCode,
+          amount: amount,
+          description: description,
           items: [
             {
               name: "Nạp tiền tài khoản",
@@ -163,9 +159,8 @@ Deno.serve(async (req) => {
               price: amount
             }
           ],
-          cancelUrl: `${req.url.split('/functions')[0]}/`,
           returnUrl: `${req.url.split('/functions')[0]}/`,
-          expiredAt: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
+          cancelUrl: `${req.url.split('/functions')[0]}/`
         };
 
         console.log("PayOS request body:", payosBody);
