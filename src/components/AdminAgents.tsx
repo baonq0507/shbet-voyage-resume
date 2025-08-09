@@ -37,7 +37,7 @@ export const AdminAgents: React.FC = () => {
   const { toast } = useToast();
 
   const [agents, setAgents] = useState<AgentRow[]>([]);
-  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'levels' | 'users'>('add');
+  const [activeTab, setActiveTab] = useState<'list' | 'levels'>('list');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [levels, setLevels] = useState<CommissionLevel[]>([]);
   const [newLevel, setNewLevel] = useState<number | ''>('');
@@ -52,6 +52,12 @@ export const AdminAgents: React.FC = () => {
   const [newLevelDescription, setNewLevelDescription] = useState('');
   const [agentLevels, setAgentLevels] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // View users count modal state
+  const [viewUsersOpen, setViewUsersOpen] = useState(false);
+  const [viewUsersCount, setViewUsersCount] = useState<number | null>(null);
+  const [viewUsersLoading, setViewUsersLoading] = useState(false);
+  const [selectedAgentName, setSelectedAgentName] = useState<string>('');
 
   const fetchAgents = async () => {
     try {
@@ -157,6 +163,29 @@ export const AdminAgents: React.FC = () => {
     } catch (error) {
       console.error('Error deleting level:', error);
       toast({ title: 'Lỗi', description: 'Không thể xóa cấp bậc', variant: 'destructive' });
+    }
+  };
+
+  const openUsersCount = async (agent: AgentRow) => {
+    try {
+      setSelectedAgentId(agent.id);
+      setSelectedAgentName(
+        agent.profile?.username || agent.profile?.full_name || agent.referral_code || 'Đại lý'
+      );
+      setViewUsersOpen(true);
+      setViewUsersLoading(true);
+      const { count, error } = await supabase
+        .from('agent_referrals')
+        .select('id', { head: true, count: 'exact' })
+        .eq('agent_id', agent.id);
+      if (error) throw error;
+      setViewUsersCount(count || 0);
+    } catch (error) {
+      console.error('Error counting users for agent:', error);
+      toast({ title: 'Lỗi', description: 'Không thể lấy số lượng người dùng', variant: 'destructive' });
+      setViewUsersCount(null);
+    } finally {
+      setViewUsersLoading(false);
     }
   };
 
@@ -274,6 +303,7 @@ export const AdminAgents: React.FC = () => {
 
   useEffect(() => {
     fetchAgentLevels();
+    fetchAgents();
   }, []);
 
   return (
@@ -282,90 +312,169 @@ export const AdminAgents: React.FC = () => {
         <h2 className="text-2xl font-bold">Quản lý đại lý</h2>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div>
-            <CardTitle>Cấp bậc đại lý</CardTitle>
-            <CardDescription>Danh sách cấp bậc và trạng thái</CardDescription>
-          </div>
-          <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-            <DialogTrigger asChild>
-              <Button>Tạo cấp bậc</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Tạo cấp bậc đại lý mới</DialogTitle>
-                <DialogDescription>Nhập tên, mã và % hoa hồng cho cấp bậc.</DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Tên cấp bậc</Label>
-                  <Input value={newLevelName} onChange={(e) => setNewLevelName(e.target.value)} placeholder="VD: Cấp 1, VIP..." />
-                </div>
-                <div>
-                  <Label>Mã cấp bậc</Label>
-                  <Input value={newLevelCode} onChange={(e) => setNewLevelCode(e.target.value)} placeholder="VD: LEVEL1, VIP..." />
-                </div>
-                <div>
-                  <Label>% Hoa hồng</Label>
-                  <Input type="number" value={newLevelCommission} onChange={(e) => setNewLevelCommission(e.target.value === '' ? '' : Number(e.target.value))} placeholder="VD: 10" />
-                </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'list' | 'levels')} className="w-full">
+        <TabsList>
+          <TabsTrigger value="list">Danh sách đại lý</TabsTrigger>
+          <TabsTrigger value="levels">Cấp bậc</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Danh sách đại lý</CardTitle>
+                <CardDescription>Quản lý và theo dõi đại lý</CardDescription>
               </div>
-              <DialogFooter>
-                <Button onClick={createNewAgentLevel}>Tạo cấp bậc</Button>
-              </DialogFooter>
+              <Button variant="outline" onClick={fetchAgents}>Tải lại</Button>
+            </CardHeader>
+            <CardContent>
+              {agents.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Đại lý</TableHead>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Mã giới thiệu</TableHead>
+                      <TableHead>% Hoa hồng</TableHead>
+                      <TableHead>Tổng hoa hồng</TableHead>
+                      <TableHead>Người dùng</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead>Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agents.map((agent) => (
+                      <TableRow key={agent.id}>
+                        <TableCell className="font-medium">{agent.profile?.full_name || '—'}</TableCell>
+                        <TableCell>{agent.profile?.username || '—'}</TableCell>
+                        <TableCell>{agent.referral_code || '—'}</TableCell>
+                        <TableCell>{agent.commission_percentage}%</TableCell>
+                        <TableCell>{agent.total_commission?.toLocaleString?.() || 0}</TableCell>
+                        <TableCell>{agent.referral_count ?? 0}</TableCell>
+                        <TableCell>
+                          <Badge variant={agent.is_active ? 'default' : 'secondary'}>
+                            {agent.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="space-x-2">
+                          <Button variant="outline" size="sm" onClick={() => openUsersCount(agent)}>
+                            Xem người dùng
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-muted-foreground">Chưa có đại lý nào.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Dialog open={viewUsersOpen} onOpenChange={setViewUsersOpen}>
+            <DialogContent className="sm:max-w-[480px]">
+              <DialogHeader>
+                <DialogTitle>Số người dùng của đại lý</DialogTitle>
+                <DialogDescription>Đại lý: {selectedAgentName}</DialogDescription>
+              </DialogHeader>
+              <div className="text-center py-6">
+                {viewUsersLoading ? (
+                  <span>Đang tải...</span>
+                ) : (
+                  <p className="text-xl font-semibold">Tổng: {viewUsersCount ?? 0} người dùng</p>
+                )}
+              </div>
             </DialogContent>
           </Dialog>
-        </CardHeader>
-        <CardContent>
-          {agentLevels.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tên cấp bậc</TableHead>
-                  <TableHead>Mã</TableHead>
-                  <TableHead>% Hoa hồng</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {agentLevels.map((level) => (
-                  <TableRow key={level.id}>
-                    <TableCell className="font-medium">{level.name}</TableCell>
-                    <TableCell>{level.code}</TableCell>
-                    <TableCell>{level.commission_percentage}%</TableCell>
-                    <TableCell>
-                      <Badge variant={level.is_active ? 'default' : 'secondary'}>
-                        {level.is_active ? 'Hoạt động' : 'Tạm dừng'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm" onClick={async () => {
-                        try {
-                          const { error } = await supabase
-                            .from('agent_levels' as any)
-                            .update({ is_active: !level.is_active })
-                            .eq('id', level.id);
-                          if (error) throw error;
-                          fetchAgentLevels();
-                          toast({ title: 'Đã cập nhật', description: 'Trạng thái cấp bậc đã được thay đổi' });
-                        } catch (error) {
-                          toast({ title: 'Lỗi', description: 'Không thể cập nhật trạng thái', variant: 'destructive' });
-                        }
-                      }}>
-                        {level.is_active ? 'Tạm dừng' : 'Kích hoạt'}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground">Chưa có cấp bậc nào.</p>
-          )}
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="levels">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Cấp bậc đại lý</CardTitle>
+                <CardDescription>Danh sách cấp bậc và trạng thái</CardDescription>
+              </div>
+              <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                <DialogTrigger asChild>
+                  <Button>Tạo cấp bậc</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Tạo cấp bậc đại lý mới</DialogTitle>
+                    <DialogDescription>Nhập tên, mã và % hoa hồng cho cấp bậc.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Tên cấp bậc</Label>
+                      <Input value={newLevelName} onChange={(e) => setNewLevelName(e.target.value)} placeholder="VD: Cấp 1, VIP..." />
+                    </div>
+                    <div>
+                      <Label>Mã cấp bậc</Label>
+                      <Input value={newLevelCode} onChange={(e) => setNewLevelCode(e.target.value)} placeholder="VD: LEVEL1, VIP..." />
+                    </div>
+                    <div>
+                      <Label>% Hoa hồng</Label>
+                      <Input type="number" value={newLevelCommission} onChange={(e) => setNewLevelCommission(e.target.value === '' ? '' : Number(e.target.value))} placeholder="VD: 10" />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={createNewAgentLevel}>Tạo cấp bậc</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {agentLevels.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên cấp bậc</TableHead>
+                      <TableHead>Mã</TableHead>
+                      <TableHead>% Hoa hồng</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead>Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agentLevels.map((level) => (
+                      <TableRow key={level.id}>
+                        <TableCell className="font-medium">{level.name}</TableCell>
+                        <TableCell>{level.code}</TableCell>
+                        <TableCell>{level.commission_percentage}%</TableCell>
+                        <TableCell>
+                          <Badge variant={level.is_active ? 'default' : 'secondary'}>
+                            {level.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            try {
+                              const { error } = await supabase
+                                .from('agent_levels' as any)
+                                .update({ is_active: !level.is_active })
+                                .eq('id', level.id);
+                              if (error) throw error;
+                              fetchAgentLevels();
+                              toast({ title: 'Đã cập nhật', description: 'Trạng thái cấp bậc đã được thay đổi' });
+                            } catch (error) {
+                              toast({ title: 'Lỗi', description: 'Không thể cập nhật trạng thái', variant: 'destructive' });
+                            }
+                          }}>
+                            {level.is_active ? 'Tạm dừng' : 'Kích hoạt'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-muted-foreground">Chưa có cấp bậc nào.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
