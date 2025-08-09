@@ -142,9 +142,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
             // Update transaction status for current order
             setTxStatus(transaction.status);
             
-            // If payment confirmed but still awaiting approval (callback received)
-            if (transaction.status === 'approved' && transaction.admin_note?.includes('PayOS confirmed')) {
-              setTxStatus('pending'); // Show loading while balance is being updated
+            // Update status to show successful completion
+            if (transaction.status === 'approved') {
+              setTxStatus('approved');
             }
           }
           
@@ -156,7 +156,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                             transaction.type === 'bonus' ? 'Bonus' : 'Rút tiền'} ${transaction.amount?.toLocaleString()} VND đã được duyệt`,
             });
             
-            // Auto-close modal after successful deposit and balance update
+            // Auto-close modal after successful deposit
             if (isCurrentTransaction && transaction.type === 'deposit') {
               setTimeout(() => {
                 onClose();
@@ -169,7 +169,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                 setQrCodeImageUrl(null);
                 setDepositAmount("");
                 setPromotionCode("");
-              }, 2000); // Close after 2 seconds to let user see the success message
+              }, 3000); // Close after 3 seconds to let user see the success message
             }
           } else if (transaction.status === 'rejected') {
             toast({

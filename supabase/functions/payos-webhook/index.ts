@@ -156,6 +156,33 @@ Deno.serve(async (req) => {
       console.log("✅ Transaction updated successfully:", transaction.id);
       console.log("✅ Balance update will be handled by database trigger");
       
+      // Check for bonus in admin_note and create bonus transaction
+      const adminNote = transaction.admin_note || '';
+      const bonusMatch = adminNote.match(/bonus=(\d+)/);
+      
+      if (bonusMatch) {
+        const bonusAmount = parseInt(bonusMatch[1]);
+        console.log("Found bonus amount in transaction:", bonusAmount);
+        
+        // Create bonus transaction
+        const { error: bonusError } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: transaction.user_id,
+            amount: bonusAmount,
+            type: 'bonus',
+            status: 'approved',
+            admin_note: `Promotion bonus for deposit transaction ${transaction.id}`,
+            approved_at: new Date().toISOString()
+          });
+
+        if (bonusError) {
+          console.error("Error creating bonus transaction:", bonusError);
+        } else {
+          console.log("✅ Bonus transaction created successfully:", bonusAmount);
+        }
+      }
+      
       return jsonResponse({ 
         message: "Webhook processed successfully",
         transactionId: transaction.id,
