@@ -1044,7 +1044,7 @@ const Admin = () => {
                         <Badge variant={
                           transaction.status === 'approved' ? 'default' : 
                           transaction.status === 'rejected' ? 'destructive' : 
-                          transaction.status === 'awaiting_payment' ? 'outline' : 'secondary'
+                          transaction.status === 'awaiting_payment' ? 'destructive' : 'secondary'
                         }>
                           {transaction.status === 'approved' ? 'Đã duyệt' : 
                            transaction.status === 'rejected' ? 'Từ chối' : 
