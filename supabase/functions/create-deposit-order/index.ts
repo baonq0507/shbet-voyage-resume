@@ -60,6 +60,8 @@ Deno.serve(async (req) => {
       ? `method=vietqr/payos; orderCode=${orderCode}; promo=${promotionCode}`
       : `method=vietqr/payos; orderCode=${orderCode}`;
 
+    console.log("Creating transaction for user:", user.id, "amount:", amount);
+    
     const { data: inserted, error: insertErr } = await supabase
       .from("transactions")
       .insert({
@@ -72,8 +74,11 @@ Deno.serve(async (req) => {
       .select("id")
       .maybeSingle();
 
+    console.log("Transaction insert result:", { inserted, insertErr });
+
     if (insertErr || !inserted) {
-      return jsonResponse({ error: "Không thể tạo giao dịch" }, { status: 500 });
+      console.error("Transaction insert failed:", insertErr);
+      return jsonResponse({ error: "Không thể tạo giao dịch", details: insertErr?.message }, { status: 500 });
     }
 
     const clientId = Deno.env.get("PAYOS_CLIENT_ID");
