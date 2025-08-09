@@ -152,6 +152,10 @@ Deno.serve(async (req) => {
           orderCode,
           amount,
           description,
+          buyerName: username,
+          buyerEmail: user.email || "",
+          buyerPhone: "",
+          buyerAddress: "",
           items: [
             {
               name: "Nạp tiền tài khoản",
@@ -159,12 +163,8 @@ Deno.serve(async (req) => {
               price: amount
             }
           ],
-          returnUrl: `${req.url.split('/functions')[0]}/`,
           cancelUrl: `${req.url.split('/functions')[0]}/`,
-          buyerName: username,
-          buyerEmail: user.email || "",
-          buyerPhone: "",
-          buyerAddress: "",
+          returnUrl: `${req.url.split('/functions')[0]}/`,
           expiredAt: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
         };
 
