@@ -70,6 +70,7 @@ export const AdminAgents: React.FC = () => {
   const [selectedAgentCommission, setSelectedAgentCommission] = useState<number>(0);
 
   const [referredUsers, setReferredUsers] = useState<ReferredUserDetail[]>([]);
+  const [search, setSearch] = useState('');
 
   const fetchAgents = async () => {
     try {
@@ -375,6 +376,17 @@ export const AdminAgents: React.FC = () => {
     }
   };
 
+  const filteredAgents = React.useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return agents;
+    return agents.filter((a) => {
+      const rc = (a.referral_code || '').toLowerCase();
+      const uname = (a.profile?.username || '').toLowerCase();
+      const fname = (a.profile?.full_name || '').toLowerCase();
+      return rc.includes(term) || uname.includes(term) || fname.includes(term);
+    });
+  }, [agents, search]);
+
   useEffect(() => {
     fetchAgentLevels();
     fetchAgents();
@@ -402,7 +414,14 @@ export const AdminAgents: React.FC = () => {
               <Button variant="outline" onClick={fetchAgents}>Tải lại</Button>
             </CardHeader>
             <CardContent>
-              {agents.length > 0 ? (
+              <div className="mb-4">
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Tìm theo username, họ tên, mã giới thiệu"
+                />
+              </div>
+              {filteredAgents.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -417,7 +436,7 @@ export const AdminAgents: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {agents.map((agent) => (
+                    {filteredAgents.map((agent) => (
                       <TableRow key={agent.id}>
                         <TableCell className="font-medium">{agent.profile?.full_name || '—'}</TableCell>
                         <TableCell>{agent.profile?.username || '—'}</TableCell>
@@ -440,7 +459,7 @@ export const AdminAgents: React.FC = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-muted-foreground">Chưa có đại lý nào.</p>
+                <p className="text-muted-foreground">Không có kết quả.</p>
               )}
             </CardContent>
           </Card>
