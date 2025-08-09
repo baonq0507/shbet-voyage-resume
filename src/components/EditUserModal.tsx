@@ -27,7 +27,7 @@ interface UserProfile {
 }
 
 interface UserRole {
-  role: 'admin' | 'user';
+  role: 'admin' | 'agent' | 'user';
 }
 
 interface EditUserModalProps {
@@ -39,7 +39,7 @@ interface EditUserModalProps {
 
 export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUserModalProps) {
   const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState<'admin' | 'user'>('user');
+  const [userRole, setUserRole] = useState<'admin' | 'agent' | 'user'>('user');
   const [formData, setFormData] = useState({
     full_name: '',
     username: '',
@@ -48,6 +48,12 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     avatar_url: '',
   });
   const [uploading, setUploading] = useState(false);
+
+  // Agent level management
+  const [agentLevels, setAgentLevels] = useState<
+    { id: string; name: string; code: string; commission_percentage: number }[]
+  >([]);
+  const [selectedLevelId, setSelectedLevelId] = useState<string>('');
 
   const { toast } = useToast();
 
@@ -65,6 +71,13 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     }
   }, [user]);
 
+  useEffect(() => {
+    if (userRole === 'agent' && user) {
+      fetchAgentLevels();
+      fetchUserAgentRecord();
+    }
+  }, [userRole, user]);
+
   const fetchUserRole = async () => {
     if (!user) return;
 
@@ -79,9 +92,14 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
         console.error('Error fetching user role:', error);
         setUserRole('user');
       } else {
-        const roles = data || [];
-        const hasAdmin = roles.some(r => r.role === 'admin');
-        setUserRole(hasAdmin ? 'admin' : 'user');
+        const roles = (data || []).map((r: UserRole) => r.role);
+        if (roles.includes('admin')) {
+          setUserRole('admin');
+        } else if (roles.includes('agent')) {
+          setUserRole('agent');
+        } else {
+          setUserRole('user');
+        }
       }
     } catch (error) {
       console.error('Error fetching user role:', error);
@@ -89,6 +107,37 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     }
   };
 
+
+  // Fetch active agent levels
+  const fetchAgentLevels = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agent_levels')
+        .select('id, name, code, commission_percentage, is_active')
+        .eq('is_active', true)
+        .order('commission_percentage', { ascending: true });
+      if (error) throw error;
+      setAgentLevels(data || []);
+    } catch (err) {
+      console.error('Error fetching agent levels:', err);
+    }
+  };
+
+  // Fetch agent record for this user to prefill level
+  const fetchUserAgentRecord = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('agents')
+        .select('id, level_id')
+        .eq('user_id', user.user_id)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) setSelectedLevelId(data.level_id || '');
+    } catch (err) {
+      console.error('Error fetching user agent record:', err);
+    }
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -166,6 +215,37 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
         });
 
       if (roleError) throw roleError;
+
+      // Ensure agent record and level when role is 'agent'
+      if (userRole === 'agent') {
+        const { data: existingAgent, error: agentFetchErr } = await supabase
+          .from('agents')
+          .select('id')
+          .eq('user_id', user.user_id)
+          .maybeSingle();
+        if (agentFetchErr) throw agentFetchErr;
+
+        if (!existingAgent) {
+          const { error: agentInsertErr } = await supabase
+            .from('agents')
+            .insert({
+              user_id: user.user_id,
+              level_id: selectedLevelId || null,
+              is_active: true,
+            });
+          if (agentInsertErr) throw agentInsertErr;
+        } else {
+          const { error: agentUpdateErr } = await supabase
+            .from('agents')
+            .update({
+              level_id: selectedLevelId || null,
+              is_active: true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingAgent.id);
+          if (agentUpdateErr) throw agentUpdateErr;
+        }
+      }
 
       toast({
         title: 'Thành công',
@@ -302,24 +382,50 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
             
             <div className="space-y-2">
               <Label htmlFor="role">Vai trò người dùng</Label>
-              <Select value={userRole} onValueChange={(value: 'admin' | 'user') => setUserRole(value)}>
+              <Select value={userRole} onValueChange={(value: 'admin' | 'agent' | 'user') => setUserRole(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn vai trò" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">Người dùng thường</SelectItem>
+                  <SelectItem value="agent">Đại lý</SelectItem>
                   <SelectItem value="admin">Quản trị viên</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                {userRole === 'admin' 
-                  ? 'Quản trị viên có toàn quyền truy cập vào hệ thống' 
-                  : 'Người dùng thường chỉ có quyền truy cập cơ bản'
-                }
+                {userRole === 'admin'
+                  ? 'Quản trị viên có toàn quyền truy cập vào hệ thống'
+                  : userRole === 'agent'
+                  ? 'Đại lý có quyền quản lý người dùng giới thiệu và nhận hoa hồng'
+                  : 'Người dùng thường chỉ có quyền truy cập cơ bản'}
               </p>
             </div>
           </div>
 
+
+          {/* Agent Level (only for agent role) */}
+          {userRole === 'agent' && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Cấp độ đại lý</h3>
+              <div className="space-y-2">
+                <Label>Chọn cấp độ</Label>
+                <Select value={selectedLevelId || 'none'} onValueChange={(v) => setSelectedLevelId(v === 'none' ? '' : v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn cấp độ" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    <SelectItem value="none">Không chọn</SelectItem>
+                    {agentLevels.map((lvl) => (
+                      <SelectItem key={lvl.id} value={lvl.id}>
+                        {lvl.name} ({lvl.code}) · {Number(lvl.commission_percentage)}%
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Cấp độ ảnh hưởng đến % hoa hồng mặc định của đại lý.</p>
+              </div>
+            </div>
+          )}
 
           {/* Account Information */}
           <div className="space-y-4">

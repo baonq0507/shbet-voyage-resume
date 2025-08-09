@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'admin' | 'agent' | 'user';
 
 interface UseRoleReturn {
   role: UserRole | null;
@@ -34,10 +34,15 @@ export const useRole = (): UseRoleReturn => {
         console.error('Error fetching user role:', error);
         setRole('user'); // Default to user role
       } else {
-        // Get the highest priority role (admin > user)
-        const roles = data || [];
-        const hasAdmin = roles.some(r => r.role === 'admin');
-        setRole(hasAdmin ? 'admin' : (roles[0]?.role || 'user'));
+        // Get the highest priority role (admin > agent > user)
+        const roles = (data || []).map((r: { role: UserRole }) => r.role);
+        if (roles.includes('admin')) {
+          setRole('admin');
+        } else if (roles.includes('agent')) {
+          setRole('agent');
+        } else {
+          setRole(roles[0] ?? 'user');
+        }
       }
     } catch (error) {
       console.error('Error fetching user role:', error);

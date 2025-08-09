@@ -49,6 +49,36 @@ export type Database = {
           },
         ]
       }
+      agent_levels: {
+        Row: {
+          code: string
+          commission_percentage: number
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          commission_percentage?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          commission_percentage?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_referrals: {
         Row: {
           agent_id: string
@@ -103,6 +133,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          level_id: string | null
           referral_code: string | null
           referral_count: number
           total_commission: number
@@ -114,6 +145,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          level_id?: string | null
           referral_code?: string | null
           referral_count?: number
           total_commission?: number
@@ -125,13 +157,22 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          level_id?: string | null
           referral_code?: string | null
           referral_count?: number
           total_commission?: number
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agents_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "agent_levels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bank: {
         Row: {
@@ -598,7 +639,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "agent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -726,7 +767,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "agent"],
     },
   },
 } as const
