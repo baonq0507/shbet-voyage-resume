@@ -446,6 +446,19 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="referralCode">Mã mời (tuỳ chọn)</Label>
+                <div className="relative">
+                  <Input
+                    id="referralCode"
+                    type="text"
+                    placeholder="Nhập mã mời (nếu có)"
+                    value={referralCode || ''}
+                    onChange={(e) => setReferralCode(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="regPassword">Mật khẩu</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
