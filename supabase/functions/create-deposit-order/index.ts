@@ -31,6 +31,30 @@ function generateVietQRUrl(bankCode: string, accountNumber: string, accountName:
   return `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.png?amount=${amount}&addInfo=${encodedDescription}&accountName=${encodedAccountName}`;
 }
 
+function createPayOSSignature(orderCode: number, amount: number, description: string, cancelUrl: string, returnUrl: string, checksumKey: string) {
+  // Create signature string according to PayOS requirements
+  const data = `amount=${amount}&cancelUrl=${cancelUrl}&description=${description}&orderCode=${orderCode}&returnUrl=${returnUrl}`;
+  
+  // Create HMAC SHA256 signature
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(checksumKey);
+  const messageData = encoder.encode(data);
+  
+  return crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  ).then(key => 
+    crypto.subtle.sign('HMAC', key, messageData)
+  ).then(signature => 
+    Array.from(new Uint8Array(signature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+  );
+}
+
 Deno.serve(async (req) => {
   console.log("=== CREATE DEPOSIT ORDER START ===");
   console.log("Method:", req.method);
@@ -148,6 +172,12 @@ Deno.serve(async (req) => {
       try {
         console.log("Creating PayOS payment order with HTTP request...");
         
+        const cancelUrl = `${req.url.split('/functions')[0]}/`;
+        const returnUrl = `${req.url.split('/functions')[0]}/`;
+        
+        // Generate signature
+        const signature = await createPayOSSignature(orderCode, amount, description, cancelUrl, returnUrl, checksumKey);
+        
         const payosBody = {
           orderCode: orderCode,
           amount: amount,
@@ -163,9 +193,10 @@ Deno.serve(async (req) => {
               price: amount
             }
           ],
-          cancelUrl: `${req.url.split('/functions')[0]}/`,
-          returnUrl: `${req.url.split('/functions')[0]}/`,
-          expiredAt: Math.floor(Date.now() / 1000) + 3600
+          cancelUrl: cancelUrl,
+          returnUrl: returnUrl,
+          expiredAt: Math.floor(Date.now() / 1000) + 3600,
+          signature: signature
         };
 
         console.log("PayOS request body:", payosBody);
