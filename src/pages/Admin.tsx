@@ -29,7 +29,7 @@ interface Transaction {
   user_id: string;
   type: 'deposit' | 'withdrawal' | 'bonus';
   amount: number;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'awaiting_payment';
   bank_id?: string;
   proof_image_url?: string;
   admin_note?: string;
@@ -1043,10 +1043,12 @@ const Admin = () => {
                       <TableCell>
                         <Badge variant={
                           transaction.status === 'approved' ? 'default' : 
-                          transaction.status === 'rejected' ? 'destructive' : 'secondary'
+                          transaction.status === 'rejected' ? 'destructive' : 
+                          transaction.status === 'awaiting_payment' ? 'outline' : 'secondary'
                         }>
                           {transaction.status === 'approved' ? 'Đã duyệt' : 
-                           transaction.status === 'rejected' ? 'Từ chối' : 'Chờ duyệt'}
+                           transaction.status === 'rejected' ? 'Từ chối' : 
+                           transaction.status === 'awaiting_payment' ? 'Chờ thanh toán' : 'Chờ duyệt'}
                         </Badge>
                       </TableCell>
                       <TableCell>{new Date(transaction.created_at).toLocaleDateString('vi-VN')}</TableCell>
