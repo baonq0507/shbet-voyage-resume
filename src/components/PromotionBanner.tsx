@@ -9,8 +9,8 @@ export const PromotionBanner: React.FC = () => {
       alt: 'DIAMONDBET68 - Thương hiệu giải trí đỉnh cao - Banner 1',
     },
     {
-      src: '/lovable-uploads/f7e4207a-c2a0-4ee4-80b0-6ccf7b7a6cf4.png',
-      alt: 'DIAMONDBET68 - Đăng ký nhận ngay 88K - Banner 2',
+      src: '/lovable-uploads/3b746ef5-0afd-4060-800b-b81351e8b86f.png',
+      alt: 'DIAMONDBET68 - Nạp tiền siêu tốc - Banner 2',
     },
   ];
 
