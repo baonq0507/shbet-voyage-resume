@@ -1005,6 +1005,7 @@ const Admin = () => {
         <TabsList>
           <TabsTrigger value="all">Tất cả</TabsTrigger>
           <TabsTrigger value="pending">Chờ duyệt</TabsTrigger>
+          <TabsTrigger value="awaiting_payment">Chờ thanh toán</TabsTrigger>
           <TabsTrigger value="approved">Đã duyệt</TabsTrigger>
           <TabsTrigger value="rejected">Đã từ chối</TabsTrigger>
         </TabsList>
@@ -1195,6 +1196,64 @@ const Admin = () => {
                 <TableBody>
                   {transactions
                     .filter(t => t.status === 'pending')
+                    .map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            transaction.type === 'deposit' ? 'default' : 
+                            transaction.type === 'withdrawal' ? 'secondary' : 'outline'
+                          }>
+                            {transaction.type === 'deposit' ? 'Nạp tiền' : 
+                             transaction.type === 'withdrawal' ? 'Rút tiền' : 'Bonus'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{transaction.amount.toLocaleString()} VND</TableCell>
+                        <TableCell>{new Date(transaction.created_at).toLocaleDateString('vi-VN')}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm"
+                              onClick={() => handleTransactionAction(transaction.id, 'approve')}
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleTransactionAction(transaction.id, 'reject')}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="awaiting_payment">
+          <Card>
+            <CardHeader>
+              <CardTitle>Giao dịch chờ thanh toán</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Người dùng</TableHead>
+                    <TableHead>Loại giao dịch</TableHead>
+                    <TableHead>Số tiền</TableHead>
+                    <TableHead>Thời gian</TableHead>
+                    <TableHead>Thao tác</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions
+                    .filter(t => t.status === 'awaiting_payment')
                     .map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
