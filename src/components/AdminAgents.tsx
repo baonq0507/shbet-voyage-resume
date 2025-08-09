@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface AgentRow {
   id: string;
@@ -50,6 +51,7 @@ export const AdminAgents: React.FC = () => {
   const [newLevelCommission, setNewLevelCommission] = useState<number | ''>('');
   const [newLevelDescription, setNewLevelDescription] = useState('');
   const [agentLevels, setAgentLevels] = useState<any[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const fetchAgents = async () => {
     try {
@@ -271,7 +273,6 @@ export const AdminAgents: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchAgents();
     fetchAgentLevels();
   }, []);
 
@@ -281,112 +282,90 @@ export const AdminAgents: React.FC = () => {
         <h2 className="text-2xl font-bold">Quản lý đại lý</h2>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-        <TabsList>
-          <TabsTrigger value="add">Tạo cấp bậc</TabsTrigger>
-          
-        </TabsList>
-
-
-        {/* CREATE AGENT LEVEL */}
-        <TabsContent value="add" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tạo cấp bậc đại lý mới</CardTitle>
-              <CardDescription>Tạo các cấp bậc đại lý với tên, mã và % hoa hồng</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle>Cấp bậc đại lý</CardTitle>
+            <CardDescription>Danh sách cấp bậc và trạng thái</CardDescription>
+          </div>
+          <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+            <DialogTrigger asChild>
+              <Button>Tạo cấp bậc</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Tạo cấp bậc đại lý mới</DialogTitle>
+                <DialogDescription>Nhập tên, mã và % hoa hồng cho cấp bậc.</DialogDescription>
+              </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Tên cấp bậc</Label>
-                  <Input 
-                    value={newLevelName} 
-                    onChange={(e) => setNewLevelName(e.target.value)} 
-                    placeholder="VD: Cấp 1, Cấp 2, VIP..." 
-                  />
+                  <Input value={newLevelName} onChange={(e) => setNewLevelName(e.target.value)} placeholder="VD: Cấp 1, VIP..." />
                 </div>
                 <div>
                   <Label>Mã cấp bậc</Label>
-                  <Input 
-                    value={newLevelCode} 
-                    onChange={(e) => setNewLevelCode(e.target.value)} 
-                    placeholder="VD: LEVEL1, VIP, BRONZE..." 
-                  />
+                  <Input value={newLevelCode} onChange={(e) => setNewLevelCode(e.target.value)} placeholder="VD: LEVEL1, VIP..." />
                 </div>
                 <div>
                   <Label>% Hoa hồng</Label>
-                  <Input 
-                    type="number" 
-                    value={newLevelCommission} 
-                    onChange={(e) => setNewLevelCommission(e.target.value === '' ? '' : Number(e.target.value))} 
-                    placeholder="VD: 10" 
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button onClick={createNewAgentLevel} className="w-full">
-                    Tạo cấp bậc
-                  </Button>
+                  <Input type="number" value={newLevelCommission} onChange={(e) => setNewLevelCommission(e.target.value === '' ? '' : Number(e.target.value))} placeholder="VD: 10" />
                 </div>
               </div>
-
-              {/* Display existing levels */}
-              {agentLevels.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-4">Các cấp bậc hiện có</h3>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Tên cấp bậc</TableHead>
-                        <TableHead>Mã</TableHead>
-                        <TableHead>% Hoa hồng</TableHead>
-                        <TableHead>Trạng thái</TableHead>
-                        <TableHead>Thao tác</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {agentLevels.map((level) => (
-                        <TableRow key={level.id}>
-                          <TableCell className="font-medium">{level.name}</TableCell>
-                          <TableCell>{level.code}</TableCell>
-                          <TableCell>{level.commission_percentage}%</TableCell>
-                          <TableCell>
-                            <Badge variant={level.is_active ? "default" : "secondary"}>
-                              {level.is_active ? "Hoạt động" : "Tạm dừng"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={async () => {
-                                try {
-                                  const { error } = await supabase
-                                    .from('agent_levels' as any)
-                                    .update({ is_active: !level.is_active })
-                                    .eq('id', level.id);
-                                  if (error) throw error;
-                                  fetchAgentLevels();
-                                  toast({ title: 'Đã cập nhật', description: 'Trạng thái cấp bậc đã được thay đổi' });
-                                } catch (error) {
-                                  toast({ title: 'Lỗi', description: 'Không thể cập nhật trạng thái', variant: 'destructive' });
-                                }
-                              }}
-                            >
-                              {level.is_active ? "Tạm dừng" : "Kích hoạt"}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-      </Tabs>
+              <DialogFooter>
+                <Button onClick={createNewAgentLevel}>Tạo cấp bậc</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {agentLevels.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tên cấp bậc</TableHead>
+                  <TableHead>Mã</TableHead>
+                  <TableHead>% Hoa hồng</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Thao tác</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {agentLevels.map((level) => (
+                  <TableRow key={level.id}>
+                    <TableCell className="font-medium">{level.name}</TableCell>
+                    <TableCell>{level.code}</TableCell>
+                    <TableCell>{level.commission_percentage}%</TableCell>
+                    <TableCell>
+                      <Badge variant={level.is_active ? 'default' : 'secondary'}>
+                        {level.is_active ? 'Hoạt động' : 'Tạm dừng'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from('agent_levels' as any)
+                            .update({ is_active: !level.is_active })
+                            .eq('id', level.id);
+                          if (error) throw error;
+                          fetchAgentLevels();
+                          toast({ title: 'Đã cập nhật', description: 'Trạng thái cấp bậc đã được thay đổi' });
+                        } catch (error) {
+                          toast({ title: 'Lỗi', description: 'Không thể cập nhật trạng thái', variant: 'destructive' });
+                        }
+                      }}>
+                        {level.is_active ? 'Tạm dừng' : 'Kích hoạt'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-muted-foreground">Chưa có cấp bậc nào.</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
