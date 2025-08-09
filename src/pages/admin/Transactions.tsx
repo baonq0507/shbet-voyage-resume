@@ -59,6 +59,31 @@ const Transactions: React.FC = () => {
 
   useEffect(() => {
     fetchTransactions();
+
+    // Subscribe to realtime inserts on transactions
+    const channel = supabase
+      .channel('transactions-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'transactions' },
+        (payload) => {
+          const newTx: any = payload.new;
+          // Notify only for deposit submissions
+          if (newTx?.type === 'deposit') {
+            toast({
+              title: 'Yêu cầu nạp tiền mới',
+              description: `${Number(newTx.amount).toLocaleString()} VND`,
+            });
+          }
+          // Refresh list and stats
+          fetchTransactions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchTransactions = async () => {
