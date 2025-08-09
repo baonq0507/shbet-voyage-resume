@@ -14,7 +14,7 @@ import { useRole } from '@/hooks/useRole';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
-import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash, History } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash, History, ArrowUpDown } from 'lucide-react';
 import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 import { usePromotionApplication } from '@/hooks/usePromotionApplication';
 import { useDepositApproval } from '@/hooks/useDepositApproval';
@@ -143,6 +143,36 @@ const Admin = () => {
   const [newLevelPercent, setNewLevelPercent] = useState<number | ''>('');
   const [assignUsername, setAssignUsername] = useState('');
   const [assignToAgentId, setAssignToAgentId] = useState<string | null>(null);
+
+  // Users search/sort (Dashboard)
+  const [userSearch, setUserSearch] = useState('');
+  type UserSortKey = 'username' | 'full_name' | 'balance' | 'created_at' | 'total_deposit';
+  const [userSortKey, setUserSortKey] = useState<UserSortKey>('created_at');
+  const [userSortDir, setUserSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleUserSort = (key: UserSortKey) => {
+    if (userSortKey === key) setUserSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setUserSortKey(key); setUserSortDir('asc'); }
+  };
+
+  // Transactions search/sort (Dashboard)
+  const [txSearch, setTxSearch] = useState('');
+  type TxSortKey = 'user' | 'type' | 'amount' | 'status' | 'created_at';
+  const [txSortKey, setTxSortKey] = useState<TxSortKey>('created_at');
+  const [txSortDir, setTxSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleTxSort = (key: TxSortKey) => {
+    if (txSortKey === key) setTxSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setTxSortKey(key); setTxSortDir('asc'); }
+  };
+
+  // Promotions search/sort (Dashboard)
+  const [promoSearch, setPromoSearch] = useState('');
+  type PromoSortKey = 'title' | 'promotion_type' | 'is_active' | 'start_date' | 'end_date';
+  const [promoSortKey, setPromoSortKey] = useState<PromoSortKey>('start_date');
+  const [promoSortDir, setPromoSortDir] = useState<'asc' | 'desc'>('desc');
+  const togglePromoSort = (key: PromoSortKey) => {
+    if (promoSortKey === key) setPromoSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setPromoSortKey(key); setPromoSortDir('asc'); }
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -617,6 +647,45 @@ const Admin = () => {
     </div>
   );
 
+  // Derived lists for Users (Dashboard)
+  const filteredUsersDash = users.filter((u) => {
+    const q = userSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (u.full_name || '').toLowerCase().includes(q) ||
+      (u.username || '').toLowerCase().includes(q)
+    );
+  });
+
+  const sortedUsersDash = React.useMemo(() => {
+    const arr = [...filteredUsersDash];
+    const getVal = (u: UserProfile, key: UserSortKey): string | number => {
+      switch (key) {
+        case 'username':
+          return (u.username || '').toLowerCase();
+        case 'full_name':
+          return (u.full_name || '').toLowerCase();
+        case 'balance':
+          return Number(u.balance) || 0;
+        case 'total_deposit':
+          return getUserDepositStats(u.user_id).total || 0;
+        case 'created_at':
+          return new Date(u.created_at).getTime();
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, userSortKey);
+      const vb = getVal(b, userSortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return userSortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredUsersDash, userSortKey, userSortDir]);
+
   const renderUserManagement = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -629,19 +698,46 @@ const Admin = () => {
           <CardDescription>Quản lý tất cả người dùng trong hệ thống</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Input
+              placeholder="Tìm theo tên hoặc username"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+            />
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tên đăng nhập</TableHead>
-                <TableHead>Họ tên</TableHead>
-                <TableHead>Số dư</TableHead>
-                <TableHead>Tổng nạp</TableHead>
-                <TableHead>Ngày tạo</TableHead>
+                <TableHead>
+                  <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleUserSort('username')}>
+                    Tên đăng nhập <ArrowUpDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleUserSort('full_name')}>
+                    Họ tên <ArrowUpDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleUserSort('balance')}>
+                    Số dư <ArrowUpDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleUserSort('total_deposit')}>
+                    Tổng nạp <ArrowUpDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleUserSort('created_at')}>
+                    Ngày tạo <ArrowUpDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </TableHead>
                 <TableHead>Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {sortedUsersDash.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.username}</TableCell>
                   <TableCell>{user.full_name}</TableCell>
