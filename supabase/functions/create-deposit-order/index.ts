@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
 
         console.log("PayOS request body:", payosBody);
 
-        const response = await fetch("https://api.payos.com/v1/payment-requests", {
+        const response = await fetch("https://api-merchant.payos.vn/v2/payment-requests", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
