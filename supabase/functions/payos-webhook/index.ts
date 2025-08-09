@@ -29,7 +29,43 @@ Deno.serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const PAYOS_CHECKSUM_KEY = Deno.env.get("PAYOS_CHECKSUM_KEY");
     const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+    // Verify PayOS signature for security
+    if (PAYOS_CHECKSUM_KEY) {
+      const signature = req.headers.get("x-payos-signature");
+      if (signature) {
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          "raw",
+          encoder.encode(PAYOS_CHECKSUM_KEY),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign", "verify"]
+        );
+        
+        const expectedSignature = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          encoder.encode(JSON.stringify(body))
+        );
+        
+        const expectedSignatureHex = Array.from(new Uint8Array(expectedSignature))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+        
+        if (signature !== expectedSignatureHex) {
+          console.error("Invalid PayOS signature");
+          return jsonResponse({ error: "Invalid signature" }, { status: 401 });
+        }
+        console.log("PayOS signature verified successfully");
+      } else {
+        console.warn("No PayOS signature provided");
+      }
+    } else {
+      console.warn("PAYOS_CHECKSUM_KEY not configured - signature verification skipped");
+    }
 
     const orderCode = body?.data?.orderCode || body?.orderCode || body?.code;
     const status = body?.data?.status || body?.status;
@@ -37,8 +73,6 @@ Deno.serve(async (req) => {
     if (!orderCode) {
       return jsonResponse({ error: "Missing orderCode" }, { status: 400 });
     }
-
-    // TODO: verify signature using PAYOS_CHECKSUM_KEY
 
     if (String(status).toUpperCase() === "PAID" || String(status).toUpperCase() === "SUCCESS") {
       console.log(`Processing successful payment for orderCode: ${orderCode}`);
