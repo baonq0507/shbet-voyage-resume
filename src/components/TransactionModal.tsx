@@ -63,6 +63,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     orderCode?: string | number;
     description?: string;
     amount?: number;
+    paymentUrl?: string;
+    qrCode?: string;
   } | null>(null);
   const [txStatus, setTxStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
 
@@ -233,6 +235,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         transactionId: data.transactionId,
         orderCode: data.orderCode,
         description: data.description,
+        paymentUrl: data.paymentUrl,
+        qrCode: data.qrCode,
         amount,
       });
       setTxStatus('pending');
@@ -535,50 +539,91 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
                 {depositStep === 'qr' && (
                   <div className="space-y-4">
-                    {!selectedBank ? (
-                      <Alert>
-                        <AlertDescription>
-                          Vui lòng chọn ngân hàng trước khi tạo mã QR.
-                        </AlertDescription>
-                      </Alert>
+                    {orderInfo?.paymentUrl ? (
+                      <div className="text-center space-y-4">
+                        <Label className="text-sm font-medium">Thanh toán qua PayOS</Label>
+                        
+                        {orderInfo.qrCode && (
+                          <div className="space-y-3">
+                            <img
+                              src={orderInfo.qrCode}
+                              alt="PayOS QR Code"
+                              className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm"
+                            />
+                            <p className="text-xs text-muted-foreground">Quét mã QR để thanh toán</p>
+                          </div>
+                        )}
+                        
+                        <div className="space-y-3">
+                          <Button 
+                            onClick={() => window.open(orderInfo.paymentUrl, '_blank')}
+                            className="w-full"
+                            size="lg"
+                          >
+                            Mở trang thanh toán PayOS
+                          </Button>
+                          
+                          <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Mã đơn hàng</span>
+                              <span className="font-medium">{orderInfo.orderCode}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Số tiền</span>
+                              <span className="font-bold">{(orderInfo.amount || 0).toLocaleString()} VND</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Nội dung</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium truncate max-w-[180px]" title={orderInfo.description}>{orderInfo.description}</span>
+                                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.description || '')}>
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-sm">
+                          Trạng thái: {txStatus === 'approved' ? (
+                            <span className="text-green-600 font-medium">✅ Thanh toán thành công</span>
+                          ) : txStatus === 'rejected' ? (
+                            <span className="text-red-600 font-medium">❌ Thanh toán thất bại</span>
+                          ) : (
+                            <span className="text-orange-600 font-medium">⏳ Đang chờ thanh toán...</span>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1" onClick={() => setDepositStep('bank')}>Quay lại</Button>
+                          <Button className="flex-1" onClick={onClose} disabled={txStatus !== 'approved'}>
+                            {txStatus === 'approved' ? 'Hoàn tất' : 'Đóng'}
+                          </Button>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="text-center space-y-3">
-                        <Label className="text-sm font-medium">Quét mã VietQR để thanh toán</Label>
-                        <img
-                          src={`https://img.vietqr.io/image/${selectedBank.bank_name}-${selectedBank.account_number}-compact2.png?amount=${orderInfo?.amount || 0}&addInfo=${encodeURIComponent(orderInfo?.description || '')}`}
-                          alt="VietQR"
-                          className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm"
-                        />
+                      <div className="text-center space-y-4">
+                        <Alert>
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            PayOS chưa được cấu hình hoặc có lỗi khi tạo link thanh toán. Vui lòng liên hệ hỗ trợ.
+                          </AlertDescription>
+                        </Alert>
+                        
                         <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Mã đơn hàng</span>
+                            <span className="font-medium">{orderInfo?.orderCode}</span>
+                          </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Số tiền</span>
                             <span className="font-bold">{(orderInfo?.amount || 0).toLocaleString()} VND</span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Nội dung chuyển khoản</span>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium truncate max-w-[180px]" title={orderInfo?.description}>{orderInfo?.description}</span>
-                              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo?.description || '')}>
-                                <Copy className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
                         </div>
-                        <div className="text-sm">
-                          Trạng thái: {txStatus === 'approved' ? (
-                            <span className="text-green-600 font-medium">Đã nhận tiền</span>
-                          ) : txStatus === 'rejected' ? (
-                            <span className="text-red-600 font-medium">Từ chối</span>
-                          ) : (
-                            <span className="text-orange-600 font-medium">Đang chờ thanh toán...</span>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" onClick={() => setDepositStep('bank')}>Quay lại</Button>
-                          <Button className="flex-1" onClick={onClose} disabled={txStatus !== 'approved'}>
-                            Đóng
-                          </Button>
-                        </div>
+                        
+                        <Button variant="outline" className="w-full" onClick={() => setDepositStep('bank')}>
+                          Quay lại
+                        </Button>
                       </div>
                     )}
                   </div>

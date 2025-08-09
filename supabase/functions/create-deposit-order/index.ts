@@ -127,55 +127,77 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get("PAYOS_API_KEY");
     const checksumKey = Deno.env.get("PAYOS_CHECKSUM_KEY");
 
-    let bankCode = Deno.env.get("RECEIVER_BANK_CODE");
-    let accountNumber = Deno.env.get("RECEIVER_ACCOUNT_NUMBER");
-    let accountName = Deno.env.get("RECEIVER_ACCOUNT_NAME");
+    console.log("PayOS config check:", {
+      hasClientId: !!clientId,
+      hasApiKey: !!apiKey,
+      hasChecksumKey: !!checksumKey
+    });
 
-    // If PayOS keys are configured, attempt to create an order and prefer returned receiving info
+    // If PayOS keys are configured, create payment order
     if (clientId && apiKey && checksumKey) {
       try {
-        // NOTE: This is a minimal placeholder call structure. You may need to adapt to PayOS API specifics.
-        const body = {
+        console.log("Creating PayOS payment order...");
+        
+        const payosBody = {
           orderCode,
           amount,
           description,
-          returnUrl: `${SUPABASE_URL}/functions/v1/payos-webhook?type=return&orderCode=${orderCode}`,
-          cancelUrl: `${SUPABASE_URL}/functions/v1/payos-webhook?type=cancel&orderCode=${orderCode}`,
+          returnUrl: `${req.url.split('/functions')[0]}/`,
+          cancelUrl: `${req.url.split('/functions')[0]}/`,
         };
 
-        const resp = await fetch("https://api.payos.com/v1/payment-requests", {
+        console.log("PayOS request body:", payosBody);
+
+        const response = await fetch("https://api.payos.com/v1/payment-requests", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-client-id": clientId,
             "x-api-key": apiKey,
           },
-          body: JSON.stringify(body),
+          body: JSON.stringify(payosBody),
         });
 
-        if (resp.ok) {
-          const data = await resp.json();
-          // Try to map PayOS response to receiving account info if available
-          bankCode = data?.data?.bankCode || bankCode || undefined;
-          accountNumber = data?.data?.accountNumber || accountNumber || undefined;
-          accountName = data?.data?.accountName || accountName || undefined;
+        console.log("PayOS response status:", response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("PayOS response data:", data);
+
+          const paymentLinkUrl = data?.data?.checkoutUrl || data?.data?.paymentUrl;
+          
+          if (paymentLinkUrl) {
+            console.log("✅ PayOS payment link created successfully:", paymentLinkUrl);
+            
+            return jsonResponse({
+              ok: true,
+              transactionId: inserted.id,
+              orderCode,
+              description,
+              paymentUrl: paymentLinkUrl,
+              qrCode: data?.data?.qrCode,
+            });
+          } else {
+            console.warn("PayOS response missing payment URL:", data);
+          }
         } else {
-          const errText = await resp.text();
-          console.warn("PayOS create order failed:", errText);
+          const errorText = await response.text();
+          console.error("PayOS API error:", response.status, errorText);
         }
       } catch (e) {
-        console.warn("PayOS request error:", e);
+        console.error("PayOS request error:", e);
       }
     }
 
+    // Fallback: return basic info if PayOS fails or not configured
+    console.log("Falling back to basic response (PayOS not available)");
+    
     return jsonResponse({
       ok: true,
       transactionId: inserted.id,
       orderCode,
       description,
-      bankCode,
-      accountNumber,
-      accountName,
+      error: "PayOS not configured or failed - manual payment required",
     });
   } catch (e) {
     console.error("=== UNHANDLED ERROR ===");
