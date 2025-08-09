@@ -172,6 +172,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   };
 
   const handleCreateDepositOrder = async () => {
+    console.log("handleCreateDepositOrder called with:", { depositAmount, user: !!user });
+    
     if (!depositAmount || !user) {
       toast({ title: 'Lỗi', description: 'Vui lòng nhập số tiền nạp', variant: 'destructive' });
       return;
@@ -180,13 +182,25 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     setCreatingOrder(true);
     try {
       const amount = parseFloat(depositAmount);
+      console.log("Parsed amount:", amount);
+      
+      if (!amount || amount <= 0) {
+        throw new Error('Vui lòng nhập số tiền hợp lệ');
+      }
+
+      const requestBody = {
+        amount,
+        promotionCode: promotionCode?.trim() || undefined,
+      };
+      
+      console.log("Request body to send:", requestBody);
+
       const { data, error } = await supabase.functions.invoke('create-deposit-order', {
-        body: {
-          amount,
-          promotionCode: promotionCode?.trim() || undefined,
-        },
+        body: requestBody,
         headers: { 'Content-Type': 'application/json' }
       });
+
+      console.log("Edge function response:", { data, error });
 
       if (error) throw error;
 
