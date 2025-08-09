@@ -7,7 +7,7 @@ import { PromotionSection } from "@/components/PromotionSection";
 import { PromotionBanner } from "@/components/PromotionBanner";
 import { Shield, Clock, Users, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AuthModal from "@/components/AuthModal";
 import MobileNavigation from "@/components/MobileNavigation";
 import MobileAuthButtons from "@/components/MobileAuthButtons";
@@ -42,11 +42,21 @@ const Index = () => {
 
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authActiveTab, setAuthActiveTab] = useState<'login' | 'register'>('login');
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('ref')) {
+        setAuthActiveTab('register');
+        setIsAuthModalOpen(true);
+      }
+    } catch {}
+  }, []);
 
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
   };
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -81,6 +91,7 @@ const Index = () => {
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+        activeTab={authActiveTab}
       />
     </div>
   );
