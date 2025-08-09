@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         .select('id, user_id, amount, status')
         .like('admin_note', `%orderCode=${orderCode}%`)
         .eq('type', 'deposit')
-        .eq('status', 'pending');
+        .eq('status', 'awaiting_payment'); // Tìm giao dịch đang chờ thanh toán
 
       console.log("Found transactions:", transactions);
       console.log("Find error:", findError);
@@ -170,7 +170,7 @@ Deno.serve(async (req) => {
           .select('id')
           .like('admin_note', `%orderCode=${paymentData.orderCode}%`)
           .eq('type', 'deposit')
-          .eq('status', 'pending');
+          .eq('status', 'awaiting_payment'); // Tìm giao dịch đang chờ thanh toán
 
         if (transactions && transactions.length > 0) {
           await supabase

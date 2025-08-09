@@ -67,7 +67,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     paymentUrl?: string;
     qrCode?: string;
   } | null>(null);
-  const [txStatus, setTxStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  const [txStatus, setTxStatus] = useState<'awaiting_payment' | 'pending' | 'approved' | 'rejected' | null>(null);
   const [qrCodeImageUrl, setQrCodeImageUrl] = useState<string | null>(null);
 
   // Update active tab when initialTab changes or modal opens
@@ -244,7 +244,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         qrCode: data.qrCode,
         amount,
       });
-      setTxStatus('pending');
+      setTxStatus('awaiting_payment'); // Chờ thanh toán
       setDepositStep('qr');
     } catch (err) {
       console.error('Error creating deposit order:', err);
@@ -640,15 +640,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                           </div>
                         </div>
                         
-                        <div className="text-sm">
-                          Trạng thái: {txStatus === 'approved' ? (
-                            <span className="text-green-600 font-medium">✅ Thanh toán thành công</span>
-                          ) : txStatus === 'rejected' ? (
-                            <span className="text-red-600 font-medium">❌ Thanh toán thất bại</span>
-                          ) : (
-                            <span className="text-orange-600 font-medium">⏳ Đang chờ thanh toán...</span>
-                          )}
-                        </div>
+                         <div className="text-sm">
+                           Trạng thái: {txStatus === 'approved' ? (
+                             <span className="text-green-600 font-medium">✅ Thanh toán thành công</span>
+                           ) : txStatus === 'rejected' ? (
+                             <span className="text-red-600 font-medium">❌ Thanh toán thất bại</span>
+                           ) : txStatus === 'awaiting_payment' ? (
+                             <span className="text-orange-600 font-medium">⏳ Chờ thanh toán</span>
+                           ) : (
+                             <span className="text-blue-600 font-medium">🔄 Đang xử lý...</span>
+                           )}
+                         </div>
                         
                         <div className="flex gap-2">
                           <Button variant="outline" className="flex-1" onClick={() => setDepositStep('bank')}>Quay lại</Button>

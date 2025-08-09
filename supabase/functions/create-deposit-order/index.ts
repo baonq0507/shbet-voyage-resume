@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
         user_id: user.id,
         type: "deposit",
         amount: amount,
-        status: "pending",
+        status: "awaiting_payment", // Chờ thanh toán
         admin_note: adminNote,
       })
       .select("id")
