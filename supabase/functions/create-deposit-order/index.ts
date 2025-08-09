@@ -23,6 +23,14 @@ function randomOrderCode() {
   return Number(`${now}${rand}`.slice(-12)); // 12-digit code
 }
 
+function generateVietQRUrl(bankCode: string, accountNumber: string, accountName: string, amount: number, description: string) {
+  // Generate VietQR URL using vietqr.io service
+  const encodedDescription = encodeURIComponent(description);
+  const encodedAccountName = encodeURIComponent(accountName);
+  
+  return `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.png?amount=${amount}&addInfo=${encodedDescription}&accountName=${encodedAccountName}`;
+}
+
 Deno.serve(async (req) => {
   console.log("=== CREATE DEPOSIT ORDER START ===");
   console.log("Method:", req.method);
@@ -162,12 +170,15 @@ Deno.serve(async (req) => {
 
         console.log("PayOS request body:", payosBody);
 
+        console.log("Making PayOS API request to: https://api-merchant.payos.vn/v2/payment-requests");
+        
         const response = await fetch("https://api-merchant.payos.vn/v2/payment-requests", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-client-id": clientId,
             "x-api-key": apiKey,
+            "x-partner-code": clientId // Some PayOS versions need this
           },
           body: JSON.stringify(payosBody),
         });
@@ -203,15 +214,50 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fallback: return basic info if PayOS fails or not configured
-    console.log("Falling back to basic response (PayOS not available)");
+    // Fallback: Create VietQR if bank details are configured
+    console.log("Falling back to VietQR generation...");
+    
+    const receiverBankCode = Deno.env.get("RECEIVER_BANK_CODE");
+    const receiverAccountNumber = Deno.env.get("RECEIVER_ACCOUNT_NUMBER");
+    const receiverAccountName = Deno.env.get("RECEIVER_ACCOUNT_NAME");
+    
+    if (receiverBankCode && receiverAccountNumber && receiverAccountName) {
+      console.log("Generating VietQR with bank details");
+      
+      const qrCodeUrl = generateVietQRUrl(
+        receiverBankCode,
+        receiverAccountNumber,
+        receiverAccountName,
+        amount,
+        description
+      );
+      
+      return jsonResponse({
+        ok: true,
+        transactionId: inserted.id,
+        orderCode,
+        description,
+        qrCode: qrCodeUrl,
+        bankInfo: {
+          bankCode: receiverBankCode,
+          accountNumber: receiverAccountNumber,
+          accountName: receiverAccountName,
+          amount: amount,
+          content: description
+        },
+        message: "QR Code được tạo thành công"
+      });
+    }
+    
+    // Final fallback: return basic info
+    console.log("No bank details configured, returning basic response");
     
     return jsonResponse({
       ok: true,
       transactionId: inserted.id,
       orderCode,
       description,
-      error: "PayOS not configured or failed - manual payment required",
+      error: "Cần cấu hình thông tin ngân hàng hoặc PayOS để tạo QR Code",
     });
   } catch (e) {
     console.error("=== UNHANDLED ERROR ===");
