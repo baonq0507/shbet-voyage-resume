@@ -456,7 +456,13 @@ export const AdminAgents: React.FC = () => {
                   {viewUsersLoading ? (
                     <span>Đang tải...</span>
                   ) : (
-                    <p className="text-base font-medium">Tổng: {viewUsersCount ?? 0} người dùng</p>
+                    <p className="text-base font-medium">
+                      Tổng: {viewUsersCount ?? 0} người dùng • Tổng hoa hồng (theo % hiện tại): {
+                        referredUsers
+                          .reduce((sum, u) => sum + Math.floor((u.total_deposit * (selectedAgentCommission ?? 0)) / 100), 0)
+                          .toLocaleString()
+                      }
+                    </p>
                   )}
                 </div>
                 {!viewUsersLoading && (
