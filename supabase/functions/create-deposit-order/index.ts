@@ -3,7 +3,6 @@
 // Optionally, you can set RECEIVER_BANK_CODE, RECEIVER_ACCOUNT_NUMBER, RECEIVER_ACCOUNT_NAME to build VietQR if PayOS response is unavailable
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import PayOS from "https://esm.sh/@payos/node@1.0.10";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -147,12 +146,9 @@ Deno.serve(async (req) => {
     // If PayOS keys are configured, create payment order
     if (clientId && apiKey && checksumKey) {
       try {
-        console.log("Initializing PayOS SDK...");
+        console.log("Creating PayOS payment order with HTTP request...");
         
-        // Initialize PayOS SDK
-        const payOS = new PayOS(clientId, apiKey, checksumKey);
-        
-        const paymentData = {
+        const payosBody = {
           orderCode,
           amount,
           description,
@@ -172,31 +168,49 @@ Deno.serve(async (req) => {
           expiredAt: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
         };
 
-        console.log("PayOS payment data:", paymentData);
-        console.log("Creating payment link with PayOS SDK...");
+        console.log("PayOS request body:", payosBody);
+        console.log("Making PayOS API request to: https://api-merchant.payos.vn/v2/payment-requests");
         
-        const paymentLinkResponse = await payOS.createPaymentLink(paymentData);
-        console.log("PayOS SDK response:", paymentLinkResponse);
+        const response = await fetch("https://api-merchant.payos.vn/v2/payment-requests", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-client-id": clientId,
+            "x-api-key": apiKey,
+          },
+          body: JSON.stringify(payosBody),
+        });
 
-        if (paymentLinkResponse && paymentLinkResponse.checkoutUrl) {
-          console.log("✅ PayOS payment link created successfully:", paymentLinkResponse.checkoutUrl);
+        console.log("PayOS response status:", response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("PayOS response data:", data);
+
+          const paymentLinkUrl = data?.data?.checkoutUrl || data?.data?.paymentUrl;
           
-          return jsonResponse({
-            ok: true,
-            transactionId: inserted.id,
-            orderCode,
-            description,
-            paymentUrl: paymentLinkResponse.checkoutUrl,
-            qrCode: paymentLinkResponse.qrCode,
-            paymentLinkId: paymentLinkResponse.paymentLinkId,
-            message: "Link thanh toán PayOS được tạo thành công"
-          });
+          if (paymentLinkUrl) {
+            console.log("✅ PayOS payment link created successfully:", paymentLinkUrl);
+            
+            return jsonResponse({
+              ok: true,
+              transactionId: inserted.id,
+              orderCode,
+              description,
+              paymentUrl: paymentLinkUrl,
+              qrCode: data?.data?.qrCode,
+              message: "Link thanh toán PayOS được tạo thành công"
+            });
+          } else {
+            console.warn("PayOS response missing payment URL:", data);
+          }
         } else {
-          console.warn("PayOS SDK response missing payment URL:", paymentLinkResponse);
+          const errorText = await response.text();
+          console.error("PayOS API error:", response.status, errorText);
         }
       } catch (e) {
-        console.error("PayOS SDK error:", e.message);
-        console.error("PayOS SDK error details:", e);
+        console.error("PayOS request error:", e.message);
+        console.error("PayOS request error details:", e);
       }
     }
 
