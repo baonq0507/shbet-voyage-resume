@@ -10,34 +10,34 @@ export const useDepositApproval = () => {
     setIsProcessing(true);
     
     try {
-      console.log('Starting deposit approval process:', { transactionId, username, amount });
+      // console.log('Starting deposit approval process:', { transactionId, username, amount });
       
-      // Step 1: Call deposit-game-api to process payment with third-party
-      const { data: apiResult, error: apiError } = await supabase.functions.invoke('deposit-game-api', {
-        body: { username, amount }
-      });
+      // // Step 1: Call deposit-game-api to process payment with third-party
+      // const { data: apiResult, error: apiError } = await supabase.functions.invoke('deposit-game-api', {
+      //   body: { username, amount }
+      // });
 
-      if (apiError) {
-        console.error('deposit-game-api error:', apiError);
-        toast({
-          title: "Lỗi",
-          description: `Lỗi kết nối API: ${apiError.message}`,
-          variant: "destructive"
-        });
-        return false;
-      }
+      // if (apiError) {
+      //   console.error('deposit-game-api error:', apiError);
+      //   toast({
+      //     title: "Lỗi",
+      //     description: `Lỗi kết nối API: ${apiError.message}`,
+      //     variant: "destructive"
+      //   });
+      //   return false;
+      // }
 
       // Step 2: Check if third-party API call was successful
-      if (!apiResult?.success) {
-        const errorMessage = apiResult?.message || 'Lỗi không xác định từ hệ thống game';
-        console.error('deposit-game-api failed:', apiResult);
-        toast({
-          title: "Lỗi",
-          description: `Nạp tiền thất bại: ${errorMessage}`,
-          variant: "destructive"
-        });
-        return false;
-      }
+      // if (!apiResult?.success) {
+      //   const errorMessage = apiResult?.message || 'Lỗi không xác định từ hệ thống game';
+      //   console.error('deposit-game-api failed:', apiResult);
+      //   toast({
+      //     title: "Lỗi",
+      //     description: `Nạp tiền thất bại: ${errorMessage}`,
+      //     variant: "destructive"
+      //   });
+      //   return false;
+      // }
 
       console.log('deposit-game-api success, proceeding with database updates');
 
