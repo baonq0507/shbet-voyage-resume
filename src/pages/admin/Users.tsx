@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit, Trash2, List, History, MoreVertical } from 'lucide-react';
+import { Users as UsersIcon, Search, Eye, DollarSign, Calendar, Phone, Mail, Edit, Trash2, List, History, MoreVertical, ArrowUpDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import AdminLayout from '@/components/AdminLayout';
 import { EditUserModal } from '@/components/EditUserModal';
@@ -56,6 +56,17 @@ const Users: React.FC = () => {
   const [isBetHistoryOpen, setIsBetHistoryOpen] = useState(false);
 
   const { toast } = useToast();
+
+  type SortKey = 'full_name' | 'username' | 'balance' | 'created_at' | 'last_login_at';
+  const [sortKey, setSortKey] = useState<SortKey>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -221,6 +232,35 @@ const Users: React.FC = () => {
     user.phone_number?.includes(searchTerm)
   );
 
+  const sortedUsers = React.useMemo(() => {
+    const arr = [...filteredUsers];
+    const getVal = (u: UserProfile, key: SortKey): string | number => {
+      switch (key) {
+        case 'full_name':
+          return (u.full_name || '').toLowerCase();
+        case 'username':
+          return (u.username || '').toLowerCase();
+        case 'balance':
+          return Number(u.balance) || 0;
+        case 'created_at':
+          return new Date(u.created_at).getTime();
+        case 'last_login_at':
+          return u.last_login_at ? new Date(u.last_login_at).getTime() : 0;
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, sortKey);
+      const vb = getVal(b, sortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredUsers, sortKey, sortDir]);
+
   const totalUsers = users.length;
   const activeUsers = users.filter(user => user.last_login_at).length;
   const totalBalance = users.reduce((sum, user) => sum + user.balance, 0);
@@ -314,16 +354,32 @@ const Users: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px]">Thông tin</TableHead>
-                      <TableHead className="w-[120px]">Số dư</TableHead>
+                      <TableHead className="w-[200px]">
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('full_name')}>
+                          Thông tin <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('balance')}>
+                          Số dư <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead className="w-[200px]">Liên hệ</TableHead>
-                      <TableHead className="w-[120px]">Ngày tạo</TableHead>
-                      <TableHead className="w-[140px]">Đăng nhập cuối</TableHead>
+                      <TableHead className="w-[120px]">
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('created_at')}>
+                          Ngày tạo <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
+                      <TableHead className="w-[140px]">
+                        <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleSort('last_login_at')}>
+                          Đăng nhập cuối <ArrowUpDown className="ml-1 h-4 w-4" />
+                        </Button>
+                      </TableHead>
                       <TableHead className="w-[280px]">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => (
+                    {sortedUsers.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div>
