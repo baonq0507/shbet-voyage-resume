@@ -66,6 +66,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     amount?: number;
     paymentUrl?: string;
     qrCode?: string;
+    promotion?: {
+      title: string;
+      bonusAmount: number;
+      description: string;
+    } | null;
   } | null>(null);
   const [txStatus, setTxStatus] = useState<'awaiting_payment' | 'pending' | 'approved' | 'rejected' | null>(null);
   const [qrCodeImageUrl, setQrCodeImageUrl] = useState<string | null>(null);
@@ -272,9 +277,18 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         paymentUrl: data.paymentUrl,
         qrCode: data.qrCode,
         amount,
+        promotion: data.promotion || null,
       });
       setTxStatus('awaiting_payment'); // Chờ thanh toán
       setDepositStep('qr');
+      
+      // Show promotion applied message if applicable
+      if (data.promotion) {
+        toast({
+          title: "Khuyến mãi được áp dụng! 🎉",
+          description: `${data.promotion.title}: +${data.promotion.bonusAmount.toLocaleString()} VND`,
+        });
+      }
     } catch (err) {
       console.error('Error creating deposit order:', err);
       toast({ title: 'Lỗi', description: 'Không thể tạo đơn nạp tiền', variant: 'destructive' });
@@ -639,28 +653,43 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                            </div>
                          ) : null}
                         
-                         <div className="space-y-3">
-                          
-                          <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-muted-foreground">Mã đơn hàng</span>
-                              <span className="font-medium">{orderInfo.orderCode}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-muted-foreground">Số tiền</span>
-                              <span className="font-bold">{(orderInfo.amount || 0).toLocaleString()} VND</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-muted-foreground">Nội dung</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium truncate max-w-[180px]" title={orderInfo.description}>{orderInfo.description}</span>
-                                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.description || '')}>
-                                  <Copy className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                          <div className="space-y-3">
+                           {orderInfo.promotion && (
+                             <div className="space-y-2 bg-green-50 border border-green-200 p-3 rounded-lg text-left">
+                               <div className="flex items-center gap-2">
+                                 <Tag className="w-4 h-4 text-green-600" />
+                                 <span className="font-medium text-green-800">Khuyến mãi được áp dụng</span>
+                               </div>
+                               <div className="flex items-center justify-between">
+                                 <span className="text-sm text-green-600">{orderInfo.promotion.title}</span>
+                                 <span className="font-bold text-green-800">+{orderInfo.promotion.bonusAmount.toLocaleString()} VND</span>
+                               </div>
+                               {orderInfo.promotion.description && (
+                                 <p className="text-xs text-green-600">{orderInfo.promotion.description}</p>
+                               )}
+                             </div>
+                           )}
+                           
+                           <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-muted-foreground">Mã đơn hàng</span>
+                               <span className="font-medium">{orderInfo.orderCode}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-muted-foreground">Số tiền</span>
+                               <span className="font-bold">{(orderInfo.amount || 0).toLocaleString()} VND</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-muted-foreground">Nội dung</span>
+                               <div className="flex items-center gap-2">
+                                 <span className="font-medium truncate max-w-[180px]" title={orderInfo.description}>{orderInfo.description}</span>
+                                 <Button variant="ghost" size="sm" onClick={() => copyToClipboard(orderInfo.description || '')}>
+                                   <Copy className="w-4 h-4" />
+                                 </Button>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
                         
                          <div className="text-sm">
                            Trạng thái: {txStatus === 'approved' ? (

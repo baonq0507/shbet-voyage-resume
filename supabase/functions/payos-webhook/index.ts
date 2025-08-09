@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       // Find transaction by orderCode in admin_note
       const { data: transactions, error: findError } = await supabase
         .from('transactions')
-        .select('id, user_id, amount, status')
+        .select('id, user_id, amount, status, admin_note')
         .like('admin_note', `%orderCode=${orderCode}%`)
         .eq('type', 'deposit')
         .eq('status', 'awaiting_payment'); // Tìm giao dịch đang chờ thanh toán
@@ -154,6 +154,35 @@ Deno.serve(async (req) => {
       }
 
       console.log("✅ Transaction updated successfully:", transaction.id);
+
+      // Check if there's a bonus to apply from the admin_note
+      const adminNote = transaction.admin_note || '';
+      const bonusMatch = adminNote.match(/bonus=(\d+)/);
+      
+      if (bonusMatch) {
+        const bonusAmount = parseInt(bonusMatch[1]);
+        console.log("Found bonus amount in transaction:", bonusAmount);
+        
+        if (bonusAmount > 0) {
+          // Create bonus transaction
+          const { error: bonusError } = await supabase
+            .from('transactions')
+            .insert({
+              user_id: transaction.user_id,
+              type: 'bonus',
+              amount: bonusAmount,
+              status: 'approved',
+              admin_note: `Khuyến mãi nạp tiền: ${bonusAmount.toLocaleString()} VND | Auto-applied from deposit ${transaction.id}`
+            });
+
+          if (bonusError) {
+            console.error("Error creating bonus transaction:", bonusError);
+          } else {
+            console.log("✅ Bonus transaction created successfully:", bonusAmount);
+          }
+        }
+      }
+      
       console.log("✅ Balance update will be handled by database trigger");
       
       return jsonResponse({ 
