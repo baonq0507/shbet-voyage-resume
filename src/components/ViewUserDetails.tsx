@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
@@ -18,8 +20,9 @@ interface UserProfile {
 }
 
 export function ViewUserDetails({ user }: { user: UserProfile }) {
-  const [userRole, setUserRole] = useState<'admin' | 'user'>('user');
-
+  const [userRole, setUserRole] = useState<'admin' | 'agent' | 'user'>('user');
+  const [agentInfo, setAgentInfo] = useState<{ id: string; referral_code: string | null } | null>(null);
+  const { toast } = useToast();
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!user?.user_id) return;
@@ -36,7 +39,8 @@ export function ViewUserDetails({ user }: { user: UserProfile }) {
         } else {
           const roles = data || [];
           const hasAdmin = roles.some((r: any) => r.role === 'admin');
-          setUserRole(hasAdmin ? 'admin' : 'user');
+          const hasAgent = roles.some((r: any) => r.role === 'agent');
+          setUserRole(hasAdmin ? 'admin' : hasAgent ? 'agent' : 'user');
         }
       } catch (err) {
         console.error('Error fetching user role:', err);
@@ -46,6 +50,25 @@ export function ViewUserDetails({ user }: { user: UserProfile }) {
 
     fetchUserRole();
   }, [user?.user_id]);
+
+  useEffect(() => {
+    const fetchAgent = async () => {
+      if (!user?.user_id) return;
+      if (userRole !== 'agent') { setAgentInfo(null); return; }
+      try {
+        const { data, error } = await supabase
+          .from('agents')
+          .select('id, referral_code')
+          .eq('user_id', user.user_id)
+          .maybeSingle();
+        if (!error) {
+          setAgentInfo(data ? { id: data.id, referral_code: data.referral_code } : null);
+        }
+      } catch {}
+    };
+
+    fetchAgent();
+  }, [user?.user_id, userRole]);
 
   if (!user) return null;
 
@@ -98,10 +121,44 @@ export function ViewUserDetails({ user }: { user: UserProfile }) {
         <div>
           <Label className="mb-1 block">Vai trò người dùng</Label>
           <div className="text-sm">
-            {userRole === 'admin' ? 'Quản trị viên' : 'Người dùng thường'}
+            {userRole === 'admin' ? 'Quản trị viên' : userRole === 'agent' ? 'Đại lý' : 'Người dùng thường'}
           </div>
         </div>
       </div>
+
+      {/* Link mời đại lý */}
+      {userRole === 'agent' && agentInfo?.referral_code && (
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold border-b pb-2">Link mời đại lý</h3>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2">
+            <div className="space-y-2">
+              <Label>Mã giới thiệu</Label>
+              <Input value={agentInfo.referral_code} readOnly />
+            </div>
+            <div className="space-y-2">
+              <Label>Link mời</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={`${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${agentInfo.referral_code}`}
+                  readOnly
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${agentInfo.referral_code}`;
+                    navigator.clipboard.writeText(link).then(() => {
+                      toast({ title: 'Đã sao chép', description: 'Link mời đã được sao chép' });
+                    });
+                  }}
+                  variant="outline"
+                >
+                  Sao chép
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Thông tin tài khoản */}
       <div className="space-y-4">
