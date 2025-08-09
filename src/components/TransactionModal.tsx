@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePromotionCodes } from "@/hooks/usePromotionCodes";
 import { BankAccountModal } from "./BankAccountModal";
 import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle, Tag, Plus } from "lucide-react";
+import QRCode from "qrcode";
 
 interface Bank {
   id: string;
@@ -67,6 +68,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     qrCode?: string;
   } | null>(null);
   const [txStatus, setTxStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  const [qrCodeImageUrl, setQrCodeImageUrl] = useState<string | null>(null);
 
   // Update active tab when initialTab changes or modal opens
   useEffect(() => {
@@ -271,6 +273,35 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       if (interval) window.clearInterval(interval);
     };
   }, [depositStep, orderInfo?.transactionId]);
+
+  // Generate QR code image when qrCode string is available
+  useEffect(() => {
+    const generateQRImage = async () => {
+      if (orderInfo?.qrCode && typeof orderInfo.qrCode === 'string') {
+        try {
+          // Generate QR code image from VietQR string
+          const qrImageUrl = await QRCode.toDataURL(orderInfo.qrCode, {
+            errorCorrectionLevel: 'M',
+            margin: 1,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            },
+            width: 256
+          });
+          setQrCodeImageUrl(qrImageUrl);
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+          // Fallback to display the QR string as text if image generation fails
+          setQrCodeImageUrl(null);
+        }
+      } else {
+        setQrCodeImageUrl(null);
+      }
+    };
+
+    generateQRImage();
+  }, [orderInfo?.qrCode]);
 
   const handleWithdrawSubmit = async () => {
     if (!user || !profile?.username) {
@@ -543,16 +574,23 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                       <div className="text-center space-y-4">
                         <Label className="text-sm font-medium">Thanh toán qua PayOS</Label>
                         
-                        {orderInfo.qrCode && (
-                          <div className="space-y-3">
-                            <img
-                              src={orderInfo.qrCode}
-                              alt="PayOS QR Code"
-                              className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm"
-                            />
-                            <p className="text-xs text-muted-foreground">Quét mã QR để thanh toán</p>
-                          </div>
-                        )}
+                         {qrCodeImageUrl ? (
+                           <div className="space-y-3">
+                             <img
+                               src={qrCodeImageUrl}
+                               alt="VietQR Code"
+                               className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm"
+                             />
+                             <p className="text-xs text-muted-foreground">Quét mã QR để thanh toán</p>
+                           </div>
+                         ) : orderInfo.qrCode ? (
+                           <div className="space-y-3">
+                             <div className="w-48 h-48 md:w-56 md:h-56 mx-auto border rounded-lg shadow-sm bg-gray-100 flex items-center justify-center">
+                               <p className="text-sm text-gray-500">Đang tạo mã QR...</p>
+                             </div>
+                             <p className="text-xs text-muted-foreground">Quét mã QR để thanh toán</p>
+                           </div>
+                         ) : null}
                         
                         <div className="space-y-3">
                           <Button 
