@@ -80,19 +80,28 @@ Deno.serve(async (req) => {
       // First, get the transaction details
       const { data: transaction, error: fetchError } = await supabaseAdmin
         .from("transactions")
-        .select("*, profiles!inner(user_id, balance)")
+        .select("id, user_id, amount, status")
         .ilike("admin_note", `%orderCode=${orderCode}%`)
         .eq("status", "pending")
-        .single();
+        .maybeSingle();
 
-      if (fetchError || !transaction) {
-        console.error("Transaction not found or already processed:", fetchError);
-        return jsonResponse({ ok: false, error: "Transaction not found" }, { status: 404 });
+      if (fetchError) {
+        console.error("Error fetching transaction:", fetchError);
+        return jsonResponse({ ok: false, error: "Database error" }, { status: 500 });
       }
 
-      console.log("Found transaction:", transaction.id, "for user:", transaction.user_id);
+      if (!transaction) {
+        console.log(`No pending transaction found for orderCode: ${orderCode}`);
+        return jsonResponse({ ok: true, message: "Transaction not found or already processed" });
+      }
 
-      // Update transaction status to approved
+      console.log(`Found pending transaction: ${transaction.id} for user: ${transaction.user_id}, amount: ${transaction.amount}`);
+
+      // Update transaction status to approved - this will trigger existing database functions
+      // The handle_deposit_approval trigger will automatically:
+      // 1. Update user balance 
+      // 2. Handle agent commissions
+      // 3. Process referral bonuses
       const { error: updateError } = await supabaseAdmin
         .from("transactions")
         .update({ 
@@ -102,37 +111,25 @@ Deno.serve(async (req) => {
         .eq("id", transaction.id);
 
       if (updateError) {
-        console.error("Failed to update transaction:", updateError);
-        return jsonResponse({ ok: false, error: "Failed to update transaction" });
+        console.error("Failed to update transaction status:", updateError);
+        return jsonResponse({ ok: false, error: "Failed to update transaction" }, { status: 500 });
       }
 
-      // Update user balance - this will trigger the existing function handle_deposit_approval
-      const newBalance = (transaction.profiles.balance || 0) + transaction.amount;
-      const { error: balanceError } = await supabaseAdmin
-        .from("profiles")
-        .update({ 
-          balance: newBalance,
-          updated_at: new Date().toISOString()
-        })
-        .eq("user_id", transaction.user_id);
-
-      if (balanceError) {
-        console.error("Failed to update user balance:", balanceError);
-        return jsonResponse({ ok: false, error: "Failed to update balance" });
-      }
-
-      console.log(`Successfully processed payment: ${transaction.amount} VND for user ${transaction.user_id}`);
-      console.log(`New balance: ${newBalance} VND`);
-
-      // The realtime notification will be sent automatically via the existing trigger
-      // when the transaction status is updated due to the real-time subscription in TransactionModal
+      console.log(`✅ Successfully processed PayOS callback:`);
+      console.log(`- Transaction ID: ${transaction.id}`);
+      console.log(`- User ID: ${transaction.user_id}`);
+      console.log(`- Amount: ${transaction.amount.toLocaleString()} VND`);
+      console.log(`- OrderCode: ${orderCode}`);
+      console.log(`- Status updated to: approved`);
+      console.log(`- Database triggers will handle balance update and notifications`);
 
       return jsonResponse({ 
         ok: true, 
         message: "Payment processed successfully",
         transactionId: transaction.id,
         amount: transaction.amount,
-        newBalance: newBalance
+        orderCode: orderCode,
+        status: "approved"
       });
     }
 
