@@ -70,11 +70,19 @@ Deno.serve(async (req) => {
     console.log("Parsing request body...");
     let bodyData;
     try {
-      bodyData = await req.json();
-      console.log("Request body:", bodyData);
+      const text = await req.text();
+      console.log("Raw request body:", text);
+      
+      if (!text || text.trim() === '') {
+        console.error("Empty request body");
+        return jsonResponse({ error: "Request body is empty" }, { status: 400 });
+      }
+      
+      bodyData = JSON.parse(text);
+      console.log("Parsed body:", bodyData);
     } catch (e) {
-      console.error("Failed to parse JSON:", e);
-      return jsonResponse({ error: "Invalid JSON" }, { status: 400 });
+      console.error("Failed to parse JSON:", e.message);
+      return jsonResponse({ error: "Invalid JSON format" }, { status: 400 });
     }
 
     const { amount, promotionCode } = bodyData;
