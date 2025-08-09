@@ -195,16 +195,24 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       
       console.log("Request body to send:", requestBody);
 
-      const { data, error } = await supabase.functions.invoke('create-deposit-order', {
-        body: JSON.stringify(requestBody),
-        headers: { 
-          'Content-Type': 'application/json'
-        }
+      const response = await fetch('https://hlydtwqhiuwbikkjemck.supabase.co/functions/v1/create-deposit-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTA1MjQsImV4cCI6MjA2OTgyNjUyNH0.deIb21DJNmyM5ZjocFAl4j_47AF6CnY26LN0Bn9eB9k'
+        },
+        body: JSON.stringify(requestBody)
       });
 
-      console.log("Edge function response:", { data, error });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Request failed');
+      }
 
-      if (error) throw error;
+      const data = await response.json();
+
+      console.log("Edge function response:", { data });
 
       if (!data) throw new Error('Không nhận được dữ liệu từ máy chủ');
 
