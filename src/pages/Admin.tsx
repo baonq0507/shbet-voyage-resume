@@ -154,6 +154,10 @@ const Admin = () => {
     else { setUserSortKey(key); setUserSortDir('asc'); }
   };
 
+  // Role filter and roles map
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'agent' | 'user'>('all');
+  const [userRoles, setUserRoles] = useState<Record<string, ('admin' | 'agent' | 'user')[]>>({});
+
   // Transactions search/sort (Dashboard)
   const [txSearch, setTxSearch] = useState('');
   type TxSortKey = 'user' | 'type' | 'amount' | 'status' | 'created_at';
@@ -261,6 +265,26 @@ const Admin = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      // Fetch roles for these users
+      const rolesMap: Record<string, ('admin' | 'agent' | 'user')[]> = {};
+      const userIds = (data || []).map((u: any) => u.user_id);
+      if (userIds.length > 0) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds);
+        if (!rolesError && rolesData) {
+          rolesData.forEach((r: any) => {
+            const uid = r.user_id as string;
+            const role = r.role as 'admin' | 'agent' | 'user';
+            if (!rolesMap[uid]) rolesMap[uid] = [];
+            if (!rolesMap[uid].includes(role)) rolesMap[uid].push(role);
+          });
+        }
+      }
+
+      setUserRoles(rolesMap);
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -504,14 +528,20 @@ const Admin = () => {
     };
   };
 
+  // Helper: derive highest priority role for a user
+  const getTopRole = (userId: string): 'admin' | 'agent' | 'user' => {
+    const roles = userRoles[userId] || [];
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('agent')) return 'agent';
+    return 'user';
+  };
+
   // Derived lists for Users (Dashboard)
   const filteredUsersDash = users.filter((u) => {
     const q = userSearch.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      (u.full_name || '').toLowerCase().includes(q) ||
-      (u.username || '').toLowerCase().includes(q)
-    );
+    const matchesText = !q || (u.full_name || '').toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q);
+    const matchesRole = roleFilter === 'all' || getTopRole(u.user_id) === roleFilter;
+    return matchesText && matchesRole;
   });
 
   const sortedUsersDash = React.useMemo(() => {
@@ -700,12 +730,24 @@ const Admin = () => {
           <CardDescription>Quản lý tất cả người dùng trong hệ thống</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
+          <div className="mb-4 flex gap-3 flex-col sm:flex-row">
             <Input
               placeholder="Tìm theo tên hoặc username"
               value={userSearch}
               onChange={(e) => setUserSearch(e.target.value)}
+              className="sm:flex-1"
             />
+            <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as 'all' | 'admin' | 'agent' | 'user')}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Vai trò" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả vai trò</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Table>
             <TableHeader>
