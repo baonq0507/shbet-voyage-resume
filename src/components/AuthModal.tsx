@@ -31,11 +31,12 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
   
   // Referral code from URL (?ref=CODE)
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralFromUrl, setReferralFromUrl] = useState(false);
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get('ref');
-      if (ref) setReferralCode(ref);
+      if (ref) { setReferralCode(ref); setReferralFromUrl(true); }
     } catch {}
   }, []);
   
@@ -454,6 +455,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
                     placeholder="Nhập mã mời (nếu có)"
                     value={referralCode || ''}
                     onChange={(e) => setReferralCode(e.target.value)}
+                    readOnly={!!referralFromUrl}
                   />
                 </div>
               </div>
