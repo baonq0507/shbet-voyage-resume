@@ -1,5 +1,6 @@
 import React from 'react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 export const PromotionBanner: React.FC = () => {
   const slides = [
@@ -15,7 +16,7 @@ export const PromotionBanner: React.FC = () => {
 
   return (
     <section className="relative w-full overflow-hidden">
-      <Carousel opts={{ loop: true }} className="w-full">
+      <Carousel opts={{ loop: true }} plugins={[Autoplay({ delay: 3000, stopOnMouseEnter: true })]} className="w-full">
         <CarouselContent>
           {slides.map((s, idx) => (
             <CarouselItem key={idx} className="px-0">
