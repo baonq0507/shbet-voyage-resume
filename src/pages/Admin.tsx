@@ -921,24 +921,24 @@ const Admin = () => {
                               Chi tiết
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-w-3xl">
                             <DialogHeader>
                               <DialogTitle>Chi tiết giao dịch</DialogTitle>
                             </DialogHeader>
                             {selectedTransaction && (
-                              <div className="space-y-4">
+                              <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <Label>Người dùng</Label>
-                                    <div className="text-sm font-medium">{selectedTransaction.profiles?.username}</div>
+                                    <div className="text-sm font-medium">{selectedTransaction.profiles?.username || 'N/A'}</div>
+                                  </div>
+                                  <div>
+                                    <Label>Họ tên</Label>
+                                    <div className="text-sm">{selectedTransaction.profiles?.full_name || '—'}</div>
                                   </div>
                                   <div>
                                     <Label>Loại giao dịch</Label>
                                     <div className="text-sm font-medium">{selectedTransaction.type === 'deposit' ? 'Nạp tiền' : selectedTransaction.type === 'withdrawal' ? 'Rút tiền' : 'Bonus'}</div>
-                                  </div>
-                                  <div>
-                                    <Label>Số tiền</Label>
-                                    <div className="text-sm font-medium">{selectedTransaction.amount.toLocaleString()} VND</div>
                                   </div>
                                   <div>
                                     <Label>Trạng thái</Label>
@@ -950,14 +950,43 @@ const Admin = () => {
                                        selectedTransaction.status === 'rejected' ? 'Từ chối' : 'Chờ duyệt'}
                                     </Badge>
                                   </div>
+                                  <div>
+                                    <Label>Số tiền</Label>
+                                    <div className="text-sm font-medium">{selectedTransaction.amount.toLocaleString()} VND</div>
+                                  </div>
+                                  <div>
+                                    <Label>Số dư hiện tại</Label>
+                                    <div className="text-sm">{selectedTransaction.profiles?.balance?.toLocaleString?.() || 0} VND</div>
+                                  </div>
+                                  <div>
+                                    <Label>Thời gian tạo</Label>
+                                    <div className="text-sm">{new Date(selectedTransaction.created_at).toLocaleString('vi-VN')}</div>
+                                  </div>
+                                  <div>
+                                    <Label>Thời gian duyệt</Label>
+                                    <div className="text-sm">{(selectedTransaction as any).approved_at ? new Date((selectedTransaction as any).approved_at).toLocaleString('vi-VN') : '—'}</div>
+                                  </div>
                                 </div>
+
+                                {selectedTransaction.bank && (
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Ngân hàng</Label>
+                                      <div className="text-sm">{selectedTransaction.bank.bank_name}</div>
+                                    </div>
+                                    <div>
+                                      <Label>Số tài khoản</Label>
+                                      <div className="text-sm">{selectedTransaction.bank.account_number}</div>
+                                    </div>
+                                  </div>
+                                )}
 
                                 {selectedTransaction.proof_image_url && (
                                   <div>
                                     <Label>Ảnh minh chứng</Label>
                                     <img 
                                       src={selectedTransaction.proof_image_url} 
-                                      alt="Proof" 
+                                      alt="Ảnh minh chứng giao dịch" 
                                       className="mt-2 max-w-full h-auto rounded border"
                                     />
                                   </div>
@@ -973,7 +1002,7 @@ const Admin = () => {
                                 )}
 
                                 {selectedTransaction.status === 'pending' && (
-                                  <div className="flex gap-2 pt-4">
+                                  <div className="flex gap-2 pt-2">
                                     <Button 
                                       onClick={() => handleTransactionAction(selectedTransaction.id, 'approve')}
                                       className="flex-1"
