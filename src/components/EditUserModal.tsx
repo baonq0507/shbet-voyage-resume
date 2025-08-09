@@ -47,10 +47,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     avatar_url: '',
   });
   const [uploading, setUploading] = useState(false);
-  const [isAgent, setIsAgent] = useState(false);
-  const [commission, setCommission] = useState<number>(10);
-  const [referralCode, setReferralCode] = useState<string>('');
-  const [referralCount, setReferralCount] = useState<number>(0);
 
   const { toast } = useToast();
 
@@ -67,7 +63,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
         avatar_url: user.avatar_url || '',
       });
       fetchUserRole();
-      fetchAgentInfo();
       fetchAllAgents();
       setSelectedAgentId(user.referred_by || '');
     }
@@ -97,38 +92,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
     }
   };
 
-  const fetchAgentInfo = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('agents')
-        .select('commission_percentage, referral_code, referral_count')
-        .eq('user_id', user.user_id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching agent info:', error);
-        setIsAgent(false);
-        setReferralCode('');
-        setReferralCount(0);
-        return;
-      }
-
-      if (data) {
-        setIsAgent(true);
-        setCommission(Number((data as any).commission_percentage) || 10);
-        setReferralCode((data as any).referral_code || '');
-        setReferralCount(Number((data as any).referral_count) || 0);
-      } else {
-        setIsAgent(false);
-        setReferralCode('');
-        setReferralCount(0);
-      }
-    } catch (err) {
-      console.error('Error fetching agent info:', err);
-      setIsAgent(false);
-    }
-  };
 
   const fetchAllAgents = async () => {
     try {
@@ -161,82 +124,6 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
       console.error('Error fetching agents list:', err);
     }
   };
-  const handleMakeAgent = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      // Generate a unique referral code via RPC
-      const { data: codeData, error: codeError } = await supabase.rpc('generate_referral_code');
-      if (codeError) throw codeError;
-      const code = (codeData as string) || '';
-
-      const { error } = await supabase
-        .from('agents')
-        .insert({
-          user_id: user.user_id,
-          commission_percentage: commission,
-          referral_code: code,
-        });
-
-      if (error) throw error;
-
-      toast({ title: 'Thành công', description: 'Đã chuyển người dùng thành đại lý.' });
-      setIsAgent(true);
-      setReferralCode(code);
-      await fetchAgentInfo();
-      onUserUpdated();
-    } catch (error) {
-      console.error('Error making agent:', error);
-      toast({ title: 'Lỗi', description: 'Không thể chuyển thành đại lý', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleUpdateCommission = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('agents')
-        .update({ commission_percentage: commission })
-        .eq('user_id', user.user_id);
-
-      if (error) throw error;
-
-      toast({ title: 'Thành công', description: 'Đã cập nhật % hoa hồng.' });
-      await fetchAgentInfo();
-      onUserUpdated();
-    } catch (error) {
-      console.error('Error updating commission:', error);
-      toast({ title: 'Lỗi', description: 'Không thể cập nhật hoa hồng', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleRevokeAgent = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('agents')
-        .delete()
-        .eq('user_id', user.user_id);
-
-      if (error) throw error;
-
-      toast({ title: 'Thành công', description: 'Đã hủy đại lý cho người dùng.' });
-      setIsAgent(false);
-      setReferralCode('');
-      setReferralCount(0);
-      onUserUpdated();
-    } catch (error) {
-      console.error('Error revoking agent:', error);
-      toast({ title: 'Lỗi', description: 'Không thể hủy đại lý', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
