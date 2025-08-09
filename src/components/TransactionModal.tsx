@@ -108,6 +108,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       setSelectedBank(null);
       setOrderInfo(null);
       setTxStatus(null);
+      setQrCodeImageUrl(null);
+      setDepositAmount("");
+      setPromotionCode("");
       fetchUserBankAccounts();
       fetchBanks();
     }
@@ -302,6 +305,21 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
     generateQRImage();
   }, [orderInfo?.qrCode]);
+
+  // Auto close modal when payment is successful
+  useEffect(() => {
+    if (txStatus === 'approved') {
+      toast({
+        title: "Nạp tiền thành công ✅",
+        description: `Đã nạp ${(orderInfo?.amount || 0).toLocaleString()} VND thành công`,
+      });
+      
+      // Auto close modal after 2 seconds
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    }
+  }, [txStatus, orderInfo?.amount, toast, onClose]);
 
   const handleWithdrawSubmit = async () => {
     if (!user || !profile?.username) {
