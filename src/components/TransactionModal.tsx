@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,24 +31,6 @@ interface UserBankAccount {
   is_active: boolean;
 }
 
-
-// Cấu hình tài khoản nhận tiền VietQR (cần cập nhật theo thực tế)
-const RECEIVER = {
-  bankCode: "VCB",
-  accountNumber: "1234567890",
-  accountName: "TEN CHU TAI KHOAN",
-};
-
-const buildVietQRUrl = (amount: number, addInfo: string) => {
-  const base = `https://img.vietqr.io/image/${RECEIVER.bankCode}-${RECEIVER.accountNumber}-compact2.png`;
-  const params = new URLSearchParams({
-    amount: String(Math.max(0, Math.floor(amount || 0))),
-    addInfo,
-    accountName: RECEIVER.accountName,
-  });
-  return `${base}?${params.toString()}`;
-};
-
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -58,6 +40,8 @@ interface TransactionModalProps {
 const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialTab = 'deposit' }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   console.log('TransactionModal props:', { isOpen, initialTab, activeTab });
+  const [banks, setBanks] = useState<Bank[]>([]);
+  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [promotionCode, setPromotionCode] = useState("");
@@ -88,6 +72,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
   useEffect(() => {
     if (isOpen) {
+      fetchBanks();
       fetchUserBankAccounts();
     }
   }, [isOpen]);
@@ -136,6 +121,27 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     };
   }, [user, toast]);
 
+  const fetchBanks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bank')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setBanks(data || []);
+      if (data && data.length > 0) {
+        setSelectedBank(data[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching banks:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải thông tin ngân hàng",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchUserBankAccounts = async () => {
     if (!user) return;
@@ -185,6 +191,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         status: 'pending'
       };
 
+      // Optional: attach selected bank if available
+      if (selectedBank?.id) {
+        transactionData.bank_id = selectedBank.id;
+      }
 
       // Add promotion code to admin note if provided
       if (promotionCode.trim()) {
@@ -388,69 +398,93 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* VietQR dynamic section */}
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <Label className="text-sm font-medium">QR Code chuyển khoản</Label>
-                    <div className="mt-2">
-                      <img
-                        src={buildVietQRUrl(parseFloat(depositAmount) || 0, `NAP ${profile?.username || user?.email?.split("@")[0] || "USER"}`)}
-                        alt="QR Nạp tiền VietQR"
-                        className="w-32 h-32 md:w-48 md:h-48 mx-auto border rounded-lg shadow-sm"
-                        loading="lazy"
-                      />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Nội dung chuyển khoản: {`NAP ${profile?.username || user?.email?.split("@")[0] || "USER"}`}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Bank Information Section */}
-                  <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
-                    <Label className="text-sm font-medium text-center block">Thông tin chuyển khoản</Label>
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Mã ngân hàng</Label>
-                        <div className="flex items-center justify-between p-2 bg-background rounded border">
-                          <span className="font-medium">{RECEIVER.bankCode}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(RECEIVER.bankCode)}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Số tài khoản</Label>
-                        <div className="flex items-center justify-between p-2 bg-background rounded border">
-                          <span className="font-medium text-lg">{RECEIVER.accountNumber}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(RECEIVER.accountNumber)}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Chủ tài khoản</Label>
-                        <div className="flex items-center justify-between p-2 bg-background rounded border">
-                          <span className="font-medium">{RECEIVER.accountName}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(RECEIVER.accountName)}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bank-select">Chọn ngân hàng</Label>
+                  <Select 
+                    value={selectedBank?.id || ""}
+                    onValueChange={(value) => {
+                      const bank = banks.find(b => b.id === value);
+                      setSelectedBank(bank || null);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn ngân hàng" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {banks.map((bank) => (
+                        <SelectItem key={bank.id} value={bank.id}>
+                          {bank.bank_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                {selectedBank && (
+                  <div className="space-y-3">
+                    <div className="flex flex-col space-y-4">
+                      {/* QR Code Section */}
+                      <div className="text-center">
+                        <Label className="text-sm font-medium">QR Code chuyển khoản</Label>
+                        {selectedBank.qr_code_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={selectedBank.qr_code_url} 
+                              alt="QR Code" 
+                              className="w-32 h-32 md:w-48 md:h-48 mx-auto border rounded-lg shadow-sm"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Bank Information Section */}
+                      <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                        <Label className="text-sm font-medium text-center block">Thông tin chuyển khoản</Label>
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Ngân hàng</Label>
+                            <div className="flex items-center justify-between p-2 bg-background rounded border">
+                              <span className="font-medium">{selectedBank.bank_name}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedBank.bank_name)}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Số tài khoản</Label>
+                            <div className="flex items-center justify-between p-2 bg-background rounded border">
+                              <span className="font-medium text-lg">{selectedBank.account_number}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedBank.account_number)}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Chủ tài khoản</Label>
+                            <div className="flex items-center justify-between p-2 bg-background rounded border">
+                              <span className="font-medium">{selectedBank.account_holder}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedBank.account_holder)}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="deposit-amount">Số tiền nạp (VND)</Label>

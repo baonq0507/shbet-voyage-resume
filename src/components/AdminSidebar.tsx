@@ -13,6 +13,7 @@ import {
   TrendingUp,
   FileText,
   Building2,
+  Landmark,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -60,6 +61,12 @@ const menuItems = [
     title: 'Giao dịch',
     icon: CreditCard,
     description: 'Nạp tiền, rút tiền, lịch sử'
+  },
+  {
+    id: 'banks',
+    title: 'Ngân hàng',
+    icon: Landmark,
+    description: 'Quản lý ngân hàng nạp tiền'
   },
   {
     id: 'promotions',
