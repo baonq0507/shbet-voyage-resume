@@ -196,8 +196,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       console.log("Request body to send:", requestBody);
 
       const { data, error } = await supabase.functions.invoke('create-deposit-order', {
-        body: requestBody,
-        headers: { 'Content-Type': 'application/json' }
+        body: JSON.stringify(requestBody),
+        headers: { 
+          'Content-Type': 'application/json'
+        }
       });
 
       console.log("Edge function response:", { data, error });
