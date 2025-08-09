@@ -610,14 +610,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                            </div>
                          ) : null}
                         
-                        <div className="space-y-3">
-                          <Button 
-                            onClick={() => window.open(orderInfo.paymentUrl, '_blank')}
-                            className="w-full"
-                            size="lg"
-                          >
-                            Mở trang thanh toán PayOS
-                          </Button>
+                         <div className="space-y-3">
                           
                           <div className="space-y-2 bg-muted/50 p-3 rounded-lg text-left">
                             <div className="flex items-center justify-between">
