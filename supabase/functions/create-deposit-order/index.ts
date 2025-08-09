@@ -125,92 +125,16 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Số tiền không hợp lệ" }, { status: 400 });
     }
 
-    // Check for eligible promotions
-    console.log("Checking for eligible promotions...");
-    let applicablePromotion = null;
-    let bonusAmount = 0;
-
-    // First check if user provided a promotion code
-    if (promotionCode) {
-      const { data: codePromotion } = await supabase
-        .from('promotions')
-        .select('*')
-        .eq('promotion_code', promotionCode.trim())
-        .eq('is_active', true)
-        .lte('start_date', new Date().toISOString())
-        .gte('end_date', new Date().toISOString())
-        .maybeSingle();
-
-      if (codePromotion && codePromotion.min_deposit && amount >= codePromotion.min_deposit) {
-        applicablePromotion = codePromotion;
-        console.log("Applied user-provided promotion code:", promotionCode);
-      }
-    }
-
-    // If no code provided or invalid, check for automatic promotions
-    if (!applicablePromotion) {
-      // Check for first deposit promotion
-      const { data: isFirstDeposit } = await supabase
-        .rpc('is_first_deposit', { user_id_param: user.id });
-
-      if (isFirstDeposit) {
-        const { data: firstDepositPromo } = await supabase
-          .from('promotions')
-          .select('*')
-          .eq('promotion_type', 'first_deposit')
-          .eq('is_active', true)
-          .lte('start_date', new Date().toISOString())
-          .gte('end_date', new Date().toISOString())
-          .lte('min_deposit', amount)
-          .order('bonus_amount', { ascending: false })
-          .maybeSingle();
-
-        if (firstDepositPromo) {
-          applicablePromotion = firstDepositPromo;
-          console.log("Applied first deposit promotion:", firstDepositPromo.title);
-        }
-      }
-
-      // If no first deposit promo, check for general time-based promotions
-      if (!applicablePromotion) {
-        const { data: timeBasedPromo } = await supabase
-          .from('promotions')
-          .select('*')
-          .eq('promotion_type', 'time_based')
-          .eq('is_active', true)
-          .lte('start_date', new Date().toISOString())
-          .gte('end_date', new Date().toISOString())
-          .lte('min_deposit', amount)
-          .order('bonus_amount', { ascending: false })
-          .maybeSingle();
-
-        if (timeBasedPromo) {
-          applicablePromotion = timeBasedPromo;
-          console.log("Applied time-based promotion:", timeBasedPromo.title);
-        }
-      }
-    }
-
-    // Calculate bonus amount if promotion is applicable
-    if (applicablePromotion) {
-      if (applicablePromotion.bonus_amount) {
-        bonusAmount = applicablePromotion.bonus_amount;
-      } else if (applicablePromotion.bonus_percentage) {
-        bonusAmount = Math.floor((amount * applicablePromotion.bonus_percentage) / 100);
-      }
-      console.log("Calculated bonus amount:", bonusAmount);
-    }
-
     const orderCode = randomOrderCode();
     const username = user.user_metadata?.username || user.email?.split("@")[0] || user.id.substring(0, 6);
     const description = `NAP ${orderCode.toString().slice(-6)}`;
 
     // Create pending transaction first (RLS ensures user_id matches auth uid)
-    const adminNote = applicablePromotion
-      ? `method=vietqr/payos; orderCode=${orderCode}; promo=${applicablePromotion.promotion_code || applicablePromotion.title}; bonus=${bonusAmount}`
+    const adminNote = promotionCode
+      ? `method=vietqr/payos; orderCode=${orderCode}; promo=${promotionCode}`
       : `method=vietqr/payos; orderCode=${orderCode}`;
 
-    console.log("Creating transaction for user:", user.id, "amount:", amount, "bonus:", bonusAmount);
+    console.log("Creating transaction for user:", user.id, "amount:", amount);
     
     const { data: inserted, error: insertErr } = await supabase
       .from("transactions")
@@ -307,14 +231,7 @@ Deno.serve(async (req) => {
               description,
               paymentUrl: paymentLinkUrl,
               qrCode: data?.data?.qrCode,
-              promotion: applicablePromotion ? {
-                title: applicablePromotion.title,
-                bonusAmount: bonusAmount,
-                description: applicablePromotion.description
-              } : null,
-              message: applicablePromotion 
-                ? `Link thanh toán PayOS được tạo thành công. Khuyến mãi: +${bonusAmount.toLocaleString()} VND`
-                : "Link thanh toán PayOS được tạo thành công"
+              message: "Link thanh toán PayOS được tạo thành công"
             });
           } else {
             console.warn("PayOS response missing payment URL:", data);
