@@ -33,6 +33,15 @@ interface CommissionLevel {
   updated_at?: string;
 }
 
+interface ReferredUserDetail {
+  user_id: string;
+  username: string;
+  full_name: string;
+  total_deposit: number;
+  total_withdrawal: number;
+  commission_earned: number;
+}
+
 export const AdminAgents: React.FC = () => {
   const { toast } = useToast();
 
@@ -58,6 +67,8 @@ export const AdminAgents: React.FC = () => {
   const [viewUsersCount, setViewUsersCount] = useState<number | null>(null);
   const [viewUsersLoading, setViewUsersLoading] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState<string>('');
+
+  const [referredUsers, setReferredUsers] = useState<ReferredUserDetail[]>([]);
 
   const fetchAgents = async () => {
     try {
@@ -166,6 +177,66 @@ export const AdminAgents: React.FC = () => {
     }
   };
 
+  const fetchReferredUsersDetails = async (agentId: string) => {
+    try {
+      const { data: refs, error: refErr } = await supabase
+        .from('agent_referrals')
+        .select('referred_user_id, commission_earned')
+        .eq('agent_id', agentId);
+      if (refErr) throw refErr;
+
+      const referrals = refs || [];
+      if (referrals.length === 0) {
+        setReferredUsers([]);
+        return;
+      }
+
+      const userIds = referrals.map((r: any) => r.referred_user_id);
+
+      const [{ data: profiles }, { data: txs }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('user_id, username, full_name')
+          .in('user_id', userIds),
+        supabase
+          .from('transactions')
+          .select('user_id, type, amount, status')
+          .in('user_id', userIds)
+          .eq('status', 'approved'),
+      ]);
+
+      const profileMap = new Map<string, any>();
+      (profiles || []).forEach((p: any) => profileMap.set(p.user_id, p));
+
+      const aggregates = new Map<string, { deposit: number; withdrawal: number }>();
+      (txs || []).forEach((t: any) => {
+        const agg = aggregates.get(t.user_id) || { deposit: 0, withdrawal: 0 };
+        if (t.type === 'deposit') agg.deposit += Number(t.amount) || 0;
+        if (t.type === 'withdrawal') agg.withdrawal += Number(t.amount) || 0;
+        aggregates.set(t.user_id, agg);
+      });
+
+      const result: ReferredUserDetail[] = referrals.map((r: any) => {
+        const prof = profileMap.get(r.referred_user_id) || {};
+        const agg = aggregates.get(r.referred_user_id) || { deposit: 0, withdrawal: 0 };
+        return {
+          user_id: r.referred_user_id,
+          username: prof.username || '—',
+          full_name: prof.full_name || '—',
+          total_deposit: agg.deposit,
+          total_withdrawal: agg.withdrawal,
+          commission_earned: Number(r.commission_earned) || 0,
+        };
+      });
+
+      setReferredUsers(result);
+    } catch (error) {
+      console.error('Error fetching referred users details:', error);
+      setReferredUsers([]);
+      toast({ title: 'Lỗi', description: 'Không thể tải chi tiết người dùng', variant: 'destructive' });
+    }
+  };
+
   const openUsersCount = async (agent: AgentRow) => {
     try {
       setSelectedAgentId(agent.id);
@@ -180,6 +251,7 @@ export const AdminAgents: React.FC = () => {
         .eq('agent_id', agent.id);
       if (error) throw error;
       setViewUsersCount(count || 0);
+      await fetchReferredUsersDetails(agent.id);
     } catch (error) {
       console.error('Error counting users for agent:', error);
       toast({ title: 'Lỗi', description: 'Không thể lấy số lượng người dùng', variant: 'destructive' });
@@ -377,11 +449,43 @@ export const AdminAgents: React.FC = () => {
                 <DialogTitle>Số người dùng của đại lý</DialogTitle>
                 <DialogDescription>Đại lý: {selectedAgentName}</DialogDescription>
               </DialogHeader>
-              <div className="text-center py-6">
-                {viewUsersLoading ? (
-                  <span>Đang tải...</span>
-                ) : (
-                  <p className="text-xl font-semibold">Tổng: {viewUsersCount ?? 0} người dùng</p>
+              <div className="py-4 space-y-4">
+                <div className="text-center">
+                  {viewUsersLoading ? (
+                    <span>Đang tải...</span>
+                  ) : (
+                    <p className="text-base font-medium">Tổng: {viewUsersCount ?? 0} người dùng</p>
+                  )}
+                </div>
+                {!viewUsersLoading && (
+                  referredUsers.length > 0 ? (
+                    <div className="max-h-96 overflow-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Người dùng</TableHead>
+                            <TableHead>Họ tên</TableHead>
+                            <TableHead className="text-right">Tổng nạp</TableHead>
+                            <TableHead className="text-right">Tổng rút</TableHead>
+                            <TableHead className="text-right">Hoa hồng</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {referredUsers.map((u) => (
+                            <TableRow key={u.user_id}>
+                              <TableCell className="font-medium">{u.username}</TableCell>
+                              <TableCell>{u.full_name}</TableCell>
+                              <TableCell className="text-right">{u.total_deposit.toLocaleString()}</TableCell>
+                              <TableCell className="text-right">{u.total_withdrawal.toLocaleString()}</TableCell>
+                              <TableCell className="text-right">{u.commission_earned.toLocaleString()}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground">Chưa có người dùng giới thiệu.</p>
+                  )
                 )}
               </div>
             </DialogContent>
