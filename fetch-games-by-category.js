@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
 const SUPABASE_URL = 'https://hlydtwqhiuwbikkjemck.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI1MDUyNCwiZXhwIjoyMDY5ODI2NTI0fQ.rKdwAXUb3BVhJxYheLLBIRFMqXKq9xJ9mAXSBxPX6KQ';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-role-key-here';
 
 // Cấu hình API
 const API_CONFIG = {
