@@ -16,7 +16,7 @@ interface GameLoginData {
   IsWapSports: boolean;
   CompanyKey: string;
   Portfolio: string;
-  ServerId: string;
+  ServerId: string; 
 }
 
 interface GameLoginResponse {
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       IsWapSports: isSports,
       CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
       Portfolio: isSports ? 'ThirdPartySportsBook' : 'SeamlessGame',
-      ServerId: '206.206.126.141'
+      ServerId: '206.206.126.141',
     };
 
     console.log('🚀 Calling game API with data:', gameLoginData);
