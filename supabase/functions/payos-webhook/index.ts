@@ -42,9 +42,20 @@ Deno.serve(async (req) => {
   console.log("=== PAYOS WEBHOOK START ===");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
+  console.log("Headers:", Object.fromEntries(req.headers.entries()));
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Handle GET request for PayOS webhook validation
+  if (req.method === "GET") {
+    console.log("GET request - PayOS webhook validation");
+    return jsonResponse({ 
+      message: "PayOS webhook endpoint is active",
+      status: "ok",
+      timestamp: new Date().toISOString()
+    });
   }
 
   try {
