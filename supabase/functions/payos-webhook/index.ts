@@ -165,7 +165,6 @@ Deno.serve(async (req) => {
       
       // Apply promotion bonus when payment is confirmed
       // Use original admin_note to find promotion info
-      const originalAdminNote = transaction.admin_note || '';
       const promoMatch = originalAdminNote.match(/promo=([^;]+)/);
       
       if (promoMatch) {
