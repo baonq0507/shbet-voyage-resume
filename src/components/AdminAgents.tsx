@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowUpDown } from 'lucide-react';
+import { Plus, Edit, Users, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface AgentRow {
   id: string;
@@ -69,6 +69,13 @@ export const AdminAgents: React.FC = () => {
   const [viewUsersLoading, setViewUsersLoading] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState<string>('');
   const [selectedAgentCommission, setSelectedAgentCommission] = useState<number>(0);
+  
+  // Search and sort state for users table
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState<{
+    key: 'username' | 'full_name' | 'total_deposit' | 'total_withdrawal' | 'commission';
+    direction: 'asc' | 'desc';
+  } | null>(null);
 
   const [referredUsers, setReferredUsers] = useState<ReferredUserDetail[]>([]);
   const [search, setSearch] = useState('');
@@ -444,6 +451,76 @@ export const AdminAgents: React.FC = () => {
     return arr;
   }, [filteredAgents, sortKey, sortDir]);
 
+  // Handle sort for users table
+  const handleSort = (key: 'username' | 'full_name' | 'total_deposit' | 'total_withdrawal' | 'commission') => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        return {
+          key,
+          direction: current.direction === 'asc' ? 'desc' : 'asc'
+        };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  // Filter and sort users
+  const filteredAndSortedUsers = useMemo(() => {
+    let filtered = referredUsers;
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = referredUsers.filter(user => 
+        user.username.toLowerCase().includes(term) ||
+        user.full_name.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply sorting
+    if (sortConfig) {
+      filtered = [...filtered].sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        switch (sortConfig.key) {
+          case 'username':
+            aValue = a.username.toLowerCase();
+            bValue = b.username.toLowerCase();
+            break;
+          case 'full_name':
+            aValue = a.full_name.toLowerCase();
+            bValue = b.full_name.toLowerCase();
+            break;
+          case 'total_deposit':
+            aValue = a.total_deposit;
+            bValue = b.total_deposit;
+            break;
+          case 'total_withdrawal':
+            aValue = a.total_withdrawal;
+            bValue = b.total_withdrawal;
+            break;
+          case 'commission':
+            aValue = Math.floor((a.total_deposit * (selectedAgentCommission ?? 0)) / 100);
+            bValue = Math.floor((b.total_deposit * (selectedAgentCommission ?? 0)) / 100);
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [referredUsers, searchTerm, sortConfig, selectedAgentCommission]);
+
   useEffect(() => {
     fetchAgentLevels();
     fetchAgents();
@@ -595,32 +672,111 @@ export const AdminAgents: React.FC = () => {
                      </>
                    )}
                  </div>
-                {!viewUsersLoading && (
-                  referredUsers.length > 0 ? (
-                    <div className="max-h-96 overflow-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Người dùng</TableHead>
-                            <TableHead>Họ tên</TableHead>
-                            <TableHead className="text-right">Tổng nạp</TableHead>
-                            <TableHead className="text-right">Tổng rút</TableHead>
-                            <TableHead className="text-right">Hoa hồng (theo % hiện tại)</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {referredUsers.map((u) => (
-                            <TableRow key={u.user_id}>
-                              <TableCell className="font-medium">{u.username}</TableCell>
-                              <TableCell>{u.full_name}</TableCell>
-                              <TableCell className="text-right">{u.total_deposit.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">{u.total_withdrawal.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">{Math.floor((u.total_deposit * (selectedAgentCommission ?? 0)) / 100).toLocaleString()}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                 {!viewUsersLoading && (
+                   referredUsers.length > 0 ? (
+                     <div className="space-y-4">
+                       {/* Search Input */}
+                       <div className="relative">
+                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                         <Input
+                           placeholder="Tìm kiếm theo tên người dùng hoặc họ tên..."
+                           value={searchTerm}
+                           onChange={(e) => setSearchTerm(e.target.value)}
+                           className="pl-10"
+                         />
+                       </div>
+
+                       {/* Table */}
+                       <div className="max-h-96 overflow-auto">
+                         <Table>
+                           <TableHeader>
+                             <TableRow>
+                               <TableHead>
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   className="h-auto p-0 font-semibold"
+                                   onClick={() => handleSort('username')}
+                                 >
+                                   Người dùng
+                                   {sortConfig?.key === 'username' && (
+                                     sortConfig.direction === 'asc' ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
+                                   )}
+                                   {(!sortConfig || sortConfig.key !== 'username') && <ArrowUpDown className="ml-1 h-4 w-4" />}
+                                 </Button>
+                               </TableHead>
+                               <TableHead>
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   className="h-auto p-0 font-semibold"
+                                   onClick={() => handleSort('full_name')}
+                                 >
+                                   Họ tên
+                                   {sortConfig?.key === 'full_name' && (
+                                     sortConfig.direction === 'asc' ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
+                                   )}
+                                   {(!sortConfig || sortConfig.key !== 'full_name') && <ArrowUpDown className="ml-1 h-4 w-4" />}
+                                 </Button>
+                               </TableHead>
+                               <TableHead className="text-right">
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   className="h-auto p-0 font-semibold"
+                                   onClick={() => handleSort('total_deposit')}
+                                 >
+                                   Tổng nạp
+                                   {sortConfig?.key === 'total_deposit' && (
+                                     sortConfig.direction === 'asc' ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
+                                   )}
+                                   {(!sortConfig || sortConfig.key !== 'total_deposit') && <ArrowUpDown className="ml-1 h-4 w-4" />}
+                                 </Button>
+                               </TableHead>
+                               <TableHead className="text-right">
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   className="h-auto p-0 font-semibold"
+                                   onClick={() => handleSort('total_withdrawal')}
+                                 >
+                                   Tổng rút
+                                   {sortConfig?.key === 'total_withdrawal' && (
+                                     sortConfig.direction === 'asc' ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
+                                   )}
+                                   {(!sortConfig || sortConfig.key !== 'total_withdrawal') && <ArrowUpDown className="ml-1 h-4 w-4" />}
+                                 </Button>
+                               </TableHead>
+                               <TableHead className="text-right">
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   className="h-auto p-0 font-semibold"
+                                   onClick={() => handleSort('commission')}
+                                 >
+                                   Hoa hồng (theo % hiện tại)
+                                   {sortConfig?.key === 'commission' && (
+                                     sortConfig.direction === 'asc' ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
+                                   )}
+                                   {(!sortConfig || sortConfig.key !== 'commission') && <ArrowUpDown className="ml-1 h-4 w-4" />}
+                                 </Button>
+                               </TableHead>
+                             </TableRow>
+                           </TableHeader>
+                           <TableBody>
+                             {filteredAndSortedUsers.map((u) => (
+                               <TableRow key={u.user_id}>
+                                 <TableCell className="font-medium">{u.username}</TableCell>
+                                 <TableCell>{u.full_name}</TableCell>
+                                 <TableCell className="text-right">{u.total_deposit.toLocaleString()}</TableCell>
+                                 <TableCell className="text-right">{u.total_withdrawal.toLocaleString()}</TableCell>
+                                 <TableCell className="text-right">{Math.floor((u.total_deposit * (selectedAgentCommission ?? 0)) / 100).toLocaleString()}</TableCell>
+                               </TableRow>
+                             ))}
+                           </TableBody>
+                         </Table>
+                       </div>
+                     </div>
                   ) : (
                     <p className="text-center text-muted-foreground">Chưa có người dùng giới thiệu.</p>
                   )
