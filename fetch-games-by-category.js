@@ -128,7 +128,10 @@ async function saveGamesToDatabase(games) {
   try {
     const { data, error } = await supabase
       .from('games')
-      .insert(games)
+      .upsert(games, { 
+        onConflict: 'game_id,gpid',
+        ignoreDuplicates: false 
+      })
       .select();
     if (error) {
       console.error('❌ Lỗi khi lưu games vào database:', error);
