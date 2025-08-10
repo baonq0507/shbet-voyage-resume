@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePromotions } from "@/hooks/usePromotions";
 import { usePromotionCodes } from "@/hooks/usePromotionCodes";
 import { BankAccountModal } from "./BankAccountModal";
 import { Copy, CreditCard, Upload, Wallet, AlertTriangle, CheckCircle, Tag, Plus } from "lucide-react";
@@ -45,6 +46,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [promotionCode, setPromotionCode] = useState("");
+  const [availablePromotion, setAvailablePromotion] = useState<any>(null);
   const [proofImage, setProofImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
@@ -53,6 +55,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const { toast } = useToast();
   const { user, profile } = useAuth();
   const { validatePromotionCode } = usePromotionCodes();
+  const { getActivePromotions, getLatestPromotion } = usePromotions();
 
   // New deposit flow state
   const [depositStep, setDepositStep] = useState<'method' | 'amount' | 'bank' | 'qr'>('method');
@@ -111,10 +114,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       setQrCodeImageUrl(null);
       setDepositAmount("");
       setPromotionCode("");
+      setAvailablePromotion(null);
       fetchUserBankAccounts();
       fetchBanks();
+      
+      // Check for available promotions
+      const activePromotions = getActivePromotions();
+      if (activePromotions.length > 0) {
+        setAvailablePromotion(activePromotions[0]);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, getActivePromotions]);
 
   // Set up real-time subscription for user's transactions
   useEffect(() => {
@@ -577,6 +587,42 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                         onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
                       />
                     </div>
+                    
+                    {/* Display available promotion */}
+                    {availablePromotion && (
+                      <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Tag className="w-4 h-4 text-yellow-600" />
+                          <span className="font-medium text-yellow-800">Khuyến mãi có sẵn</span>
+                        </div>
+                        <p className="text-sm text-yellow-700 mb-2">{availablePromotion.title}</p>
+                        {availablePromotion.description && (
+                          <p className="text-xs text-yellow-600 mb-2">{availablePromotion.description}</p>
+                        )}
+                        <div className="text-sm font-medium text-orange-700">
+                          {availablePromotion.bonus_percentage 
+                            ? `Tặng ${availablePromotion.bonus_percentage}% số tiền nạp`
+                            : availablePromotion.bonus_amount 
+                            ? `Tặng ${availablePromotion.bonus_amount.toLocaleString()} VND`
+                            : 'Khuyến mãi đặc biệt'
+                          }
+                        </div>
+                        {depositAmount && (
+                          <div className="mt-2 p-2 bg-white/50 rounded border">
+                            <div className="text-xs text-gray-600">Dự kiến nhận được:</div>
+                            <div className="font-bold text-green-700">
+                              {(() => {
+                                const amount = parseFloat(depositAmount) || 0;
+                                const bonus = availablePromotion.bonus_percentage 
+                                  ? amount * (availablePromotion.bonus_percentage / 100)
+                                  : availablePromotion.bonus_amount || 0;
+                                return `${amount.toLocaleString()} + ${bonus.toLocaleString()} = ${(amount + bonus).toLocaleString()} VND`;
+                              })()}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => setDepositStep('method')}>Quay lại</Button>
                       <Button className="flex-1" onClick={() => setDepositStep('bank')} disabled={!depositAmount}>
