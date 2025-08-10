@@ -555,20 +555,46 @@ export const AdminAgents: React.FC = () => {
                 <DialogTitle>Số người dùng của đại lý</DialogTitle>
                 <DialogDescription>Đại lý: {selectedAgentName}</DialogDescription>
               </DialogHeader>
-              <div className="py-4 space-y-4">
-                <div className="text-center">
-                  {viewUsersLoading ? (
-                    <span>Đang tải...</span>
-                  ) : (
-                    <p className="text-base font-medium">
-                      Tổng: {viewUsersCount ?? 0} người dùng • Tổng hoa hồng (theo % hiện tại): {
-                        referredUsers
-                          .reduce((sum, u) => sum + Math.floor((u.total_deposit * (selectedAgentCommission ?? 0)) / 100), 0)
-                          .toLocaleString()
-                      }
-                    </p>
-                  )}
-                </div>
+               <div className="py-4 space-y-4">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {viewUsersLoading ? (
+                     <div className="col-span-full text-center">
+                       <span>Đang tải...</span>
+                     </div>
+                   ) : (
+                     <>
+                       {/* Card for Total Users */}
+                       <Card>
+                         <CardContent className="pt-6">
+                           <div className="text-center">
+                             <h3 className="text-2xl font-bold text-primary">
+                               {viewUsersCount ?? 0}
+                             </h3>
+                             <p className="text-sm text-muted-foreground">
+                               Tổng người dùng
+                             </p>
+                           </div>
+                         </CardContent>
+                       </Card>
+
+                       {/* Card for Total Commission */}
+                       <Card>
+                         <CardContent className="pt-6">
+                           <div className="text-center">
+                             <h3 className="text-2xl font-bold text-green-600">
+                               {referredUsers
+                                 .reduce((sum, u) => sum + Math.floor((u.total_deposit * (selectedAgentCommission ?? 0)) / 100), 0)
+                                 .toLocaleString()} VND
+                             </h3>
+                             <p className="text-sm text-muted-foreground">
+                               Tổng hoa hồng (theo % hiện tại)
+                             </p>
+                           </div>
+                         </CardContent>
+                       </Card>
+                     </>
+                   )}
+                 </div>
                 {!viewUsersLoading && (
                   referredUsers.length > 0 ? (
                     <div className="max-h-96 overflow-auto">
