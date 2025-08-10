@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       // Find transaction by orderCode in admin_note
       const { data: transactions, error: findError } = await supabase
         .from('transactions')
-        .select('id, user_id, amount, status')
+        .select('id, user_id, amount, status, admin_note')
         .like('admin_note', `%orderCode=${orderCode}%`)
         .eq('type', 'deposit')
         .eq('status', 'awaiting_payment'); // Tìm giao dịch đang chờ thanh toán
@@ -138,12 +138,19 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Amount mismatch" }, { status: 400 });
       }
 
+      // Preserve original admin_note and append PayOS confirmation
+      const originalAdminNote = transaction.admin_note || '';
+      const payosConfirmation = `PayOS confirmed: ${new Date().toISOString()}`;
+      const updatedAdminNote = originalAdminNote ? 
+        `${originalAdminNote} | ${payosConfirmation}` : 
+        payosConfirmation;
+
       // Update transaction status to approved
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
           status: 'approved',
-          admin_note: `${transaction.admin_note || ''} | PayOS confirmed: ${new Date().toISOString()}`,
+          admin_note: updatedAdminNote,
           approved_at: new Date().toISOString()
         })
         .eq('id', transaction.id);
@@ -157,12 +164,19 @@ Deno.serve(async (req) => {
       console.log("✅ Balance update will be handled by database trigger");
       
       // Apply promotion bonus when payment is confirmed
-      const adminNote = transaction.admin_note || '';
-      const promoMatch = adminNote.match(/promo=([^;]+)/);
+      // Use original admin_note to find promotion info
+      const originalAdminNote = transaction.admin_note || '';
+      const promoMatch = originalAdminNote.match(/promo=([^;]+)/);
       
       if (promoMatch) {
         const promotionCode = promoMatch[1];
         console.log("Found promotion code in transaction:", promotionCode);
+      } else {
+        console.log("No promotion code found in admin_note. Checking for automatic promotions...");
+      }
+      
+      if (promoMatch || true) { // Always check for promotions
+        const promotionCode = promoMatch ? promoMatch[1] : undefined;
         
         try {
           // Check if user's first deposit using the is_first_deposit function
