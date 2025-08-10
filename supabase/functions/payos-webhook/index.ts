@@ -138,6 +138,18 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Amount mismatch" }, { status: 400 });
       }
 
+      // CHECK FIRST DEPOSIT STATUS BEFORE UPDATING TRANSACTION
+      console.log("🎯 Checking if first deposit BEFORE transaction approval");
+      const { data: isFirstDepositResult, error: firstDepositError } = await supabase
+        .rpc('is_first_deposit', { user_id_param: transaction.user_id });
+
+      if (firstDepositError) {
+        console.error("❌ Error checking first deposit:", firstDepositError);
+      }
+      
+      const isFirstDeposit = isFirstDepositResult || false;
+      console.log("🎯 Is first deposit (BEFORE approval):", isFirstDeposit);
+
       // Preserve original admin_note and append PayOS confirmation
       const originalAdminNote = transaction.admin_note || '';
       const payosConfirmation = `PayOS confirmed: ${new Date().toISOString()}`;
@@ -183,152 +195,142 @@ Deno.serve(async (req) => {
       console.log("🎯 Final promotion code to check:", promotionCode);
       
       try {
-        // Check if user's first deposit using the is_first_deposit function
-        console.log("🎯 Checking if first deposit for user:", transaction.user_id);
-        const { data: isFirstDepositResult, error: firstDepositError } = await supabase
-          .rpc('is_first_deposit', { user_id_param: transaction.user_id });
+        // Use the isFirstDeposit value checked BEFORE transaction approval
+        console.log("🎯 Using first deposit status checked before approval:", isFirstDeposit);
 
-        if (firstDepositError) {
-          console.error("❌ Error checking first deposit:", firstDepositError);
+        // Fetch active promotions
+        console.log("🎯 Fetching active promotions...");
+        const { data: promotions, error: promotionError } = await supabase
+          .from('promotions')
+          .select('*')
+          .eq('is_active', true)
+          .lte('start_date', new Date().toISOString())
+          .gte('end_date', new Date().toISOString())
+          .order('created_at', { ascending: false });
+
+        if (promotionError) {
+          console.error("❌ Error fetching promotions:", promotionError);
         } else {
-          const isFirstDeposit = isFirstDepositResult;
-          console.log("🎯 Is first deposit result:", isFirstDeposit);
-
-          // Fetch active promotions
-          console.log("🎯 Fetching active promotions...");
-          const { data: promotions, error: promotionError } = await supabase
-            .from('promotions')
-            .select('*')
-            .eq('is_active', true)
-            .lte('start_date', new Date().toISOString())
-            .gte('end_date', new Date().toISOString())
-            .order('created_at', { ascending: false });
-
-          if (promotionError) {
-            console.error("❌ Error fetching promotions:", promotionError);
-          } else {
-            console.log("🎯 Active promotions found:", promotions?.length || 0);
-            console.log("🎯 Promotions details:", promotions);
+          console.log("🎯 Active promotions found:", promotions?.length || 0);
+          console.log("🎯 Promotions details:", promotions);
             
-            // Find applicable promotion
-            let applicablePromotion = null;
+          // Find applicable promotion
+          let applicablePromotion = null;
 
-            if (promotionCode) {
-              // Find promotion by code
-              console.log("🎯 Looking for code-based promotion:", promotionCode);
-              applicablePromotion = promotions?.find((promo: any) => {
-                const matchesCode = promo.promotion_type === 'code_based' && promo.promotion_code === promotionCode;
-                const hasUses = !promo.max_uses || promo.current_uses < promo.max_uses;
-                const meetsMinDeposit = !promo.min_deposit || transaction.amount >= (promo.min_deposit || 0);
-                console.log(`🎯 Checking promo ${promo.title}: code=${matchesCode}, uses=${hasUses}, deposit=${meetsMinDeposit}`);
-                return matchesCode && hasUses && meetsMinDeposit;
-              }) || null;
-            }
+          if (promotionCode) {
+            // Find promotion by code
+            console.log("🎯 Looking for code-based promotion:", promotionCode);
+            applicablePromotion = promotions?.find((promo: any) => {
+              const matchesCode = promo.promotion_type === 'code_based' && promo.promotion_code === promotionCode;
+              const hasUses = !promo.max_uses || promo.current_uses < promo.max_uses;
+              const meetsMinDeposit = !promo.min_deposit || transaction.amount >= (promo.min_deposit || 0);
+              console.log(`🎯 Checking promo ${promo.title}: code=${matchesCode}, uses=${hasUses}, deposit=${meetsMinDeposit}`);
+              return matchesCode && hasUses && meetsMinDeposit;
+            }) || null;
+          }
 
-            // If no code-based promotion found, check for automatic promotions
-            if (!applicablePromotion) {
-              console.log("🎯 No code-based promotion found, checking automatic promotions...");
-              for (const promo of promotions || []) {
-                const hasRemainingUses = !promo.max_uses || promo.current_uses < promo.max_uses;
-                const meetsMinDeposit = !promo.min_deposit || transaction.amount >= (promo.min_deposit || 0);
-                
-                console.log(`🎯 Checking auto promo "${promo.title}":`, {
-                  type: promo.promotion_type,
-                  hasUses: hasRemainingUses,
-                  meetsDeposit: meetsMinDeposit,
-                  isFirstDepositOnly: promo.is_first_deposit_only,
-                  userIsFirstDeposit: isFirstDeposit
-                });
-                
-                if (!hasRemainingUses || !meetsMinDeposit) {
-                  console.log(`🎯 Skipping promo "${promo.title}" - requirements not met`);
-                  continue;
-                }
-                
-                if (promo.promotion_type === 'first_deposit' && isFirstDeposit) {
-                  console.log(`🎯 Found first deposit promotion: ${promo.title}`);
-                  applicablePromotion = promo;
-                  break;
-                } else if (promo.promotion_type === 'time_based' && !promo.is_first_deposit_only) {
-                  console.log(`🎯 Found time-based promotion: ${promo.title}`);
-                  applicablePromotion = promo;
-                  break;
-                } else if (promo.promotion_type === 'time_based' && promo.is_first_deposit_only && isFirstDeposit) {
-                  console.log(`🎯 Found first-deposit time-based promotion: ${promo.title}`);
-                  applicablePromotion = promo;
-                  break;
-                }
+          // If no code-based promotion found, check for automatic promotions
+          if (!applicablePromotion) {
+            console.log("🎯 No code-based promotion found, checking automatic promotions...");
+            for (const promo of promotions || []) {
+              const hasRemainingUses = !promo.max_uses || promo.current_uses < promo.max_uses;
+              const meetsMinDeposit = !promo.min_deposit || transaction.amount >= (promo.min_deposit || 0);
+              
+              console.log(`🎯 Checking auto promo "${promo.title}":`, {
+                type: promo.promotion_type,
+                hasUses: hasRemainingUses,
+                meetsDeposit: meetsMinDeposit,
+                isFirstDepositOnly: promo.is_first_deposit_only,
+                userIsFirstDeposit: isFirstDeposit
+              });
+              
+              if (!hasRemainingUses || !meetsMinDeposit) {
+                console.log(`🎯 Skipping promo "${promo.title}" - requirements not met`);
+                continue;
               }
-            }
-
-            console.log("🎯 Final applicable promotion:", applicablePromotion?.title || "None");
-
-            if (applicablePromotion) {
-              // Calculate bonus amount
-              let bonusAmount = 0;
-              if (applicablePromotion.bonus_percentage) {
-                bonusAmount = (transaction.amount * applicablePromotion.bonus_percentage) / 100;
-              } else if (applicablePromotion.bonus_amount) {
-                bonusAmount = applicablePromotion.bonus_amount;
+              
+              if (promo.promotion_type === 'first_deposit' && isFirstDeposit) {
+                console.log(`🎯 Found first deposit promotion: ${promo.title}`);
+                applicablePromotion = promo;
+                break;
+              } else if (promo.promotion_type === 'time_based' && !promo.is_first_deposit_only) {
+                console.log(`🎯 Found time-based promotion: ${promo.title}`);
+                applicablePromotion = promo;
+                break;
+              } else if (promo.promotion_type === 'time_based' && promo.is_first_deposit_only && isFirstDeposit) {
+                console.log(`🎯 Found first-deposit time-based promotion: ${promo.title}`);
+                applicablePromotion = promo;
+                break;
               }
-
-              console.log("🎯 Calculated bonus amount:", bonusAmount);
-
-              if (bonusAmount > 0) {
-                console.log("🎯 Applying bonus:", bonusAmount, "for promotion:", applicablePromotion.title);
-                
-                // Create bonus transaction
-                const { error: bonusError } = await supabase
-                  .from('transactions')
-                  .insert({
-                    user_id: transaction.user_id,
-                    amount: bonusAmount,
-                    type: 'bonus',
-                    status: 'approved',
-                    admin_note: `Khuyến mãi "${applicablePromotion.title}" - ${
-                      applicablePromotion.bonus_percentage 
-                        ? `${applicablePromotion.bonus_percentage}%` 
-                        : `${applicablePromotion.bonus_amount?.toLocaleString()} VND`
-                    } ${applicablePromotion.promotion_type === 'first_deposit' ? '(Nạp đầu)' : 
-                        applicablePromotion.promotion_type === 'code_based' ? `(Mã: ${promotionCode})` : ''}`,
-                    approved_at: new Date().toISOString()
-                  });
-
-                if (bonusError) {
-                  console.error("❌ Error creating bonus transaction:", bonusError);
-                } else {
-                  console.log("✅ Bonus transaction created successfully:", bonusAmount);
-                  
-                  // Update promotion usage count
-                  await supabase
-                    .from('promotions')
-                    .update({
-                      current_uses: applicablePromotion.current_uses + 1
-                    })
-                    .eq('id', applicablePromotion.id);
-
-                  // If promotion code was used, mark it as used
-                  if (promotionCode && applicablePromotion.promotion_type === 'code_based') {
-                    await supabase
-                      .from('promotion_codes')
-                      .update({
-                        is_used: true,
-                        used_by: transaction.user_id,
-                        used_at: new Date().toISOString()
-                      })
-                      .eq('code', promotionCode)
-                      .eq('promotion_id', applicablePromotion.id);
-                  }
-                }
-              } else {
-                console.log("🎯 Bonus amount is 0, not creating bonus transaction");
-              }
-            } else {
-              console.log("🎯 No applicable promotion found");
-              console.log("🎯 Summary - User:", transaction.user_id, "Amount:", transaction.amount, "IsFirstDeposit:", isFirstDeposit, "PromoCode:", promotionCode);
             }
           }
-        }
+
+          console.log("🎯 Final applicable promotion:", applicablePromotion?.title || "None");
+
+          if (applicablePromotion) {
+            // Calculate bonus amount
+            let bonusAmount = 0;
+            if (applicablePromotion.bonus_percentage) {
+              bonusAmount = (transaction.amount * applicablePromotion.bonus_percentage) / 100;
+            } else if (applicablePromotion.bonus_amount) {
+              bonusAmount = applicablePromotion.bonus_amount;
+            }
+
+            console.log("🎯 Calculated bonus amount:", bonusAmount);
+
+            if (bonusAmount > 0) {
+              console.log("🎯 Applying bonus:", bonusAmount, "for promotion:", applicablePromotion.title);
+              
+              // Create bonus transaction
+              const { error: bonusError } = await supabase
+                .from('transactions')
+                .insert({
+                  user_id: transaction.user_id,
+                  amount: bonusAmount,
+                  type: 'bonus',
+                  status: 'approved',
+                  admin_note: `Khuyến mãi "${applicablePromotion.title}" - ${
+                    applicablePromotion.bonus_percentage 
+                      ? `${applicablePromotion.bonus_percentage}%` 
+                      : `${applicablePromotion.bonus_amount?.toLocaleString()} VND`
+                  } ${applicablePromotion.promotion_type === 'first_deposit' ? '(Nạp đầu)' : 
+                      applicablePromotion.promotion_type === 'code_based' ? `(Mã: ${promotionCode})` : ''}`,
+                  approved_at: new Date().toISOString()
+                });
+
+              if (bonusError) {
+                console.error("❌ Error creating bonus transaction:", bonusError);
+              } else {
+                console.log("✅ Bonus transaction created successfully:", bonusAmount);
+                
+                // Update promotion usage count
+                await supabase
+                  .from('promotions')
+                  .update({
+                    current_uses: applicablePromotion.current_uses + 1
+                  })
+                  .eq('id', applicablePromotion.id);
+
+                // If promotion code was used, mark it as used
+                if (promotionCode && applicablePromotion.promotion_type === 'code_based') {
+                  await supabase
+                    .from('promotion_codes')
+                    .update({
+                      is_used: true,
+                      used_by: transaction.user_id,
+                      used_at: new Date().toISOString()
+                    })
+                    .eq('code', promotionCode)
+                    .eq('promotion_id', applicablePromotion.id);
+                }
+              }
+            } else {
+              console.log("🎯 Bonus amount is 0, not creating bonus transaction");
+            }
+          } else {
+            console.log("🎯 No applicable promotion found");
+            console.log("🎯 Summary - User:", transaction.user_id, "Amount:", transaction.amount, "IsFirstDeposit:", isFirstDeposit, "PromoCode:", promotionCode);
+          }
       } catch (error) {
         console.error("❌ Error processing promotion:", error);
       }
