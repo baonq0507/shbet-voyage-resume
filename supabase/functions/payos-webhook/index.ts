@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
   console.log("Method:", req.method);
   console.log("URL:", req.url);
   console.log("Headers:", Object.fromEntries(req.headers.entries()));
-  
+  return jsonResponse({ })
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
