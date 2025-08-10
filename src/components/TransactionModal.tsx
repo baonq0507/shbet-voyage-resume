@@ -58,9 +58,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
   const { getActivePromotions, getLatestPromotion } = usePromotions();
 
   // New deposit flow state
-  const [depositStep, setDepositStep] = useState<'method' | 'amount' | 'bank' | 'qr'>('method');
+  const [depositStep, setDepositStep] = useState<'method' | 'amount' | 'qr'>('method');
   const [selectedMethod, setSelectedMethod] = useState<'vietqr' | null>(null);
-  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [orderInfo, setOrderInfo] = useState<{
     transactionId?: string;
@@ -110,7 +109,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       // Reset deposit flow each time modal opens
       setDepositStep('method');
       setSelectedMethod(null);
-      setSelectedBank(null);
       setOrderInfo(null);
       setTxStatus(null);
       setQrCodeImageUrl(null);
@@ -243,7 +241,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                 // Reset deposit flow
                 setDepositStep('method');
                 setSelectedMethod(null);
-                setSelectedBank(null);
                 setOrderInfo(null);
                 setTxStatus(null);
                 setQrCodeImageUrl(null);
@@ -713,41 +710,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                     )}
                     <div className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => setDepositStep('method')}>Quay lại</Button>
-                      <Button className="flex-1" onClick={() => setDepositStep('bank')} disabled={!depositAmount}>
-                        Tiếp tục
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {depositStep === 'bank' && (
-                  <div className="space-y-4">
-                    <Label className="text-sm">Chọn ngân hàng nhận tiền</Label>
-                    <div className="grid grid-cols-1 gap-3">
-                      {banks.map((bank) => (
-                        <button
-                          key={bank.id}
-                          type="button"
-                          onClick={() => setSelectedBank(bank)}
-                          className={`p-4 rounded-lg border text-left transition ${selectedBank?.id === bank.id ? 'border-primary ring-2 ring-primary/20' : ''}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{bank.bank_name}</p>
-                              <p className="text-sm text-muted-foreground">{bank.account_number} - {bank.account_holder}</p>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1" onClick={() => setDepositStep('amount')}>Quay lại</Button>
-                      <Button className="flex-1" onClick={handleCreateDepositOrder} disabled={creatingOrder || !selectedBank}>
+                      <Button className="flex-1" onClick={handleCreateDepositOrder} disabled={creatingOrder || !depositAmount}>
                         {creatingOrder ? 'Đang tạo đơn...' : 'Tạo đơn nạp tiền'}
                       </Button>
                     </div>
                   </div>
                 )}
+
 
                 {depositStep === 'qr' && (
                   <div className="space-y-4">
@@ -813,12 +782,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                            )}
                          </div>
                         
-                        <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" onClick={() => setDepositStep('bank')}>Quay lại</Button>
-                          <Button className="flex-1" onClick={onClose} disabled={txStatus !== 'approved'}>
-                            {txStatus === 'approved' ? 'Hoàn tất' : 'Đóng'}
-                          </Button>
-                        </div>
+                         <div className="flex gap-2">
+                           <Button variant="outline" className="flex-1" onClick={() => setDepositStep('amount')}>Quay lại</Button>
+                           <Button className="flex-1" onClick={onClose} disabled={txStatus !== 'approved'}>
+                             {txStatus === 'approved' ? 'Hoàn tất' : 'Đóng'}
+                           </Button>
+                         </div>
                       </div>
                     ) : (
                       <div className="text-center space-y-4">
@@ -840,9 +809,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                           </div>
                         </div>
                         
-                        <Button variant="outline" className="w-full" onClick={() => setDepositStep('bank')}>
-                          Quay lại
-                        </Button>
+                         <Button variant="outline" className="w-full" onClick={() => setDepositStep('amount')}>
+                           Quay lại
+                         </Button>
                       </div>
                     )}
                   </div>
