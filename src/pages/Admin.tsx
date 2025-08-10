@@ -189,6 +189,109 @@ const Admin = () => {
     }
   }, [isAdmin]);
 
+  // Helper: derive highest priority role for a user
+  const getTopRole = (userId: string): 'admin' | 'agent' | 'user' => {
+    const roles = userRoles[userId] || [];
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('agent')) return 'agent';
+    return 'user';
+  };
+
+  const getUserDepositStats = (userId: string) => {
+    const userTransactions = transactions.filter(t => t.user_id === userId && t.type === 'deposit' && t.status === 'approved');
+    return {
+      count: userTransactions.length,
+      total: userTransactions.reduce((sum, t) => sum + t.amount, 0)
+    };
+  };
+
+  // Derived lists for Users (Dashboard)
+  const filteredUsersDash = React.useMemo(() => {
+    return users.filter((u) => {
+      const q = userSearch.trim().toLowerCase();
+      const matchesText = !q || (u.full_name || '').toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q);
+      const matchesRole = roleFilter === 'all' || getTopRole(u.user_id) === roleFilter;
+      return matchesText && matchesRole;
+    });
+  }, [users, userSearch, roleFilter, userRoles]);
+
+  const sortedUsersDash = React.useMemo(() => {
+    const arr = [...filteredUsersDash];
+    const getVal = (u: UserProfile, key: UserSortKey): string | number => {
+      switch (key) {
+        case 'username':
+          return (u.username || '').toLowerCase();
+        case 'full_name':
+          return (u.full_name || '').toLowerCase();
+        case 'balance':
+          return Number(u.balance) || 0;
+        case 'total_deposit':
+          return getUserDepositStats(u.user_id).total || 0;
+        case 'created_at':
+          return new Date(u.created_at).getTime();
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getVal(a, userSortKey);
+      const vb = getVal(b, userSortKey);
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return userSortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredUsersDash, userSortKey, userSortDir, transactions]);
+
+  // Filtered and sorted transactions
+  const filteredTransactions = React.useMemo(() => {
+    return transactions.filter((t) => {
+      const q = txSearch.trim().toLowerCase();
+      const matchesText = !q || (t.profiles?.username || '').toLowerCase().includes(q) || (t.profiles?.full_name || '').toLowerCase().includes(q);
+      return matchesText;
+    });
+  }, [transactions, txSearch]);
+
+  const sortedTransactions = React.useMemo(() => {
+    const arr = [...filteredTransactions];
+    arr.sort((a, b) => {
+      let va: string | number, vb: string | number;
+      switch (txSortKey) {
+        case 'user':
+          va = a.profiles?.username || '';
+          vb = b.profiles?.username || '';
+          break;
+        case 'type':
+          va = a.type;
+          vb = b.type;
+          break;
+        case 'amount':
+          va = a.amount;
+          vb = b.amount;
+          break;
+        case 'status':
+          va = a.status;
+          vb = b.status;
+          break;
+        case 'created_at':
+        default:
+          va = new Date(a.created_at).getTime();
+          vb = new Date(b.created_at).getTime();
+          break;
+      }
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return txSortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredTransactions, txSortKey, txSortDir]);
+
+  const getTransactionsByStatus = (status?: string) => {
+    return status ? sortedTransactions.filter(t => t.status === status) : sortedTransactions;
+  };
+
   const fetchStats = async () => {
     try {
       const [usersResponse, transactionsResponse, promotionsResponse] = await Promise.all([
@@ -521,58 +624,6 @@ const Admin = () => {
     }
   };
 
-  const getUserDepositStats = (userId: string) => {
-    const userTransactions = transactions.filter(t => t.user_id === userId && t.type === 'deposit' && t.status === 'approved');
-    return {
-      count: userTransactions.length,
-      total: userTransactions.reduce((sum, t) => sum + t.amount, 0)
-    };
-  };
-
-  // Helper: derive highest priority role for a user
-  const getTopRole = (userId: string): 'admin' | 'agent' | 'user' => {
-    const roles = userRoles[userId] || [];
-    if (roles.includes('admin')) return 'admin';
-    if (roles.includes('agent')) return 'agent';
-    return 'user';
-  };
-
-  // Derived lists for Users (Dashboard)
-  const filteredUsersDash = users.filter((u) => {
-    const q = userSearch.trim().toLowerCase();
-    const matchesText = !q || (u.full_name || '').toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q);
-    const matchesRole = roleFilter === 'all' || getTopRole(u.user_id) === roleFilter;
-    return matchesText && matchesRole;
-  });
-
-  const sortedUsersDash = React.useMemo(() => {
-    const arr = [...filteredUsersDash];
-    const getVal = (u: UserProfile, key: UserSortKey): string | number => {
-      switch (key) {
-        case 'username':
-          return (u.username || '').toLowerCase();
-        case 'full_name':
-          return (u.full_name || '').toLowerCase();
-        case 'balance':
-          return Number(u.balance) || 0;
-        case 'total_deposit':
-          return getUserDepositStats(u.user_id).total || 0;
-        case 'created_at':
-          return new Date(u.created_at).getTime();
-        default:
-          return 0;
-      }
-    };
-    arr.sort((a, b) => {
-      const va = getVal(a, userSortKey);
-      const vb = getVal(b, userSortKey);
-      let cmp = 0;
-      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-      else cmp = String(va).localeCompare(String(vb));
-      return userSortDir === 'asc' ? cmp : -cmp;
-    });
-    return arr;
-  }, [filteredUsersDash, userSortKey, userSortDir]);
 
   if (isLoading) {
     return (
@@ -995,51 +1046,6 @@ const Admin = () => {
     </div>
   );
 
-  // Filtered and sorted transactions
-  const filteredTransactions = transactions.filter((t) => {
-    const q = txSearch.trim().toLowerCase();
-    const matchesText = !q || (t.profiles?.username || '').toLowerCase().includes(q) || (t.profiles?.full_name || '').toLowerCase().includes(q);
-    return matchesText;
-  });
-
-  const sortedTransactions = React.useMemo(() => {
-    const arr = [...filteredTransactions];
-    arr.sort((a, b) => {
-      let va: string | number, vb: string | number;
-      switch (txSortKey) {
-        case 'user':
-          va = a.profiles?.username || '';
-          vb = b.profiles?.username || '';
-          break;
-        case 'type':
-          va = a.type;
-          vb = b.type;
-          break;
-        case 'amount':
-          va = a.amount;
-          vb = b.amount;
-          break;
-        case 'status':
-          va = a.status;
-          vb = b.status;
-          break;
-        case 'created_at':
-        default:
-          va = new Date(a.created_at).getTime();
-          vb = new Date(b.created_at).getTime();
-          break;
-      }
-      let cmp = 0;
-      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-      else cmp = String(va).localeCompare(String(vb));
-      return txSortDir === 'asc' ? cmp : -cmp;
-    });
-    return arr;
-  }, [filteredTransactions, txSortKey, txSortDir]);
-
-  const getTransactionsByStatus = (status?: string) => {
-    return status ? sortedTransactions.filter(t => t.status === status) : sortedTransactions;
-  };
 
   const renderTransactionManagement = () => (
     <div className="space-y-6">
