@@ -331,6 +331,7 @@ Deno.serve(async (req) => {
             console.log("🎯 No applicable promotion found");
             console.log("🎯 Summary - User:", transaction.user_id, "Amount:", transaction.amount, "IsFirstDeposit:", isFirstDeposit, "PromoCode:", promotionCode);
           }
+        }
       } catch (error) {
         console.error("❌ Error processing promotion:", error);
       }
