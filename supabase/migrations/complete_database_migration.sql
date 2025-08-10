@@ -1,20 +1,20 @@
 -- =============================================
--- COMPREHENSIVE DATABASE RESET & MIGRATION
--- Handles existing objects safely
+-- COMPLETE DATABASE MIGRATION
+-- Gộp tất cả migration thành một file hoàn chỉnh
 -- =============================================
 
--- Create enum for user roles (if not exists)
+-- Tạo enum cho user roles
 DO $$ BEGIN
     CREATE TYPE public.app_role AS ENUM ('admin', 'user');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
--- =============================================
--- DROP EXISTING TABLES (in correct order)
--- =============================================
+-- Drop existing tables
 DROP TABLE IF EXISTS public.promotion_codes CASCADE;
 DROP TABLE IF EXISTS public.promotions CASCADE;
+DROP TABLE IF EXISTS public.agent_referrals CASCADE;
+DROP TABLE IF EXISTS public.agent_commission_levels CASCADE;
 DROP TABLE IF EXISTS public.agents CASCADE;
 DROP TABLE IF EXISTS public.notifications CASCADE;
 DROP TABLE IF EXISTS public.games CASCADE;
@@ -24,8 +24,10 @@ DROP TABLE IF EXISTS public.user_roles CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 
 -- =============================================
--- PROFILES TABLE
+-- CREATE TABLES
 -- =============================================
+
+-- Profiles table
 CREATE TABLE public.profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL UNIQUE,
@@ -36,16 +38,12 @@ CREATE TABLE public.profiles (
   avatar_url TEXT,
   last_login_at TIMESTAMP WITH TIME ZONE,
   last_login_ip INET,
+  referred_by UUID,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable Row Level Security
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- USER ROLES TABLE
--- =============================================
+-- User roles table
 CREATE TABLE public.user_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
@@ -55,12 +53,7 @@ CREATE TABLE public.user_roles (
   UNIQUE (user_id, role)
 );
 
--- Enable RLS on user_roles
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- BANK TABLE
--- =============================================
+-- Bank table
 CREATE TABLE public.bank (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   bank_name TEXT NOT NULL,
@@ -72,16 +65,11 @@ CREATE TABLE public.bank (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS for bank table
-ALTER TABLE public.bank ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- TRANSACTIONS TABLE
--- =============================================
+-- Transactions table
 CREATE TABLE public.transactions (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('deposit', 'withdrawal')),
+  type TEXT NOT NULL CHECK (type IN ('deposit', 'withdrawal', 'bonus')),
   amount NUMERIC NOT NULL CHECK (amount > 0),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   bank_id UUID REFERENCES public.bank(id),
@@ -93,12 +81,7 @@ CREATE TABLE public.transactions (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS for transactions table
-ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- PROMOTIONS TABLE
--- =============================================
+-- Promotions table
 CREATE TABLE public.promotions (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
@@ -119,12 +102,7 @@ CREATE TABLE public.promotions (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS for promotions table
-ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- PROMOTION CODES TABLE
--- =============================================
+-- Promotion codes table
 CREATE TABLE public.promotion_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   promotion_id UUID REFERENCES public.promotions(id) ON DELETE CASCADE,
@@ -136,12 +114,7 @@ CREATE TABLE public.promotion_codes (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS on promotion codes
-ALTER TABLE public.promotion_codes ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- GAMES TABLE
--- =============================================
+-- Games table
 CREATE TABLE public.games (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   game_id VARCHAR NOT NULL,
@@ -169,12 +142,7 @@ CREATE TABLE public.games (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Enable RLS for games table
-ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- NOTIFICATIONS TABLE
--- =============================================
+-- Notifications table
 CREATE TABLE public.notifications (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID,
@@ -187,31 +155,74 @@ CREATE TABLE public.notifications (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS for notifications table
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- AGENTS TABLE
--- =============================================
+-- Agents table
 CREATE TABLE public.agents (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
   commission_percentage NUMERIC NOT NULL DEFAULT 10.00,
   total_commission NUMERIC NOT NULL DEFAULT 0.00,
   referral_count INTEGER NOT NULL DEFAULT 0,
+  referral_code TEXT UNIQUE,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS for agents table
+-- Agent commission levels table
+CREATE TABLE public.agent_commission_levels (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_id UUID NOT NULL REFERENCES public.agents(id) ON DELETE CASCADE,
+  level INTEGER NOT NULL CHECK (level > 0),
+  commission_percentage NUMERIC NOT NULL DEFAULT 0.00,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_agent_level UNIQUE (agent_id, level)
+);
+
+-- Agent referrals table
+CREATE TABLE public.agent_referrals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_id UUID REFERENCES public.agents(id) ON DELETE CASCADE NOT NULL,
+  referred_user_id UUID REFERENCES public.profiles(user_id) ON DELETE CASCADE NOT NULL,
+  referral_date TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  commission_earned NUMERIC DEFAULT 0.00,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'cancelled')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  UNIQUE(agent_id, referred_user_id)
+);
+
+-- Foreign key constraints
+ALTER TABLE public.profiles 
+ADD CONSTRAINT fk_profiles_referred_by_agents
+FOREIGN KEY (referred_by) REFERENCES public.agents(id) ON DELETE SET NULL;
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_agents_referral_code ON public.agents(referral_code);
+CREATE INDEX IF NOT EXISTS idx_profiles_referred_by ON public.profiles(referred_by);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON public.transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON public.transactions(status);
+CREATE INDEX IF NOT EXISTS idx_games_category ON public.games(category);
+CREATE INDEX IF NOT EXISTS idx_games_provider ON public.games(provider);
+
+-- Enable RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bank ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.promotion_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agent_commission_levels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agent_referrals ENABLE ROW LEVEL SECURITY;
 
 -- =============================================
--- UTILITY FUNCTIONS
+-- FUNCTIONS
 -- =============================================
 
--- Function to update timestamps
+-- Function để update timestamps
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -221,7 +232,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = 'public';
 
--- Function to check user roles
+-- Function để check user roles
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
 RETURNS BOOLEAN
 LANGUAGE SQL
@@ -237,7 +248,7 @@ AS $$
   )
 $$;
 
--- Function to get current user role
+-- Function để get current user role
 CREATE OR REPLACE FUNCTION public.get_current_user_role()
 RETURNS app_role
 LANGUAGE SQL
@@ -251,10 +262,41 @@ AS $$
   LIMIT 1
 $$;
 
--- Function to handle new user registration
+-- Function để generate referral code
+CREATE OR REPLACE FUNCTION public.generate_referral_code()
+RETURNS text
+LANGUAGE plpgsql
+SET search_path TO 'public'
+AS $function$
+DECLARE
+    code TEXT;
+    exists_check INTEGER;
+BEGIN
+    LOOP
+        code := upper(substring(md5(random()::text) from 1 for 8));
+        SELECT COUNT(*) INTO exists_check 
+        FROM public.agents 
+        WHERE referral_code = code;
+        IF exists_check = 0 THEN
+            EXIT;
+        END IF;
+    END LOOP;
+    RETURN code;
+END;
+$function$;
+
+-- Function để handle new user registration
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Auto-confirm the user's email
+  UPDATE auth.users 
+  SET email_confirmed_at = now(),
+      confirmation_token = '',
+      updated_at = now()
+  WHERE id = NEW.id;
+  
+  -- Create user profile with avatar_url
   INSERT INTO public.profiles (user_id, full_name, username, phone_number, avatar_url)
   VALUES (
     NEW.id,
@@ -264,30 +306,71 @@ BEGIN
     '/src/assets/avatars/avatar-1.jpg'
   );
   
+  -- Create user role
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'user');
+  
   RETURN NEW;
 EXCEPTION
   WHEN OTHERS THEN
-    RAISE WARNING 'Error creating profile for user %: %', NEW.id, SQLERRM;
+    RAISE WARNING 'Error in handle_new_user for user %: %', NEW.id, SQLERRM;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = 'public';
 
--- Function to auto-assign user role
-CREATE OR REPLACE FUNCTION public.handle_new_user_role()
-RETURNS TRIGGER
+-- Function để handle new agent
+CREATE OR REPLACE FUNCTION public.handle_new_agent()
+RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = 'public'
-AS $$
+SET search_path TO 'public'
+AS $function$
 BEGIN
-  INSERT INTO public.user_roles (user_id, role)
-  VALUES (NEW.id, 'user');
-  RETURN NEW;
+    IF NEW.referral_code IS NULL THEN
+        NEW.referral_code = generate_referral_code();
+    END IF;
+    RETURN NEW;
 END;
-$$;
+$function$;
 
--- Function to handle withdrawal transactions
+-- Function để handle referral signup
+CREATE OR REPLACE FUNCTION public.handle_referral_signup()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+    agent_record RECORD;
+    v_referral_id uuid;
+BEGIN
+    IF NEW.referred_by IS NOT NULL THEN
+        SELECT * INTO agent_record 
+        FROM public.agents 
+        WHERE id = NEW.referred_by;
+        IF FOUND THEN
+            SELECT id INTO v_referral_id
+            FROM public.agent_referrals
+            WHERE agent_id = agent_record.id AND referred_user_id = NEW.user_id
+            LIMIT 1;
+            IF v_referral_id IS NULL THEN
+                INSERT INTO public.agent_referrals (agent_id, referred_user_id)
+                VALUES (agent_record.id, NEW.user_id);
+            END IF;
+            UPDATE public.agents 
+            SET referral_count = (
+              SELECT COUNT(*) FROM public.agent_referrals ar WHERE ar.agent_id = agent_record.id
+            ),
+                updated_at = now()
+            WHERE id = agent_record.id;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$function$;
+
+-- Function để handle withdrawal transactions
 CREATE OR REPLACE FUNCTION public.handle_withdrawal_transaction()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -318,7 +401,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = 'public';
 
--- Function to handle transaction status changes
+-- Function để handle transaction status changes
 CREATE OR REPLACE FUNCTION public.handle_transaction_status_change()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -336,26 +419,100 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = 'public';
 
--- Function to handle deposit approval
+-- Function để handle deposit approval
 CREATE OR REPLACE FUNCTION public.handle_deposit_approval()
-RETURNS TRIGGER AS $$
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
 DECLARE
-  user_profile RECORD;
+  v_agent_id uuid;
+  v_commission_percent numeric;
+  v_commission_amount numeric;
+  v_referral_id uuid;
 BEGIN
-  IF NEW.type = 'deposit' AND OLD.status = 'pending' AND NEW.status = 'approved' THEN
-    SELECT username INTO user_profile 
-    FROM public.profiles 
+  -- Handle deposit approval: update balance when status changes to approved
+  IF NEW.type = 'deposit' AND OLD.status != 'approved' AND NEW.status = 'approved' THEN
+    
+    -- Update user balance first
+    UPDATE public.profiles
+    SET balance = COALESCE(balance, 0) + NEW.amount,
+        updated_at = now()
     WHERE user_id = NEW.user_id;
     
-    RAISE NOTICE 'Processing deposit approval for user: %, amount: %', user_profile.username, NEW.amount;
+    RAISE NOTICE 'Updated balance for user %: added % VND', NEW.user_id, NEW.amount;
+
+    -- Find agent who referred this user for commission processing
+    SELECT referred_by INTO v_agent_id
+    FROM public.profiles
+    WHERE user_id = NEW.user_id;
+
+    IF v_agent_id IS NOT NULL THEN
+      -- Prefer commission from agent level if set
+      SELECT COALESCE(al.commission_percentage, a.commission_percentage)
+      INTO v_commission_percent
+      FROM public.agents a
+      LEFT JOIN public.agent_commission_levels al ON al.id = a.level_id AND al.is_active = true
+      WHERE a.id = v_agent_id
+        AND a.is_active = true;
+
+      v_commission_percent := COALESCE(v_commission_percent, 0);
+      v_commission_amount := (NEW.amount * v_commission_percent) / 100.0;
+
+      -- Upsert referral earnings
+      SELECT id INTO v_referral_id
+      FROM public.agent_referrals
+      WHERE agent_id = v_agent_id
+        AND referred_user_id = NEW.user_id
+      LIMIT 1;
+
+      IF v_referral_id IS NULL THEN
+        INSERT INTO public.agent_referrals (agent_id, referred_user_id, commission_earned, status)
+        VALUES (v_agent_id, NEW.user_id, v_commission_amount, 'active');
+      ELSE
+        UPDATE public.agent_referrals
+        SET commission_earned = COALESCE(commission_earned, 0) + v_commission_amount,
+            updated_at = now()
+        WHERE id = v_referral_id;
+      END IF;
+
+      -- Update agent total commission
+      UPDATE public.agents
+      SET total_commission = COALESCE(total_commission, 0) + v_commission_amount,
+          updated_at = now()
+      WHERE id = v_agent_id;
+      
+      RAISE NOTICE 'Processed agent commission: % VND for agent %', v_commission_amount, v_agent_id;
+    END IF;
   END IF;
-  
+
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER
-SET search_path = 'public';
+$function$;
 
--- Function to check first deposit
+-- Function để handle bonus transactions
+CREATE OR REPLACE FUNCTION public.handle_bonus_transaction()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+BEGIN
+  -- Handle bonus transactions when they are created with approved status
+  IF NEW.type = 'bonus' AND NEW.status = 'approved' THEN
+    UPDATE public.profiles
+    SET balance = COALESCE(balance, 0) + NEW.amount,
+        updated_at = now()
+    WHERE user_id = NEW.user_id;
+    
+    RAISE NOTICE 'Added bonus to balance for user %: added % VND', NEW.user_id, NEW.amount;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+-- Function để check first deposit
 CREATE OR REPLACE FUNCTION public.is_first_deposit(user_id_param UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -369,7 +526,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = 'public';
 
--- Function to validate promotion dates
+-- Function để validate promotion dates
 CREATE OR REPLACE FUNCTION public.validate_promotion_dates()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -397,7 +554,7 @@ BEGIN
 END;
 $$;
 
--- Function to update games timestamps
+-- Function để update games timestamps
 CREATE OR REPLACE FUNCTION public.update_games_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -407,11 +564,24 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = 'public';
 
--- Function to create admin user
+-- Function để update agent referrals timestamps
+CREATE OR REPLACE FUNCTION public.update_agent_referrals_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path TO 'public'
+AS $function$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$function$;
+
+-- Function để create admin user
 CREATE OR REPLACE FUNCTION public.create_or_update_admin_user()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path TO 'public'
 AS $$
 DECLARE
     admin_user_id uuid;
@@ -615,28 +785,44 @@ CREATE POLICY "Admins can manage all agents"
 ON public.agents FOR ALL 
 USING (has_role(auth.uid(), 'admin'::app_role));
 
+-- Agent commission levels policies
+CREATE POLICY "Admins can manage all agent commission levels"
+ON public.agent_commission_levels
+FOR ALL
+USING (has_role(auth.uid(), 'admin'))
+WITH CHECK (has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Agent can view own commission levels"
+ON public.agent_commission_levels
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.agents a 
+    WHERE a.id = agent_commission_levels.agent_id AND a.user_id = auth.uid()
+  )
+);
+
+-- Agent referrals policies
+CREATE POLICY "Agents can view their own referrals"
+    ON public.agent_referrals
+    FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.agents a
+            WHERE a.id = agent_id AND a.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Admins can manage all referrals"
+    ON public.agent_referrals
+    FOR ALL
+    USING (has_role(auth.uid(), 'admin'::app_role));
+
 -- =============================================
 -- TRIGGERS
 -- =============================================
 
--- Drop existing triggers if they exist
-DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
-DROP TRIGGER IF EXISTS update_user_roles_updated_at ON public.user_roles;
-DROP TRIGGER IF EXISTS update_bank_updated_at ON public.bank;
-DROP TRIGGER IF EXISTS update_transactions_updated_at ON public.transactions;
-DROP TRIGGER IF EXISTS update_promotions_updated_at ON public.promotions;
-DROP TRIGGER IF EXISTS update_promotion_codes_updated_at ON public.promotion_codes;
-DROP TRIGGER IF EXISTS update_games_updated_at ON public.games;
-DROP TRIGGER IF EXISTS update_notifications_updated_at ON public.notifications;
-DROP TRIGGER IF EXISTS update_agents_updated_at ON public.agents;
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS on_auth_user_created_role ON auth.users;
-DROP TRIGGER IF EXISTS on_withdrawal_transaction ON public.transactions;
-DROP TRIGGER IF EXISTS on_transaction_status_change ON public.transactions;
-DROP TRIGGER IF EXISTS on_deposit_approval ON public.transactions;
-DROP TRIGGER IF EXISTS validate_promotion_dates_trigger ON public.promotions;
-
--- Create triggers for timestamp updates
+-- Triggers for timestamp updates
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
@@ -682,16 +868,33 @@ CREATE TRIGGER update_agents_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+CREATE TRIGGER trg_update_agent_commission_levels_updated_at
+  BEFORE UPDATE ON public.agent_commission_levels
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_agent_referrals_updated_at
+  BEFORE UPDATE ON public.agent_referrals
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_agent_referrals_updated_at();
+
 -- User registration triggers
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
-CREATE TRIGGER on_auth_user_created_role
-  AFTER INSERT ON auth.users
-  FOR EACH ROW 
-  EXECUTE FUNCTION public.handle_new_user_role();
+-- Agent creation trigger
+CREATE TRIGGER on_agent_created
+  BEFORE INSERT ON public.agents
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_agent();
+
+-- Referral signup trigger
+CREATE TRIGGER on_referral_signup
+  AFTER INSERT ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_referral_signup();
 
 -- Transaction triggers
 CREATE TRIGGER on_withdrawal_transaction
@@ -704,10 +907,15 @@ CREATE TRIGGER on_transaction_status_change
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_transaction_status_change();
 
-CREATE TRIGGER on_deposit_approval
+CREATE TRIGGER handle_deposit_approval_trigger
   AFTER UPDATE ON public.transactions
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_deposit_approval();
+
+CREATE TRIGGER handle_bonus_transaction_trigger
+  AFTER INSERT OR UPDATE ON public.transactions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_bonus_transaction();
 
 -- Promotion validation trigger
 CREATE TRIGGER validate_promotion_dates_trigger
@@ -726,13 +934,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO storage.buckets (id, name, public) VALUES ('promotion-images', 'promotion-images', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Drop existing storage policies
-DROP POLICY IF EXISTS "Avatar images are publicly accessible" ON storage.objects;
-DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
-DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
-DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
-
--- Create storage policies for avatar uploads
+-- Storage policies for avatar uploads
 CREATE POLICY "Avatar images are publicly accessible" 
 ON storage.objects FOR SELECT 
 USING (bucket_id = 'avatars');
@@ -782,3 +984,7 @@ ON CONFLICT DO NOTHING;
 
 -- Create admin user
 SELECT public.create_or_update_admin_user();
+
+-- =============================================
+-- MIGRATION COMPLETED
+-- =============================================
