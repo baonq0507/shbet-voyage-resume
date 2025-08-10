@@ -2,14 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
-const supabaseUrl = 'https://api.dinamondbet68.com/';
+const supabaseUrl = 'https://api.dinamondbet68.com';
 const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 
 // Cấu hình API
 const API_CONFIG = {
   baseUrl: "https://ex-api-yy5.tw946.com/web-root/restricted/information/get-game-list.aspx",
   companyKey: "C6012BA39EB643FEA4F5CD49AF138B02",
-  serverId: "api.dinamondbet68.com"
+  serverId: "206.206.126.141"
 };
 
 // Định nghĩa category dựa trên menuItems

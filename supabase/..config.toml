@@ -10,10 +10,52 @@ max_rows = 1000
 [functions.login-by-username]
 verify_jwt = false
 
+[functions.auth-token]
+verify_jwt = false
+
+[functions.test-auth]
+verify_jwt = false
+
+[functions.test-admin-login]
+verify_jwt = false
+
 [functions.get-paginated-users]
 verify_jwt = false
 
 [functions.get-paginated-transactions]
+verify_jwt = false
+
+[functions.deposit-game-api]
+verify_jwt = false
+
+[functions.withdraw-game-api]
+verify_jwt = false
+
+[functions.user-register]
+verify_jwt = false
+
+[functions.get-games-list]
+verify_jwt = false
+
+[functions.get-games-from-database]
+verify_jwt = false
+
+[functions.sync-games-database]
+verify_jwt = false
+
+[functions.game-login]
+verify_jwt = false
+
+[functions.register-player]
+verify_jwt = false
+
+[functions.check-username]
+verify_jwt = false
+
+[functions.create-deposit-order]
+verify_jwt = true
+
+[functions.payos-webhook]
 verify_jwt = false
 
 [db]
@@ -35,7 +77,7 @@ ip_version = "IPv6"
 [studio]
 enabled = true
 port = 54323
-api_url = "https://api.dinamondbet68.com/"
+api_url = "https://api.dinamondbet68.com"
 
 [inbucket]
 enabled = true
@@ -48,8 +90,8 @@ buckets = []
 
 [auth]
 enabled = true
-site_url = "https://api.dinamondbet68.com/"
-additional_redirect_urls = ["https://api.dinamondbet68.com/"]
+site_url = "https://dinamondbet68.com/"
+additional_redirect_urls = ["https://dinamondbet68.com/", "https://www.dinamondbet68.com/"]
 jwt_expiry = 3600
 enable_signup = true
 

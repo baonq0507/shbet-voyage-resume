@@ -19,58 +19,57 @@ serve(async (req) => {
   try {
     console.log(`[${requestId}] 🌐 New request received - Method: ${req.method}`);
     
-    // Validate request has JSON content
-    const contentType = req.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.log(`[${requestId}] ❌ Invalid content-type: ${contentType}`);
+    // Parse query parameters
+    const url = new URL(req.url);
+    const grantType = url.searchParams.get('grant_type');
+    
+    if (grantType !== 'password') {
+      console.log(`[${requestId}] ❌ Unsupported grant_type: ${grantType}`);
       return new Response(
-        JSON.stringify({ error: 'Content-Type must be application/json' }),
+        JSON.stringify({ error: 'Only password grant type is supported' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Parse request body
+    // Parse request body (form data for OAuth2)
     let requestBody;
     try {
-      requestBody = await req.json();
-      console.log(`[${requestId}] 📥 Request body parsed:`, requestBody);
+      const formData = await req.formData();
+      const username = formData.get('username');
+      const password = formData.get('password');
+      
+      if (!username || !password) {
+        console.log(`[${requestId}] ❌ Missing username or password`);
+        return new Response(
+          JSON.stringify({ error: 'Username and password are required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
+      requestBody = { username: username.toString(), password: password.toString() };
+      console.log(`[${requestId}] 📥 Request body parsed:`, { username: requestBody.username, password: '***' });
     } catch (parseError) {
-      console.log(`[${requestId}] ❌ Failed to parse JSON:`, parseError.message);
+      console.log(`[${requestId}] ❌ Failed to parse form data:`, parseError.message);
       return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        JSON.stringify({ error: 'Invalid form data' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     const { username, password } = requestBody;
 
-    // Validate required fields
-    if (!username) {
-      console.log(`[${requestId}] ❌ Username is missing`);
-      return new Response(
-        JSON.stringify({ error: 'Username is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    if (!password) {
-      console.log(`[${requestId}] ❌ Password is missing`);
-      return new Response(
-        JSON.stringify({ error: 'Password is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     console.log(`[${requestId}] 👤 Processing login for username: ${username}`);
 
     // Check environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
     
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
       console.log(`[${requestId}] ❌ Missing environment variables:`, {
         hasUrl: !!supabaseUrl,
-        hasKey: !!supabaseServiceKey
+        hasServiceKey: !!supabaseServiceKey,
+        hasAnonKey: !!supabaseAnonKey
       });
       return new Response(
         JSON.stringify({ error: 'Server configuration error' }),
@@ -80,8 +79,10 @@ serve(async (req) => {
 
     console.log(`[${requestId}] 🔧 Environment variables loaded successfully`);
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-    console.log(`[${requestId}] 🔌 Supabase client created`);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
+    
+    console.log(`[${requestId}] 🔌 Supabase clients created`);
 
     // Find user by username
     console.log(`[${requestId}] 🔍 Looking up user profile for username: ${username}`);
@@ -156,9 +157,6 @@ serve(async (req) => {
         }
       }
 
-      // Create a client with anon key to perform password verification
-      const supabaseAnon = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') || '');
-      
       // Attempt to sign in with the provided password
       console.log(`[${requestId}] 🔐 Attempting sign in with email: ${authUser.user.email}`);
       const { data: signInData, error: signInError } = await supabaseAnon.auth.signInWithPassword({
@@ -204,17 +202,20 @@ serve(async (req) => {
 
       console.log(`[${requestId}] ✅ Password verification completed for user: ${signInData.user.email}`);
 
-      const response = { 
-        email: signInData.user.email,
-        user_id: signInData.user.id,
-        username: username,
-        access_token: signInData.session?.access_token,
-        refresh_token: signInData.session?.refresh_token,
-        expires_in: signInData.session?.expires_in,
-        message: 'Login successful'
+      // Return OAuth2 token response format
+      const response = {
+        access_token: signInData.session.access_token,
+        token_type: 'bearer',
+        expires_in: signInData.session.expires_in,
+        refresh_token: signInData.session.refresh_token,
+        user: {
+          id: signInData.user.id,
+          email: signInData.user.email,
+          username: username
+        }
       };
       
-      console.log(`[${requestId}] ✅ Request completed successfully - Login successful`);
+      console.log(`[${requestId}] ✅ Request completed successfully - Token generated`);
 
       return new Response(
         JSON.stringify(response),

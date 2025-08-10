@@ -117,46 +117,46 @@ serve(async (req) => {
     // Step 3: Call external player registration API
     console.log(`📝 Step 3: Registering player externally - ${username}, ${fullName}`);
     // ĐĂNG KÝ VỚI SẢNH
-    // const externalRequestData = {
-    //   Username: username,
-    //   DisplayName: fullName,
-    //   Agent: 'VND1_dimonbet',
-    //   CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
-    //   ServerId: '206.206.126.141',
-    // };
+    const externalRequestData = {
+      Username: username,
+      DisplayName: fullName,
+      Agent: 'VND1_dimonbet',
+      CompanyKey: 'C6012BA39EB643FEA4F5CD49AF138B02',
+      ServerId: '206.206.126.141',
+    };
 
-    // console.log('📤 Calling external register API:', externalRequestData);
+    console.log('📤 Calling external register API:', externalRequestData);
 
-    // const externalResponse = await fetch('https://ex-api-yy5.tw946.com/web-root/restricted/player/register-player.aspx', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(externalRequestData),
-    // });
+    const externalResponse = await fetch('https://ex-api-yy5.tw946.com/web-root/restricted/player/register-player.aspx', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(externalRequestData),
+    });
 
-    // console.log(`📥 External API response status: ${externalResponse.status}`);
+    console.log(`📥 External API response status: ${externalResponse.status}`);
     
-    // const externalResponseData = await externalResponse.json();
-    // console.log('📥 External API response data:', externalResponseData);
+    const externalResponseData = await externalResponse.json();
+    console.log('📥 External API response data:', externalResponseData);
 
-    // // Check if external registration was successful
-    // const externalSuccess = externalResponse.status === 200 && externalResponseData?.error?.msg === 'No Error';
+    // Check if external registration was successful
+    const externalSuccess = externalResponse.status === 200 && externalResponseData?.error?.msg === 'No Error';
     
-    // if (!externalSuccess) {
-    //   console.log('❌ External player registration failed:', externalResponseData?.error?.msg || 'Unknown error');
-    //   return new Response(
-    //     JSON.stringify({ 
-    //       success: false, 
-    //       error: 'Tên người dùng đã tồn tại',
-    //       details: externalResponseData?.error?.msg || 'Registration failed'
-    //     }),
-    //     { 
-    //       status: 200, 
-    //       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-    //     }
-    //   );
-    // }
+    if (!externalSuccess) {
+      console.log('❌ External player registration failed:', externalResponseData?.error?.msg || 'Unknown error');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Tên người dùng đã tồn tại',
+          details: externalResponseData?.error?.msg || 'Registration failed'
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     console.log('✅ External player registration successful');
 
