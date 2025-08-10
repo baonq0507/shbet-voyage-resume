@@ -995,11 +995,71 @@ const Admin = () => {
     </div>
   );
 
+  // Filtered and sorted transactions
+  const filteredTransactions = transactions.filter((t) => {
+    const q = txSearch.trim().toLowerCase();
+    const matchesText = !q || (t.profiles?.username || '').toLowerCase().includes(q) || (t.profiles?.full_name || '').toLowerCase().includes(q);
+    return matchesText;
+  });
+
+  const sortedTransactions = React.useMemo(() => {
+    const arr = [...filteredTransactions];
+    arr.sort((a, b) => {
+      let va: string | number, vb: string | number;
+      switch (txSortKey) {
+        case 'user':
+          va = a.profiles?.username || '';
+          vb = b.profiles?.username || '';
+          break;
+        case 'type':
+          va = a.type;
+          vb = b.type;
+          break;
+        case 'amount':
+          va = a.amount;
+          vb = b.amount;
+          break;
+        case 'status':
+          va = a.status;
+          vb = b.status;
+          break;
+        case 'created_at':
+        default:
+          va = new Date(a.created_at).getTime();
+          vb = new Date(b.created_at).getTime();
+          break;
+      }
+      let cmp = 0;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      return txSortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filteredTransactions, txSortKey, txSortDir]);
+
+  const getTransactionsByStatus = (status?: string) => {
+    return status ? sortedTransactions.filter(t => t.status === status) : sortedTransactions;
+  };
+
   const renderTransactionManagement = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Quản lý giao dịch</h2>
       </div>
+
+      {/* Search and filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex gap-3 flex-col sm:flex-row">
+            <Input
+              placeholder="Tìm theo tên người dùng..."
+              value={txSearch}
+              onChange={(e) => setTxSearch(e.target.value)}
+              className="sm:flex-1"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList>
@@ -1019,16 +1079,36 @@ const Admin = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Người dùng</TableHead>
-                    <TableHead>Loại giao dịch</TableHead>
-                    <TableHead>Số tiền</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead>Thời gian</TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('user')}>
+                        Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('type')}>
+                        Loại giao dịch <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('amount')}>
+                        Số tiền <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('status')}>
+                        Trạng thái <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('created_at')}>
+                        Thời gian <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
                     <TableHead>Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((transaction) => (
+                  {getTransactionsByStatus().map((transaction) => (
                     <TableRow key={transaction.id}>
                       <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
                       <TableCell>
@@ -1186,17 +1266,31 @@ const Admin = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Người dùng</TableHead>
-                    <TableHead>Loại giao dịch</TableHead>
-                    <TableHead>Số tiền</TableHead>
-                    <TableHead>Thời gian</TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('user')}>
+                        Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('type')}>
+                        Loại giao dịch <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('amount')}>
+                        Số tiền <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('created_at')}>
+                        Thời gian <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
                     <TableHead>Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions
-                    .filter(t => t.status === 'pending')
-                    .map((transaction) => (
+                  {getTransactionsByStatus('pending').map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
                         <TableCell>
@@ -1244,17 +1338,31 @@ const Admin = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Người dùng</TableHead>
-                    <TableHead>Loại giao dịch</TableHead>
-                    <TableHead>Số tiền</TableHead>
-                    <TableHead>Thời gian</TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('user')}>
+                        Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('type')}>
+                        Loại giao dịch <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('amount')}>
+                        Số tiền <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('created_at')}>
+                        Thời gian <ArrowUpDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </TableHead>
                     <TableHead>Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions
-                    .filter(t => t.status === 'awaiting_payment')
-                    .map((transaction) => (
+                  {getTransactionsByStatus('awaiting_payment').map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
                         <TableCell>
@@ -1287,14 +1395,222 @@ const Admin = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+                 </TableBody>
+               </Table>
+             </CardContent>
+           </Card>
+         </TabsContent>
+
+         <TabsContent value="approved">
+           <Card>
+             <CardHeader>
+               <CardTitle>Giao dịch đã duyệt</CardTitle>
+             </CardHeader>
+             <CardContent>
+               <Table>
+                 <TableHeader>
+                   <TableRow>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('user')}>
+                         Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('type')}>
+                         Loại giao dịch <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('amount')}>
+                         Số tiền <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('created_at')}>
+                         Thời gian <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>Thao tác</TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody>
+                   {getTransactionsByStatus('approved').map((transaction) => (
+                     <TableRow key={transaction.id}>
+                       <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
+                       <TableCell>
+                         <Badge variant={
+                           transaction.type === 'deposit' ? 'default' : 
+                           transaction.type === 'withdrawal' ? 'secondary' : 'outline'
+                         }>
+                           {transaction.type === 'deposit' ? 'Nạp tiền' : 
+                            transaction.type === 'withdrawal' ? 'Rút tiền' : 'Bonus'}
+                         </Badge>
+                       </TableCell>
+                       <TableCell>{transaction.amount.toLocaleString()} VND</TableCell>
+                       <TableCell>{new Date(transaction.created_at).toLocaleDateString('vi-VN')}</TableCell>
+                       <TableCell>
+                         <Dialog>
+                           <DialogTrigger asChild>
+                             <Button 
+                               variant="outline" 
+                               size="sm"
+                               onClick={() => setSelectedTransaction(transaction)}
+                             >
+                               <Eye className="w-4 h-4 mr-1" />
+                               Chi tiết
+                             </Button>
+                           </DialogTrigger>
+                           <DialogContent className="max-w-3xl">
+                             <DialogHeader>
+                               <DialogTitle>Chi tiết giao dịch</DialogTitle>
+                             </DialogHeader>
+                             {selectedTransaction && (
+                               <div className="space-y-6">
+                                 <div className="grid grid-cols-2 gap-4">
+                                   <div>
+                                     <Label>Người dùng</Label>
+                                     <div className="text-sm font-medium">{selectedTransaction.profiles?.username || 'N/A'}</div>
+                                   </div>
+                                   <div>
+                                     <Label>Họ tên</Label>
+                                     <div className="text-sm">{selectedTransaction.profiles?.full_name || '—'}</div>
+                                   </div>
+                                   <div>
+                                     <Label>Loại giao dịch</Label>
+                                     <div className="text-sm font-medium">{selectedTransaction.type === 'deposit' ? 'Nạp tiền' : selectedTransaction.type === 'withdrawal' ? 'Rút tiền' : 'Bonus'}</div>
+                                   </div>
+                                   <div>
+                                     <Label>Trạng thái</Label>
+                                     <Badge variant="default">Đã duyệt</Badge>
+                                   </div>
+                                   <div>
+                                     <Label>Số tiền</Label>
+                                     <div className="text-sm font-medium">{selectedTransaction.amount.toLocaleString()} VND</div>
+                                   </div>
+                                   <div>
+                                     <Label>Thời gian tạo</Label>
+                                     <div className="text-sm">{new Date(selectedTransaction.created_at).toLocaleString('vi-VN')}</div>
+                                   </div>
+                                 </div>
+                               </div>
+                             )}
+                           </DialogContent>
+                         </Dialog>
+                       </TableCell>
+                     </TableRow>
+                   ))}
+                 </TableBody>
+               </Table>
+             </CardContent>
+           </Card>
+         </TabsContent>
+
+         <TabsContent value="rejected">
+           <Card>
+             <CardHeader>
+               <CardTitle>Giao dịch đã từ chối</CardTitle>
+             </CardHeader>
+             <CardContent>
+               <Table>
+                 <TableHeader>
+                   <TableRow>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('user')}>
+                         Người dùng <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('type')}>
+                         Loại giao dịch <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('amount')}>
+                         Số tiền <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>
+                       <Button variant="ghost" className="px-0 font-medium" onClick={() => toggleTxSort('created_at')}>
+                         Thời gian <ArrowUpDown className="ml-1 h-4 w-4" />
+                       </Button>
+                     </TableHead>
+                     <TableHead>Thao tác</TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody>
+                   {getTransactionsByStatus('rejected').map((transaction) => (
+                     <TableRow key={transaction.id}>
+                       <TableCell>{transaction.profiles?.username || 'N/A'}</TableCell>
+                       <TableCell>
+                         <Badge variant={
+                           transaction.type === 'deposit' ? 'default' : 
+                           transaction.type === 'withdrawal' ? 'secondary' : 'outline'
+                         }>
+                           {transaction.type === 'deposit' ? 'Nạp tiền' : 
+                            transaction.type === 'withdrawal' ? 'Rút tiền' : 'Bonus'}
+                         </Badge>
+                       </TableCell>
+                       <TableCell>{transaction.amount.toLocaleString()} VND</TableCell>
+                       <TableCell>{new Date(transaction.created_at).toLocaleDateString('vi-VN')}</TableCell>
+                       <TableCell>
+                         <Dialog>
+                           <DialogTrigger asChild>
+                             <Button 
+                               variant="outline" 
+                               size="sm"
+                               onClick={() => setSelectedTransaction(transaction)}
+                             >
+                               <Eye className="w-4 h-4 mr-1" />
+                               Chi tiết
+                             </Button>
+                           </DialogTrigger>
+                           <DialogContent className="max-w-3xl">
+                             <DialogHeader>
+                               <DialogTitle>Chi tiết giao dịch</DialogTitle>
+                             </DialogHeader>
+                             {selectedTransaction && (
+                               <div className="space-y-6">
+                                 <div className="grid grid-cols-2 gap-4">
+                                   <div>
+                                     <Label>Người dùng</Label>
+                                     <div className="text-sm font-medium">{selectedTransaction.profiles?.username || 'N/A'}</div>
+                                   </div>
+                                   <div>
+                                     <Label>Họ tên</Label>
+                                     <div className="text-sm">{selectedTransaction.profiles?.full_name || '—'}</div>
+                                   </div>
+                                   <div>
+                                     <Label>Loại giao dịch</Label>
+                                     <div className="text-sm font-medium">{selectedTransaction.type === 'deposit' ? 'Nạp tiền' : selectedTransaction.type === 'withdrawal' ? 'Rút tiền' : 'Bonus'}</div>
+                                   </div>
+                                   <div>
+                                     <Label>Trạng thái</Label>
+                                     <Badge variant="destructive">Đã từ chối</Badge>
+                                   </div>
+                                   <div>
+                                     <Label>Số tiền</Label>
+                                     <div className="text-sm font-medium">{selectedTransaction.amount.toLocaleString()} VND</div>
+                                   </div>
+                                   <div>
+                                     <Label>Thời gian tạo</Label>
+                                     <div className="text-sm">{new Date(selectedTransaction.created_at).toLocaleString('vi-VN')}</div>
+                                   </div>
+                                 </div>
+                               </div>
+                             )}
+                           </DialogContent>
+                         </Dialog>
+                       </TableCell>
+                     </TableRow>
+                   ))}
+                 </TableBody>
+               </Table>
+             </CardContent>
+           </Card>
+         </TabsContent>
+       </Tabs>
+     </div>
+   );
 
 
   const renderPromotionManagement = () => (
