@@ -117,11 +117,22 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       setAvailablePromotion(null);
       fetchUserBankAccounts();
       fetchBanks();
-      
-      // Check for available promotions
-      const activePromotions = getActivePromotions();
-      if (activePromotions.length > 0) {
-        setAvailablePromotion(activePromotions[0]);
+    }
+  }, [isOpen]);
+
+  // Separate effect to handle promotions loading
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        // Check for available promotions after they're loaded
+        const activePromotions = getActivePromotions();
+        console.log('Available promotions:', activePromotions);
+        if (activePromotions.length > 0) {
+          setAvailablePromotion(activePromotions[0]);
+          console.log('Set available promotion:', activePromotions[0]);
+        }
+      } catch (error) {
+        console.error('Error loading promotions:', error);
       }
     }
   }, [isOpen, getActivePromotions]);
@@ -595,7 +606,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                           <Tag className="w-4 h-4 text-yellow-600" />
                           <span className="font-medium text-yellow-800">Khuyến mãi có sẵn</span>
                         </div>
-                        <p className="text-sm text-yellow-700 mb-2">{availablePromotion.title}</p>
+                        <p className="text-sm text-yellow-700 mb-2">{availablePromotion.title || 'Khuyến mãi'}</p>
                         {availablePromotion.description && (
                           <p className="text-xs text-yellow-600 mb-2">{availablePromotion.description}</p>
                         )}
@@ -603,20 +614,25 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                           {availablePromotion.bonus_percentage 
                             ? `Tặng ${availablePromotion.bonus_percentage}% số tiền nạp`
                             : availablePromotion.bonus_amount 
-                            ? `Tặng ${availablePromotion.bonus_amount.toLocaleString()} VND`
+                            ? `Tặng ${Number(availablePromotion.bonus_amount).toLocaleString()} VND`
                             : 'Khuyến mãi đặc biệt'
                           }
                         </div>
-                        {depositAmount && (
+                        {depositAmount && Number(depositAmount) > 0 && (
                           <div className="mt-2 p-2 bg-white/50 rounded border">
                             <div className="text-xs text-gray-600">Dự kiến nhận được:</div>
                             <div className="font-bold text-green-700">
                               {(() => {
-                                const amount = parseFloat(depositAmount) || 0;
-                                const bonus = availablePromotion.bonus_percentage 
-                                  ? amount * (availablePromotion.bonus_percentage / 100)
-                                  : availablePromotion.bonus_amount || 0;
-                                return `${amount.toLocaleString()} + ${bonus.toLocaleString()} = ${(amount + bonus).toLocaleString()} VND`;
+                                try {
+                                  const amount = parseFloat(depositAmount) || 0;
+                                  const bonus = availablePromotion.bonus_percentage 
+                                    ? amount * (Number(availablePromotion.bonus_percentage) / 100)
+                                    : Number(availablePromotion.bonus_amount) || 0;
+                                  return `${amount.toLocaleString()} + ${bonus.toLocaleString()} = ${(amount + bonus).toLocaleString()} VND`;
+                                } catch (error) {
+                                  console.error('Error calculating bonus:', error);
+                                  return 'Không thể tính toán bonus';
+                                }
                               })()}
                             </div>
                           </div>
