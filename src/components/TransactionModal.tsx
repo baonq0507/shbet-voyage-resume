@@ -122,22 +122,56 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     }
   }, [isOpen]);
 
-  // Separate effect to handle promotions loading
-  useEffect(() => {
-    if (isOpen) {
-      try {
-        // Check for available promotions after they're loaded
-        const activePromotions = getActivePromotions();
-        console.log('Available promotions:', activePromotions);
-        if (activePromotions.length > 0) {
-          setAvailablePromotion(activePromotions[0]);
-          console.log('Set available promotion:', activePromotions[0]);
-        }
-      } catch (error) {
-        console.error('Error loading promotions:', error);
+  // Check if user is eligible for promotions
+  const checkPromotionEligibility = async () => {
+    if (!user || !depositAmount) return null;
+    
+    const amount = parseFloat(depositAmount);
+    if (!amount || amount <= 0) return null;
+
+    const activePromotions = getActivePromotions();
+    console.log('Available promotions:', activePromotions);
+    
+    for (const promotion of activePromotions) {
+      // Check minimum deposit requirement
+      if (promotion.min_deposit && amount < Number(promotion.min_deposit)) {
+        continue;
       }
+      
+      // Check if it's first deposit only promotion
+      if (promotion.is_first_deposit_only) {
+        try {
+          const { data: isFirstDeposit } = await supabase.rpc('is_first_deposit', {
+            user_id_param: user.id
+          });
+          
+          if (!isFirstDeposit) {
+            continue; // Skip this promotion if user already has deposits
+          }
+        } catch (error) {
+          console.error('Error checking first deposit:', error);
+          continue;
+        }
+      }
+      
+      // If we reach here, user is eligible for this promotion
+      return promotion;
     }
-  }, [isOpen, getActivePromotions]);
+    
+    return null;
+  };
+
+  // Update promotion eligibility when deposit amount changes
+  useEffect(() => {
+    if (isOpen && depositAmount) {
+      checkPromotionEligibility().then(eligiblePromotion => {
+        setAvailablePromotion(eligiblePromotion);
+        console.log('Eligible promotion:', eligiblePromotion);
+      });
+    } else {
+      setAvailablePromotion(null);
+    }
+  }, [isOpen, depositAmount, user, getActivePromotions]);
 
   // Set up real-time subscription for user's transactions
   useEffect(() => {
@@ -604,43 +638,53 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
                       />
                     </div>
                     
-                    {/* Display available promotion */}
-                    {availablePromotion && (
+                    {/* Display available promotion - only when eligible or when promotion code is entered */}
+                    {(availablePromotion || (promotionCode && promotionCode.trim())) && (
                       <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Tag className="w-4 h-4 text-yellow-600" />
-                          <span className="font-medium text-yellow-800">Khuyến mãi có sẵn</span>
+                          <span className="font-medium text-yellow-800">
+                            {availablePromotion ? 'Khuyến mãi có sẵn' : 'Mã khuyến mãi đã nhập'}
+                          </span>
                         </div>
-                        <p className="text-sm text-yellow-700 mb-2">{availablePromotion.title || 'Khuyến mãi'}</p>
-                        {availablePromotion.description && (
-                          <p className="text-xs text-yellow-600 mb-2">{availablePromotion.description}</p>
-                        )}
-                        <div className="text-sm font-medium text-orange-700">
-                          {availablePromotion.bonus_percentage 
-                            ? `Tặng ${availablePromotion.bonus_percentage}% số tiền nạp`
-                            : availablePromotion.bonus_amount 
-                            ? `Tặng ${Number(availablePromotion.bonus_amount).toLocaleString()} VND`
-                            : 'Khuyến mãi đặc biệt'
-                          }
-                        </div>
-                        {depositAmount && Number(depositAmount) > 0 && (
-                          <div className="mt-2 p-2 bg-white/50 rounded border">
-                            <div className="text-xs text-gray-600">Dự kiến nhận được:</div>
-                            <div className="font-bold text-green-700">
-                              {(() => {
-                                try {
-                                  const amount = parseFloat(depositAmount) || 0;
-                                  const bonus = availablePromotion.bonus_percentage 
-                                    ? amount * (Number(availablePromotion.bonus_percentage) / 100)
-                                    : Number(availablePromotion.bonus_amount) || 0;
-                                  return `${amount.toLocaleString()} + ${bonus.toLocaleString()} = ${(amount + bonus).toLocaleString()} VND`;
-                                } catch (error) {
-                                  console.error('Error calculating bonus:', error);
-                                  return 'Không thể tính toán bonus';
-                                }
-                              })()}
+                        {availablePromotion ? (
+                          <>
+                            <p className="text-sm text-yellow-700 mb-2">{availablePromotion.title || 'Khuyến mãi'}</p>
+                            {availablePromotion.description && (
+                              <p className="text-xs text-yellow-600 mb-2">{availablePromotion.description}</p>
+                            )}
+                            <div className="text-sm font-medium text-orange-700">
+                              {availablePromotion.bonus_percentage 
+                                ? `Tặng ${availablePromotion.bonus_percentage}% số tiền nạp`
+                                : availablePromotion.bonus_amount 
+                                ? `Tặng ${Number(availablePromotion.bonus_amount).toLocaleString()} VND`
+                                : 'Khuyến mãi đặc biệt'
+                              }
                             </div>
-                          </div>
+                            {depositAmount && Number(depositAmount) > 0 && (
+                              <div className="mt-2 p-2 bg-white/50 rounded border">
+                                <div className="text-xs text-gray-600">Dự kiến nhận được:</div>
+                                <div className="font-bold text-green-700">
+                                  {(() => {
+                                    try {
+                                      const amount = parseFloat(depositAmount) || 0;
+                                      const bonus = availablePromotion.bonus_percentage 
+                                        ? amount * (Number(availablePromotion.bonus_percentage) / 100)
+                                        : Number(availablePromotion.bonus_amount) || 0;
+                                      return `${amount.toLocaleString()} + ${bonus.toLocaleString()} = ${(amount + bonus).toLocaleString()} VND`;
+                                    } catch (error) {
+                                      console.error('Error calculating bonus:', error);
+                                      return 'Không thể tính toán bonus';
+                                    }
+                                  })()}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-sm text-yellow-700">
+                            Mã khuyến mãi "{promotionCode}" sẽ được áp dụng nếu hợp lệ
+                          </p>
                         )}
                       </div>
                     )}
