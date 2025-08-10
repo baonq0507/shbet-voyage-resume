@@ -135,17 +135,21 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     for (const promotion of activePromotions) {
       // Check minimum deposit requirement
       if (promotion.min_deposit && amount < Number(promotion.min_deposit)) {
+        console.log(`❌ Promotion "${promotion.title}" - Amount ${amount} below min deposit ${promotion.min_deposit}`);
         continue;
       }
       
-      // Check if it's first deposit only promotion
-      if (promotion.is_first_deposit_only) {
+      // For first_deposit type promotions, ALWAYS check if it's user's first deposit
+      if (promotion.promotion_type === 'first_deposit') {
         try {
           const { data: isFirstDeposit } = await supabase.rpc('is_first_deposit', {
             user_id_param: user.id
           });
           
+          console.log(`🎯 Checking first deposit for promotion "${promotion.title}": ${isFirstDeposit}`);
+          
           if (!isFirstDeposit) {
+            console.log(`❌ Promotion "${promotion.title}" - Not user's first deposit`);
             continue; // Skip this promotion if user already has deposits
           }
         } catch (error) {
@@ -154,10 +158,29 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         }
       }
       
+      // Additional check for is_first_deposit_only flag (if both conditions must be met)
+      if (promotion.is_first_deposit_only && promotion.promotion_type !== 'first_deposit') {
+        try {
+          const { data: isFirstDeposit } = await supabase.rpc('is_first_deposit', {
+            user_id_param: user.id
+          });
+          
+          if (!isFirstDeposit) {
+            console.log(`❌ Promotion "${promotion.title}" - Not first deposit (is_first_deposit_only=true)`);
+            continue;
+          }
+        } catch (error) {
+          console.error('Error checking first deposit for is_first_deposit_only:', error);
+          continue;
+        }
+      }
+      
       // If we reach here, user is eligible for this promotion
+      console.log(`✅ User eligible for promotion: "${promotion.title}"`);
       return promotion;
     }
     
+    console.log('❌ No eligible promotions found');
     return null;
   };
 
