@@ -129,10 +129,9 @@ Deno.serve(async (req) => {
     const username = user.user_metadata?.username || user.email?.split("@")[0] || user.id.substring(0, 6);
     const description = `NAP ${orderCode.toString().slice(-6)}`;
 
-    // Create pending transaction first (RLS ensures user_id matches auth uid)
-    const adminNote = promotionCode
-      ? `method=vietqr/payos; orderCode=${orderCode}; promo=${promotionCode}`
-      : `method=vietqr/payos; orderCode=${orderCode}`;
+    // Store promotion code in admin note for later processing by webhook
+    const promotionNote = promotionCode ? `; promo=${promotionCode}` : '';
+    const adminNote = `method=vietqr/payos; orderCode=${orderCode}${promotionNote}`;
 
     console.log("Creating transaction for user:", user.id, "amount:", amount);
     

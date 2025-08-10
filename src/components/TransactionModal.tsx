@@ -287,32 +287,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
 
       if (!data) throw new Error('Không nhận được dữ liệu từ máy chủ');
 
-      // Apply promotion immediately for website-based bonus
-      let finalAmount = amount;
-      let bonusAmount = 0;
-      
-      try {
-        const { data: promotionResult, error: promoError } = await supabase.functions.invoke('apply-promotion', {
-          body: { 
-            userId: user.id,
-            depositAmount: amount,
-            promotionCode: promotionCode?.trim() || undefined
-          }
-        });
-
-        if (!promoError && promotionResult?.success && promotionResult?.bonusAmount > 0) {
-          bonusAmount = promotionResult.bonusAmount;
-          finalAmount = amount + bonusAmount;
-          
-          toast({
-            title: "Khuyến mãi đã được áp dụng! 🎉",
-            description: `Bạn nhận được bonus ${bonusAmount.toLocaleString()} VND`,
-          });
-        }
-      } catch (promoError) {
-        console.warn('Promotion application failed:', promoError);
-        // Continue without promotion
-      }
+      // Promotion will be applied only after successful PayOS payment confirmation
 
       setOrderInfo({
         transactionId: data.transactionId,
@@ -320,9 +295,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         description: data.description,
         paymentUrl: data.paymentUrl,
         qrCode: data.qrCode,
-        amount: finalAmount,
+        amount: amount,
         originalAmount: amount,
-        bonusAmount: bonusAmount,
+        bonusAmount: 0, // Will be updated after payment confirmation
       });
       setTxStatus('awaiting_payment');
       setDepositStep('qr');
