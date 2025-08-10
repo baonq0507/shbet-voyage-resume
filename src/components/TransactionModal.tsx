@@ -67,6 +67,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
     orderCode?: string | number;
     description?: string;
     amount?: number;
+    originalAmount?: number;
+    bonusAmount?: number;
     paymentUrl?: string;
     qrCode?: string;
   } | null>(null);
@@ -281,10 +283,36 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       }
 
       const data = await response.json();
-
       console.log("Edge function response:", { data });
 
       if (!data) throw new Error('Không nhận được dữ liệu từ máy chủ');
+
+      // Apply promotion immediately for website-based bonus
+      let finalAmount = amount;
+      let bonusAmount = 0;
+      
+      try {
+        const { data: promotionResult, error: promoError } = await supabase.functions.invoke('apply-promotion', {
+          body: { 
+            userId: user.id,
+            depositAmount: amount,
+            promotionCode: promotionCode?.trim() || undefined
+          }
+        });
+
+        if (!promoError && promotionResult?.success && promotionResult?.bonusAmount > 0) {
+          bonusAmount = promotionResult.bonusAmount;
+          finalAmount = amount + bonusAmount;
+          
+          toast({
+            title: "Khuyến mãi đã được áp dụng! 🎉",
+            description: `Bạn nhận được bonus ${bonusAmount.toLocaleString()} VND`,
+          });
+        }
+      } catch (promoError) {
+        console.warn('Promotion application failed:', promoError);
+        // Continue without promotion
+      }
 
       setOrderInfo({
         transactionId: data.transactionId,
@@ -292,9 +320,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
         description: data.description,
         paymentUrl: data.paymentUrl,
         qrCode: data.qrCode,
-        amount,
+        amount: finalAmount,
+        originalAmount: amount,
+        bonusAmount: bonusAmount,
       });
-      setTxStatus('awaiting_payment'); // Chờ thanh toán
+      setTxStatus('awaiting_payment');
       setDepositStep('qr');
     } catch (err) {
       console.error('Error creating deposit order:', err);

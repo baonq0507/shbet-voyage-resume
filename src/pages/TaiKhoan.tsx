@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ export default function TaiKhoan() {
   const { profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
@@ -34,6 +35,32 @@ export default function TaiKhoan() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+
+  // Handle PayOS return URLs
+  useEffect(() => {
+    const status = searchParams.get('status');
+    
+    if (status === 'success') {
+      toast({
+        title: "Thanh toán thành công! 🎉",
+        description: "Giao dịch của bạn đã được xử lý thành công. Số dư sẽ được cập nhật trong vài phút.",
+      });
+      // Remove status from URL
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('status');
+      navigate({ search: newSearchParams.toString() }, { replace: true });
+    } else if (status === 'cancelled') {
+      toast({
+        title: "Thanh toán đã bị hủy",
+        description: "Bạn đã hủy giao dịch thanh toán.",
+        variant: "destructive",
+      });
+      // Remove status from URL
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('status');
+      navigate({ search: newSearchParams.toString() }, { replace: true });
+    }
+  }, [searchParams, toast, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
