@@ -94,7 +94,7 @@ const Promotions: React.FC = () => {
           end_date: data.endDate,
           is_active: data.isActive,
           is_first_deposit_only: data.isFirstDepositOnly,
-          promotion_code: data.promotionCode,
+          promotion_code: data.promotionCode || null,
           image_url: data.image_url,
           current_uses: 0,
           created_at: new Date().toISOString()
@@ -140,7 +140,7 @@ const Promotions: React.FC = () => {
           end_date: data.endDate,
           is_active: data.isActive,
           is_first_deposit_only: data.isFirstDepositOnly,
-          promotion_code: data.promotionCode,
+          promotion_code: data.promotionCode || null,
           image_url: data.image_url,
           updated_at: new Date().toISOString()
         })

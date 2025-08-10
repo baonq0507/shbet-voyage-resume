@@ -466,7 +466,7 @@ const Admin = () => {
         start_date: data.startDate,
         end_date: data.endDate,
         is_active: data.isActive,
-        promotion_code: data.promotionCode,
+        promotion_code: data.promotionCode || null,
         is_first_deposit_only: data.isFirstDepositOnly,
         image_url: data.image_url
       };
