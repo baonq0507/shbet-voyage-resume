@@ -21,29 +21,29 @@ serve(async (req) => {
     // Transform amount based on business rules:
     // If amount < 10000: divide by 1000
     // If amount >= 10000: keep the same
-    // const apiAmount = amount < 10000 ? amount / 1000 : amount;
+    const apiAmount = amount < 10000 ? amount / 1000 : amount;
     
-    // console.log('Amount transformation:', { originalAmount: amount, apiAmount });
+    console.log('Amount transformation:', { originalAmount: amount, apiAmount });
 
-    // // Call third-party API
-    // const response = await fetch('https://api.tw954.com/deposit-game', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     username: username,
-    //     amount: apiAmount,
-    //   }),
-    // });
+    // Call third-party API
+    const response = await fetch('https://api.tw954.com/deposit-game', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        amount: apiAmount,
+      }),
+    });
 
-    // console.log('Third-party API response status:', response.status);
+    console.log('Third-party API response status:', response.status);
     
-    // const responseData = await response.json();
-    // console.log('Third-party API response data:', responseData);
+    const responseData = await response.json();
+    console.log('Third-party API response data:', responseData);
 
-    // Check if API call was successful based on error.msg
-    // const success = responseData?.error?.msg === "No Error";
+    Check if API call was successful based on error.msg
+    const success = responseData?.error?.msg === "No Error";
     const success = true;
     return new Response(JSON.stringify({ 
       success,
