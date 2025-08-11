@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Phone, Lock, UserCheck, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
+import { User, Phone, Lock, UserCheck, Eye, EyeOff, Check, X, Loader2, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUsernameCheck } from "@/hooks/useUsernameCheck";
@@ -18,6 +18,9 @@ interface AuthModalProps {
 
 const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: AuthModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -126,6 +129,50 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetEmail) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập email",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/tai-khoan`,
+      });
+
+      if (error) {
+        toast({
+          title: "Lỗi",
+          description: "Không thể gửi email reset mật khẩu. Vui lòng kiểm tra email và thử lại.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Thành công",
+        description: "Đã gửi link reset mật khẩu đến email của bạn. Vui lòng kiểm tra hộp thư.",
+      });
+      
+      setShowResetPassword(false);
+      setResetEmail('');
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi reset mật khẩu",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -344,14 +391,73 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
               </div>
             </div>
             
-            <Button 
-              onClick={handleLogin}
-              disabled={isLoading}
-              className="w-full"
-              variant="casino"
-            >
-              {isLoading ? "Đang đăng nhập..." : "Đăng Nhập"}
-            </Button>
+            {!showResetPassword ? (
+              <>
+                <Button 
+                  onClick={handleLogin}
+                  disabled={isLoading}
+                  className="w-full"
+                  variant="casino"
+                >
+                  {isLoading ? "Đang đăng nhập..." : "Đăng Nhập"}
+                </Button>
+                
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword(true)}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-2">Reset mật khẩu</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Nhập email của bạn để nhận link reset mật khẩu
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="resetEmail">Email</Label>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      placeholder="Nhập email của bạn"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setShowResetPassword(false);
+                      setResetEmail('');
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Hủy
+                  </Button>
+                  <Button 
+                    onClick={handleResetPassword}
+                    disabled={isResettingPassword || !resetEmail}
+                    className="flex-1"
+                    variant="casino"
+                  >
+                    {isResettingPassword ? "Đang gửi..." : "Gửi link"}
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="register" className="space-y-4 mt-6">
