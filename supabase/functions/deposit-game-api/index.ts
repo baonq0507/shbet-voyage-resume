@@ -33,7 +33,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         // username: username,
-        username: 'baobongxx'
+        username: 'baobongxx',
         amount: apiAmount,
       }),
     });
@@ -45,7 +45,6 @@ serve(async (req) => {
 
     // Check if API call was successful based on error.msg
     const success = responseData?.error?.msg === "No Error";
-    const success = true;
     return new Response(JSON.stringify({ 
       success,
       status: response.status,
