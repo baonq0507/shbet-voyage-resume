@@ -144,31 +144,49 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, activeTab = 'login' }: Auth
 
     setIsResettingPassword(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/tai-khoan`,
+      // Use the login-by-username function to check if email exists and get user info
+      const { data: userLookup, error: lookupError } = await supabase.functions.invoke('login-by-username', {
+        body: { 
+          username: resetEmail, // Try email as username first
+          password: 'dummy' // This will fail auth but still return user info if email exists
+        }
+      });
+
+      // If email lookup fails, try a different approach - call reset function directly
+      // The reset function will handle user lookup internally
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: {
+          email: resetEmail // Send email, let the edge function find the user
+        }
       });
 
       if (error) {
-        toast({
-          title: "Lỗi",
-          description: "Không thể gửi email reset mật khẩu. Vui lòng kiểm tra email và thử lại.",
-          variant: "destructive"
-        });
+        if (error.message?.includes('not found') || error.message?.includes('không tìm thấy')) {
+          toast({
+            title: "Lỗi",
+            description: "Không tìm thấy tài khoản với email này",
+            variant: "destructive"
+          });
+        } else {
+          throw error;
+        }
         return;
       }
 
       toast({
         title: "Thành công",
-        description: "Đã gửi link reset mật khẩu đến email của bạn. Vui lòng kiểm tra hộp thư.",
+        description: data?.emailSent 
+          ? "Mật khẩu mới đã được gửi đến email của bạn" 
+          : "Mật khẩu đã được reset thành công",
       });
       
       setShowResetPassword(false);
       setResetEmail('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Password reset error:', error);
       toast({
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi reset mật khẩu",
+        description: "Có lỗi xảy ra khi reset mật khẩu. Vui lòng thử lại.",
         variant: "destructive"
       });
     } finally {
