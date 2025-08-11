@@ -14,7 +14,7 @@ import { useRole } from '@/hooks/useRole';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
-import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash, History, ArrowUpDown } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, Check, X, Eye, Building2, Gift, UserCheck, Bell, Plus, Edit, Trash, History, ArrowUpDown, Key } from 'lucide-react';
 import { PromotionForm, PromotionFormData } from '@/components/PromotionForm';
 import { usePromotionApplication } from '@/hooks/usePromotionApplication';
 import { useDepositApproval } from '@/hooks/useDepositApproval';
@@ -57,6 +57,7 @@ interface UserProfile {
   last_login_at?: string;
   last_login_ip?: any;
   updated_at: string;
+  email?: string;
 }
 
 interface Promotion {
@@ -131,6 +132,8 @@ const Admin = () => {
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [addBonusUser, setAddBonusUser] = useState<UserProfile | null>(null);
   const [bettingHistoryUser, setBettingHistoryUser] = useState<UserProfile | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<UserProfile | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
   
   const [userDetailsViewMode, setUserDetailsViewMode] = useState<'details' | 'transactions'>('details');
   const { applyPromotionToDeposit } = usePromotionApplication();
@@ -624,6 +627,63 @@ const Admin = () => {
     }
   };
 
+  const handleResetPassword = async (user: UserProfile) => {
+    try {
+      // First get the user's email from auth.users table
+      const { data: authUser, error: fetchError } = await supabase.auth.admin.getUserById(user.user_id);
+      
+      if (fetchError) throw fetchError;
+      
+      const { error } = await supabase.functions.invoke('reset-user-password', {
+        body: { 
+          userId: user.user_id,
+          email: authUser.user?.email || '',
+          fullName: user.full_name
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Thành công",
+        description: `Đã reset mật khẩu cho người dùng ${user.full_name}. Mật khẩu mới đã được tạo.`
+      });
+
+      setResetPasswordUser(null);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi reset mật khẩu",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteUser = async (user: UserProfile) => {
+    try {
+      // Delete user from auth.users table
+      const { error: authError } = await supabase.auth.admin.deleteUser(user.user_id);
+      
+      if (authError) throw authError;
+
+      toast({
+        title: "Thành công",
+        description: `Đã xóa người dùng ${user.full_name}`
+      });
+
+      setDeleteUser(null);
+      fetchUsers(); // Refresh the users list
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi xóa người dùng",
+        variant: "destructive"
+      });
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -877,6 +937,18 @@ const Admin = () => {
                           <Edit className="mr-2 h-4 w-4" />
                           Chỉnh sửa
                         </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setResetPasswordUser(user)}>
+                          <Key className="mr-2 h-4 w-4" />
+                          Reset mật khẩu
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onSelect={() => setDeleteUser(user)}
+                          className="text-red-600"
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Xóa người dùng
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onSelect={() => {
                             setSelectedUser(user);
@@ -1032,6 +1104,69 @@ const Admin = () => {
                           </div>
                           <Button onClick={() => handleAddBonus(addBonusUser!)}>
                             Cộng tiền
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Dialog reset password */}
+                    <Dialog
+                      open={!!resetPasswordUser && resetPasswordUser.user_id === user.user_id}
+                      onOpenChange={(open) => {
+                        if (!open) setResetPasswordUser(null);
+                      }}
+                    >
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Reset mật khẩu</DialogTitle>
+                          <DialogDescription>
+                            Bạn có chắc chắn muốn reset mật khẩu cho người dùng {resetPasswordUser?.full_name}? 
+                            Mật khẩu mới sẽ được gửi qua email.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setResetPasswordUser(null)}
+                          >
+                            Hủy
+                          </Button>
+                          <Button
+                            onClick={() => handleResetPassword(resetPasswordUser!)}
+                          >
+                            Reset mật khẩu
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Dialog delete user */}
+                    <Dialog
+                      open={!!deleteUser && deleteUser.user_id === user.user_id}
+                      onOpenChange={(open) => {
+                        if (!open) setDeleteUser(null);
+                      }}
+                    >
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Xóa người dùng</DialogTitle>
+                          <DialogDescription>
+                            Bạn có chắc chắn muốn xóa người dùng {deleteUser?.full_name}? 
+                            Hành động này không thể hoàn tác.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setDeleteUser(null)}
+                          >
+                            Hủy
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleDeleteUser(deleteUser!)}
+                          >
+                            Xóa
                           </Button>
                         </div>
                       </DialogContent>
