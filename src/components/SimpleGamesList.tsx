@@ -5,6 +5,8 @@ import { useGamesList } from "@/hooks/useGamesList";
 import { useGameLogin } from "@/hooks/useGameLogin";
 import { useGameFrame } from "@/hooks/useGameFrame";
 import { LazyImage } from "@/components/ui/lazy-image";
+import PointExchangeModal from "@/components/PointExchangeModal";
+import { useState } from "react";
 
 interface GameCardProps {
   title: string;
@@ -69,20 +71,30 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
   const { games, loading } = useGamesList(1, 50, category, gpids);
   const { loginToGame, loginToSportsGame } = useGameLogin();
   const { openGame } = useGameFrame();
+  const [showPointModal, setShowPointModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<any>(null);
 
   // Sort games by rank (lower rank number = higher priority) and limit to maxGames
   const sortedAndLimitedGames = games
     .sort((a, b) => (a.rank || 999) - (b.rank || 999))
     .slice(0, maxGames);
 
-  const handleGameClick = async (game: any) => {
+  const handleGameClick = (game: any) => {
     console.log('🎯 Game clicked:', game);
+    setSelectedGame(game);
+    setShowPointModal(true);
+  };
+
+  const handlePointExchangeSuccess = async () => {
+    if (!selectedGame) return;
+    
+    console.log('🎯 Processing game after point exchange:', selectedGame);
     
     // Xác định có phải sports game không
-    const isSportsGame = category === 'sports' || game.category === 'sports';
+    const isSportsGame = category === 'sports' || selectedGame.category === 'sports';
     
     // Sử dụng gpid từ game hoặc random từ gpids nếu có
-    const gameGpid = game.gpid || (gpids && gpids.length > 0 ? gpids[Math.floor(Math.random() * gpids.length)] : 1);
+    const gameGpid = selectedGame.gpid || (gpids && gpids.length > 0 ? gpids[Math.floor(Math.random() * gpids.length)] : 1);
     
     console.log('🎮 Login params:', { gpid: gameGpid, isSports: isSportsGame });
     
@@ -151,6 +163,12 @@ const SimpleGamesList = ({ title, category = "all", gpids, maxGames = 12 }: Simp
           </div>
         </div>
       </div>
+
+      <PointExchangeModal
+        open={showPointModal}
+        onOpenChange={setShowPointModal}
+        onSuccess={handlePointExchangeSuccess}
+      />
     </section>
   );
 };
