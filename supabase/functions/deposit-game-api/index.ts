@@ -42,7 +42,7 @@ serve(async (req) => {
     const responseData = await response.json();
     console.log('Third-party API response data:', responseData);
 
-    Check if API call was successful based on error.msg
+    // Check if API call was successful based on error.msg
     const success = responseData?.error?.msg === "No Error";
     return new Response(JSON.stringify({ 
       success,
