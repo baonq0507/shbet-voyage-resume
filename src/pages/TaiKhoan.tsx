@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Upload, ArrowLeft } from 'lucide-react';
+import { Camera, Upload, ArrowLeft, Key } from 'lucide-react';
 import avatar1 from '@/assets/avatars/avatar-1.jpg';
 import avatar2 from '@/assets/avatars/avatar-2.jpg';
 import avatar3 from '@/assets/avatars/avatar-3.jpg';
@@ -18,7 +18,7 @@ import avatar5 from '@/assets/avatars/avatar-5.jpg';
 const sampleAvatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
 export default function TaiKhoan() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, refreshProfile, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -35,6 +35,7 @@ export default function TaiKhoan() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // Handle PayOS return URLs
   useEffect(() => {
@@ -197,6 +198,37 @@ export default function TaiKhoan() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!profile) return;
+
+    setIsResettingPassword(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: {
+          userId: profile.user_id,
+          email: user?.email || '',
+          fullName: profile.full_name
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Thành công",
+        description: `Mật khẩu mới đã được tạo: ${data.newPassword}. Vui lòng đổi mật khẩu sau khi đăng nhập lại.`,
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể reset mật khẩu. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -348,7 +380,10 @@ export default function TaiKhoan() {
           {/* Change Password */}
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Đổi mật khẩu</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                Quản lý mật khẩu
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -375,13 +410,24 @@ export default function TaiKhoan() {
                 </div>
               </div>
               
-              <Button
-                onClick={handleChangePassword}
-                disabled={isLoading || !newPassword || !confirmPassword}
-                className="w-full md:w-auto"
-              >
-                {isLoading ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu'}
-              </Button>
+              <div className="flex flex-col md:flex-row gap-3">
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={isLoading || !newPassword || !confirmPassword}
+                  className="flex-1 md:flex-none"
+                >
+                  {isLoading ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu'}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={handleResetPassword}
+                  disabled={isResettingPassword}
+                  className="flex-1 md:flex-none"
+                >
+                  {isResettingPassword ? 'Đang reset...' : 'Reset mật khẩu'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
