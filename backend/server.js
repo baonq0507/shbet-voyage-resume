@@ -17,6 +17,9 @@ import gameRoutes from './routes/games.js';
 import userRoutes from './routes/users.js';
 import adminRoutes from './routes/admin.js';
 import webhookRoutes from './routes/webhooks.js';
+import promotionRoutes from './routes/promotions.js';
+import notificationRoutes from './routes/notifications.js';
+import agentRoutes from './routes/agents.js';
 
 // Load environment variables
 dotenv.config();
@@ -30,7 +33,7 @@ const io = new Server(server, {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
@@ -63,6 +66,9 @@ app.use('/api/games', gameRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/promotions', promotionRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/agents', agentRoutes);
 
 // Socket.IO for real-time features
 io.on('connection', (socket) => {

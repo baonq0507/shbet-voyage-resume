@@ -1,6 +1,0 @@
-      email      | is_super_admin | role  
------------------+----------------+-------
- admin@admin.com | t              | user
- admin@admin.com | t              | admin
-(2 rows)
-

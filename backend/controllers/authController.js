@@ -43,40 +43,40 @@ export const register = async (req, res) => {
 
     console.log('📤 Calling external register API:', externalRequestData);
 
-    try {
-      const externalResponse = await axios.post(
-        `${process.env.GAME_API_URL}/player/register-player.aspx`,
-        externalRequestData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    // try {
+    //   const externalResponse = await axios.post(
+    //     `${process.env.GAME_API_URL}/player/register-player.aspx`,
+    //     externalRequestData,
+    //     {
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //     }
+    //   );
 
-      console.log(`📥 External API response status: ${externalResponse.status}`);
-      console.log('📥 External API response data:', externalResponse.data);
+    //   console.log(`📥 External API response status: ${externalResponse.status}`);
+    //   console.log('📥 External API response data:', externalResponse.data);
 
-      const externalSuccess = externalResponse.status === 200 && externalResponse.data?.error?.msg === 'No Error';
+    //   const externalSuccess = externalResponse.status === 200 && externalResponse.data?.error?.msg === 'No Error';
       
-      if (!externalSuccess) {
-        console.log('❌ External player registration failed:', externalResponse.data?.error?.msg || 'Unknown error');
-        return res.status(400).json({
-          success: false,
-          error: 'Tên người dùng đã tồn tại',
-          details: externalResponse.data?.error?.msg || 'Registration failed'
-        });
-      }
+    //   if (!externalSuccess) {
+    //     console.log('❌ External player registration failed:', externalResponse.data?.error?.msg || 'Unknown error');
+    //     return res.status(400).json({
+    //       success: false,
+    //       error: 'Tên người dùng đã tồn tại',
+    //       details: externalResponse.data?.error?.msg || 'Registration failed'
+    //     });
+    //   }
 
-      console.log('✅ External player registration successful');
-    } catch (externalError) {
-      console.error('❌ External API error:', externalError.response?.data || externalError.message);
-      return res.status(400).json({
-        success: false,
-        error: 'Không thể đăng ký với hệ thống game',
-        details: externalError.response?.data?.error?.msg || externalError.message
-      });
-    }
+    //   console.log('✅ External player registration successful');
+    // } catch (externalError) {
+    //   console.error('❌ External API error:', externalError.response?.data || externalError.message);
+    //   return res.status(400).json({
+    //     success: false,
+    //     error: 'Không thể đăng ký với hệ thống game',
+    //     details: externalError.response?.data?.error?.msg || externalError.message
+    //   });
+    // }
 
     // Create user in database
     console.log('📝 Creating user in database');
@@ -149,15 +149,41 @@ export const register = async (req, res) => {
 
     console.log('✅ Registration process completed successfully');
 
+    // Auto-login after registration - update last login
+    const clientIp = req.ip || req.connection.remoteAddress;
+    console.log(`🔄 Auto-login after registration for user: ${username}, IP: ${clientIp}`);
+    await user.updateLastLogin(clientIp);
+
+    console.log('✅ Auto-login completed after registration');
+
+    // Return complete user data for frontend auto-login
     res.status(201).json({
       success: true,
-      message: 'Đăng ký thành công',
+      message: 'Đăng ký thành công và đã tự động đăng nhập',
       data: {
         user: {
           id: user._id,
           email: user.email,
           username: username,
-          fullName: fullName
+          fullName: fullName,
+          phoneNumber: phoneNumber,
+          balance: profile.balance,
+          role: userRole.role,
+          lastLoginAt: user.lastLoginAt,
+          createdAt: user.createdAt
+        },
+        profile: {
+          id: profile._id,
+          userId: user._id,
+          fullName: fullName,
+          phoneNumber: phoneNumber,
+          username: username,
+          balance: profile.balance,
+          avatarUrl: profile.avatarUrl,
+          lastLoginAt: user.lastLoginAt,
+          lastLoginIp: clientIp,
+          createdAt: profile.createdAt,
+          updatedAt: profile.updatedAt
         },
         token,
         refreshToken
@@ -223,8 +249,24 @@ export const login = async (req, res) => {
           email: user.email,
           username: profile.username,
           fullName: profile.fullName,
+          phoneNumber: profile.phoneNumber,
           balance: profile.balance,
-          role: userRole?.role || 'user'
+          role: userRole?.role || 'user',
+          lastLoginAt: user.lastLoginAt,
+          createdAt: user.createdAt
+        },
+        profile: {
+          id: profile._id,
+          userId: user._id,
+          fullName: profile.fullName,
+          phoneNumber: profile.phoneNumber,
+          username: profile.username,
+          balance: profile.balance,
+          avatarUrl: profile.avatarUrl,
+          lastLoginAt: user.lastLoginAt,
+          lastLoginIp: clientIp,
+          createdAt: profile.createdAt,
+          updatedAt: profile.updatedAt
         },
         token,
         refreshToken
