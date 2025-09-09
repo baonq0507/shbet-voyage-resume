@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
         user_id: user.id,
         type: "deposit",
         amount: amount,
-        status: "awaiting_payment", // Chờ thanh toán
+        status: "pending", // Chờ thanh toán
         admin_note: adminNote,
       })
       .select("id")
@@ -154,9 +154,9 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Không thể tạo giao dịch", details: insertErr?.message }, { status: 500 });
     }
 
-    const clientId = Deno.env.get("PAYOS_CLIENT_ID");
-    const apiKey = Deno.env.get("PAYOS_API_KEY");
-    const checksumKey = Deno.env.get("PAYOS_CHECKSUM_KEY");
+    const clientId = "1fb7a3ec-4b6d-446e-8ff5-ea4ce3e988ab";
+    const apiKey = "b8c4c8fb-512a-419d-929d-57ac59fe2526";
+    const checksumKey = "e035a4d6e71ad542009845986329ea65be999ad73052061ac92971d91ab2c40c";
 
     console.log("PayOS config check:", {
       hasClientId: !!clientId,

@@ -321,12 +321,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, in
       
       console.log("Request body to send:", requestBody);
 
-      const response = await fetch('https://hlydtwqhiuwbikkjemck.supabase.co/functions/v1/create-deposit-order', {
+      const response = await fetch('http://206.206.126.141:54321/functions/v1/create-deposit-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWR0d3FoaXV3Ymlra2plbWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTA1MjQsImV4cCI6MjA2OTgyNjUyNH0.deIb21DJNmyM5ZjocFAl4j_47AF6CnY26LN0Bn9eB9k'
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
         },
         body: JSON.stringify(requestBody)
       });
